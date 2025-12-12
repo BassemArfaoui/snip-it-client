@@ -1,1 +1,20 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global reset: remove default white margins/outlines and set app background */
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background: #02040a;
+	color: #f8fafc;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove default outline on focused elements only if desired; keep accessible focus styles
+	 — here we keep focus but remove default glowing outline on body/window. */
+*:focus {
+	outline: none;
+}
+
+/* Basic link reset */
+a { color: inherit; }
+

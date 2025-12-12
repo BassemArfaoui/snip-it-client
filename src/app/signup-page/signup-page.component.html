@@ -12,7 +12,7 @@
         <input
           type="text"
           name="name"
-          [(ngModel)]="profile.name"
+          [(ngModel)]="name"
           required
           placeholder="Jordan Smith"
         />
@@ -23,7 +23,7 @@
         <input
           type="email"
           name="email"
-          [(ngModel)]="profile.email"
+          [(ngModel)]="email"
           required
           autocomplete="email"
           placeholder="you@email.com"
@@ -35,7 +35,7 @@
         <input
           type="password"
           name="password"
-          [(ngModel)]="profile.password"
+          [(ngModel)]="password"
           required
           minlength="8"
           autocomplete="new-password"
@@ -48,7 +48,7 @@
         <input
           type="password"
           name="confirm"
-          [(ngModel)]="profile.confirm"
+          [(ngModel)]="confirm"
           required
           minlength="8"
           autocomplete="new-password"
@@ -60,7 +60,7 @@
         <input
           type="checkbox"
           name="terms"
-          [(ngModel)]="acceptTerms"
+          [(ngModel)]="termsAccepted"
         />
         <span>
           I agree to the
@@ -74,11 +74,11 @@
         class="primary"
         type="submit"
         [disabled]="
-          !profile.name ||
-          !profile.email ||
-          !profile.password ||
-          profile.password !== profile.confirm ||
-          !acceptTerms
+          !name ||
+          !email ||
+          !password ||
+          password !== confirm ||
+          !termsAccepted
         "
       >
         Create account

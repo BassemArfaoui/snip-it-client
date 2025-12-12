@@ -4,14 +4,21 @@
       <span class="logo-mark">Snip-It</span>
       <p class="tagline">Save, organize, and share your favorite snippets.</p>
     </div>
-    <nav class="primary-nav" aria-label="Primary">
-      <a
-        routerLink="/login"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >Log in</a>
-      <a routerLink="/signup" routerLinkActive="active">Sign up</a>
-    </nav>
+    @if (!isLoggedIn()) {
+      <nav class="primary-nav" aria-label="Primary">
+        <a
+          routerLink="/login"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >Log in</a>
+        <a routerLink="/signup" routerLinkActive="active">Sign up</a>
+      </nav>
+    }
+    @if (isLoggedIn()) {
+      <nav class="primary-nav" aria-label="User">
+        <a (click)="logout()" class="link">Log out</a>
+      </nav>
+    }
   </header>
 
   <main class="app-view">
