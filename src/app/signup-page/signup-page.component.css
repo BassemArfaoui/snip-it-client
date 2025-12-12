@@ -1,0 +1,126 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.auth-shell {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem 3rem;
+  background: linear-gradient(180deg, #050714, #0d1020 65%, #111a2f 100%);
+}
+
+.auth-card {
+  width: min(460px, 100%);
+  background: #0b172c;
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 20px 70px rgba(4, 8, 21, 0.65);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-header h1 {
+  margin: 0.35rem 0 0;
+  font-size: 2rem;
+}
+
+.card-header .eyebrow {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: rgba(248, 250, 252, 0.7);
+}
+
+.card-header .subtitle {
+  margin: 0.35rem 0 0;
+  color: rgba(248, 250, 252, 0.75);
+}
+
+.auth-form {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: rgba(248, 250, 252, 0.85);
+}
+
+.field input {
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #5bd4ff;
+  box-shadow: 0 0 0 2px rgba(91, 212, 255, 0.25);
+}
+
+.terms {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  color: rgba(248, 250, 252, 0.75);
+}
+
+.terms input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.25rem;
+}
+
+.link {
+  color: #5bd4ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+button.primary {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.9rem;
+  border-radius: 0.9rem;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(120deg, #5bd4ff, #4e7cff 60%, #9d62ff);
+  color: #0b172c;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.primary:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(93, 212, 255, 0.35);
+}
+
+.helper {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(248, 250, 252, 0.7);
+}

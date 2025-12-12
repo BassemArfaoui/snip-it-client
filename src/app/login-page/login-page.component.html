@@ -1,0 +1,61 @@
+<section class="auth-shell" aria-label="Login">
+  <div class="auth-card">
+    <div class="card-header">
+      <p class="eyebrow">Welcome back</p>
+      <h1>Log in to Snip-It</h1>
+      <p class="subtitle">Access your workspace and continue editing snippets instantly.</p>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()" autocomplete="off">
+      <label class="field">
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          required
+          autocomplete="email"
+          placeholder="you@email.com"
+        />
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          required
+          minlength="8"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+        />
+      </label>
+
+      <div class="options">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="remember"
+            name="remember"
+          />
+          <span>Keep me signed in</span>
+        </label>
+        <a class="link" href="#">Forgot password?</a>
+      </div>
+
+      <button
+        class="primary"
+        type="submit"
+        [disabled]="!email || !password"
+      >
+        Continue
+      </button>
+    </form>
+
+    <p class="helper">
+      Don’t have an account yet?
+      <a class="link" routerLink="/signup">Create one</a>
+    </p>
+  </div>
+</section>
