@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { login, isLoggedIn } from '../auth.store';
@@ -9,7 +8,7 @@ import { login, isLoggedIn } from '../auth.store';
 @Component({
   selector: 'snip-it-login-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.css']
 })
@@ -17,7 +16,7 @@ export class LoginPageComponent implements OnInit {
   loginForm!: FormGroup;
   loading = false;
   error: string | null = null;
-  remember = true;
+  // `remember` removed: this option was UI-only and caused invalid payloads.
 
   constructor(
     private fb: FormBuilder,
