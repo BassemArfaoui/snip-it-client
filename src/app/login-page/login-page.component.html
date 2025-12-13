@@ -6,34 +6,43 @@
       <p class="subtitle">Access your workspace and continue editing snippets instantly.</p>
     </div>
 
-    <form class="auth-form" (ngSubmit)="onSubmit()" #form="ngForm" autocomplete="off">
-      @if (error()) {
-        <div class="error-message">{{ error() }}</div>
+    <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()" autocomplete="off">
+      @if (error) {
+        <div class="error-message">{{ error }}</div>
       }
 
       <label class="field">
-        <span>Email</span>
+        <span>Email or Username</span>
         <input
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          required
+          type="text"
+          formControlName="identifier"
           autocomplete="email"
           placeholder="you@email.com"
+          [class.invalid]="identifier?.invalid && identifier?.touched"
         />
+        @if (identifier?.hasError('required') && identifier?.touched) {
+          <span class="error-hint">Email or username is required</span>
+        }
+        @if (identifier?.hasError('minlength') && identifier?.touched) {
+          <span class="error-hint">Must be at least 3 characters</span>
+        }
       </label>
 
       <label class="field">
         <span>Password</span>
         <input
           type="password"
-          name="password"
-          [(ngModel)]="password"
-          required
-          minlength="8"
+          formControlName="password"
           autocomplete="current-password"
           placeholder="Enter your password"
+          [class.invalid]="password?.invalid && password?.touched"
         />
+        @if (password?.hasError('required') && password?.touched) {
+          <span class="error-hint">Password is required</span>
+        }
+        @if (password?.hasError('minlength') && password?.touched) {
+          <span class="error-hint">Password must be at least 8 characters</span>
+        }
       </label>
 
       <div class="options">
@@ -41,7 +50,6 @@
           <input
             type="checkbox"
             [(ngModel)]="remember"
-            name="remember"
           />
           <span>Keep me signed in</span>
         </label>
@@ -51,14 +59,14 @@
       <button
         class="primary"
         type="submit"
-        [disabled]="!email || !password || loading()"
+        [disabled]="!loginForm.valid || loading"
       >
-        {{ loading() ? 'Signing in...' : 'Continue' }}
+        {{ loading ? 'Signing in...' : 'Continue' }}
       </button>
     </form>
 
     <p class="helper">
-      Don’t have an account yet?
+      Don't have an account yet?
       <a class="link" routerLink="/signup">Create one</a>
     </p>
   </div>

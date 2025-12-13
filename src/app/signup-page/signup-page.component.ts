@@ -1,130 +1,151 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { login } from '../auth.store';
+import { login, isLoggedIn } from '../auth.store';
+
+/**
+ * Custom validator: passwords must match
+ */
+function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+  const password = control.get('password');
+  const confirm = control.get('confirm');
+
+  if (!password || !confirm) return null;
+  return password.value === confirm.value ? null : { passwordMismatch: true };
+}
 
 @Component({
   selector: 'snip-it-signup-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './signup-page.component.html',
   styleUrls: ['./signup-page.component.css']
 })
-export class SignupPageComponent {
-  profile = signal({
-    name: '',
-    email: '',
-    password: '',
-    confirm: ''
-  });
+export class SignupPageComponent implements OnInit {
+  signupForm!: FormGroup;
+  otpForm!: FormGroup;
+  loading = false;
+  error: string | null = null;
+  showOtpVerification = false;
+  userEmail = '';
 
-  acceptTerms = signal(false);
-  loading = signal(false);
-  error = signal<string | null>(null);
-  showOtpVerification = signal(false);
-  otp = signal('');
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  constructor(private authService: AuthService, private router: Router) {}
+  ngOnInit(): void {
+    // Redirect to dashboard if already logged in
+    if (isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
 
-  get name(): string {
-    return this.profile().name;
-  }
-  set name(value: string) {
-    this.profile.update((current) => ({ ...current, name: value }));
-  }
+    this.signupForm = this.fb.group(
+      {
+        fullName: ['', [Validators.required, Validators.minLength(3)]],
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(8)]],
+        confirm: ['', [Validators.required, Validators.minLength(8)]],
+        terms: [false, [Validators.requiredTrue]]
+      },
+      { validators: passwordMatchValidator }
+    );
 
-  get email(): string {
-    return this.profile().email;
-  }
-  set email(value: string) {
-    this.profile.update((current) => ({ ...current, email: value }));
-  }
-
-  get password(): string {
-    return this.profile().password;
-  }
-  set password(value: string) {
-    this.profile.update((current) => ({ ...current, password: value }));
-  }
-
-  get confirm(): string {
-    return this.profile().confirm;
-  }
-  set confirm(value: string) {
-    this.profile.update((current) => ({ ...current, confirm: value }));
+    this.otpForm = this.fb.group({
+      otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
+    });
   }
 
-  get termsAccepted(): boolean {
-    return this.acceptTerms();
+  get fullName() {
+    return this.signupForm.get('fullName');
   }
-  set termsAccepted(value: boolean) {
-    this.acceptTerms.set(value);
+
+  get email() {
+    return this.signupForm.get('email');
+  }
+
+  get password() {
+    return this.signupForm.get('password');
+  }
+
+  get confirm() {
+    return this.signupForm.get('confirm');
+  }
+
+  get terms() {
+    return this.signupForm.get('terms');
+  }
+
+  get otp() {
+    return this.otpForm.get('otp');
   }
 
   onSubmit(): void {
-    if (this.loading()) return;
+    if (!this.signupForm.valid || this.loading) return;
 
-    this.loading.set(true);
-    this.error.set(null);
+    this.loading = true;
+    this.error = null;
 
-    const prof = this.profile();
+    const formVal = this.signupForm.value;
+    this.userEmail = formVal.email;
+
     this.authService.register({
-      email: prof.email,
-      username: prof.email.split('@')[0], // Use part of email as username if not provided
-      password: prof.password,
-      fullName: prof.name
+      email: formVal.email,
+      username: formVal.email.split('@')[0],
+      password: formVal.password,
+      fullName: formVal.fullName
     }).subscribe({
-      next: (response) => {
-        this.loading.set(false);
-        this.showOtpVerification.set(true); // Show OTP verification form
+      next: () => {
+        this.loading = false;
+        this.showOtpVerification = true;
       },
       error: (err) => {
-        this.loading.set(false);
-        this.error.set(err.error?.message || 'Registration failed. Please try again.');
+        this.loading = false;
+        this.error = err.error?.message || 'Registration failed. Please try again.';
       }
     });
   }
 
   onVerifyOtp(): void {
-    if (this.loading()) return;
+    if (!this.otpForm.valid || this.loading) return;
 
-    this.loading.set(true);
-    this.error.set(null);
+    this.loading = true;
+    this.error = null;
 
-    const prof = this.profile();
     this.authService.verifyEmail({
-      email: prof.email,
-      otp: this.otp()
+      email: this.userEmail,
+      otp: this.otpForm.get('otp')!.value
     }).subscribe({
-      next: (response) => {
-        this.loading.set(false);
-        login(); // Update auth store to logged in
-        this.router.navigate(['/dashboard']); // Redirect to dashboard or home
+      next: () => {
+        this.loading = false;
+        login();
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.loading.set(false);
-        this.error.set(err.error?.message || 'OTP verification failed. Please try again.');
+        this.loading = false;
+        this.error = err.error?.message || 'OTP verification failed. Please try again.';
       }
     });
   }
 
   onResendOtp(): void {
-    if (this.loading()) return;
+    if (this.loading) return;
 
-    this.loading.set(true);
-    this.error.set(null);
+    this.loading = true;
+    this.error = null;
 
-    const prof = this.profile();
-    this.authService.resendOtp(prof.email).subscribe({
+    this.authService.resendOtp(this.userEmail).subscribe({
       next: () => {
-        this.loading.set(false);
-        this.error.set(null);
+        this.loading = false;
+        this.error = null;
       },
       error: (err) => {
-        this.loading.set(false);
-        this.error.set(err.error?.message || 'Failed to resend OTP.');
+        this.loading = false;
+        this.error = err.error?.message || 'Failed to resend OTP.';
       }
     });
   }

@@ -1,62 +1,71 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { login } from '../auth.store';
+import { login, isLoggedIn } from '../auth.store';
 
 @Component({
   selector: 'snip-it-login-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.css']
 })
-export class LoginPageComponent {
-  credentials = signal({
-    email: '',
-    password: ''
-  });
+export class LoginPageComponent implements OnInit {
+  loginForm!: FormGroup;
+  loading = false;
+  error: string | null = null;
+  remember = true;
 
-  remember = signal(true);
-  loading = signal(false);
-  error = signal<string | null>(null);
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  constructor(private authService: AuthService, private router: Router) {}
+  ngOnInit(): void {
+    // Redirect to dashboard if already logged in
+    if (isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
 
-  get email(): string {
-    return this.credentials().email;
+    this.loginForm = this.fb.group({
+      identifier: ['', [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.required, Validators.minLength(8)]]
+    });
   }
-  set email(value: string) {
-    this.credentials.update(c => ({ ...c, email: value }));
+
+  get identifier() {
+    return this.loginForm.get('identifier');
   }
 
-  get password(): string {
-    return this.credentials().password;
-  }
-  set password(value: string) {
-    this.credentials.update(c => ({ ...c, password: value }));
+  get password() {
+    return this.loginForm.get('password');
   }
 
   onSubmit(): void {
-    if (this.loading()) return;
+    if (!this.loginForm.valid || this.loading) return;
 
-    this.loading.set(true);
-    this.error.set(null);
+    this.loading = true;
+    this.error = null;
 
-    const creds = this.credentials();
+    const formData = this.loginForm.value;
+    // Only send identifier and password to API, keep remember local
     this.authService.login({
-      identifier: creds.email,
-      password: creds.password
+      identifier: formData.identifier,
+      password: formData.password
     }).subscribe({
       next: (tokens) => {
-        this.loading.set(false);
-        login(); // Update auth store
-        this.router.navigate(['/dashboard']); // Navigate to dashboard or home
+        this.loading = false;
+        login();
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.loading.set(false);
-        this.error.set(err.error?.message || 'Login failed. Please check your credentials.');
+        this.loading = false;
+        this.error = err.error?.message || 'Login failed. Please check your credentials.';
       }
     });
   }
