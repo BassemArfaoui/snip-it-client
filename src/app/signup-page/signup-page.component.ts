@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../auth.service';
+import { login } from '../auth.store';
 
 @Component({
   selector: 'snip-it-signup-page',
@@ -19,6 +21,12 @@ export class SignupPageComponent {
   });
 
   acceptTerms = signal(false);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  showOtpVerification = signal(false);
+  otp = signal('');
+
+  constructor(private authService: AuthService, private router: Router) {}
 
   get name(): string {
     return this.profile().name;
@@ -56,7 +64,68 @@ export class SignupPageComponent {
   }
 
   onSubmit(): void {
-    // Replace this with real signup logic when ready
-    console.log('Registering', this.profile(), 'terms accepted', this.acceptTerms());
+    if (this.loading()) return;
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    const prof = this.profile();
+    this.authService.register({
+      email: prof.email,
+      username: prof.email.split('@')[0], // Use part of email as username if not provided
+      password: prof.password,
+      fullName: prof.name
+    }).subscribe({
+      next: (response) => {
+        this.loading.set(false);
+        this.showOtpVerification.set(true); // Show OTP verification form
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || 'Registration failed. Please try again.');
+      }
+    });
+  }
+
+  onVerifyOtp(): void {
+    if (this.loading()) return;
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    const prof = this.profile();
+    this.authService.verifyEmail({
+      email: prof.email,
+      otp: this.otp()
+    }).subscribe({
+      next: (response) => {
+        this.loading.set(false);
+        login(); // Update auth store to logged in
+        this.router.navigate(['/dashboard']); // Redirect to dashboard or home
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || 'OTP verification failed. Please try again.');
+      }
+    });
+  }
+
+  onResendOtp(): void {
+    if (this.loading()) return;
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    const prof = this.profile();
+    this.authService.resendOtp(prof.email).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.error.set(null);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || 'Failed to resend OTP.');
+      }
+    });
   }
 }

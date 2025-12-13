@@ -6,7 +6,11 @@
       <p class="subtitle">Access your workspace and continue editing snippets instantly.</p>
     </div>
 
-    <form class="auth-form" (ngSubmit)="onSubmit()" autocomplete="off">
+    <form class="auth-form" (ngSubmit)="onSubmit()" #form="ngForm" autocomplete="off">
+      @if (error()) {
+        <div class="error-message">{{ error() }}</div>
+      }
+
       <label class="field">
         <span>Email</span>
         <input
@@ -47,9 +51,9 @@
       <button
         class="primary"
         type="submit"
-        [disabled]="!email || !password"
+        [disabled]="!email || !password || loading()"
       >
-        Continue
+        {{ loading() ? 'Signing in...' : 'Continue' }}
       </button>
     </form>
 
