@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Snip-it Issues</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#0ea5e9", 
+                "background-light": "#f0f9ff",
+                "background-dark": "#0f172a",
+                "card-dark": "#1e293b",
+                "card-light": "#ffffff",
+                },
+                fontFamily: {
+                "display": ["Manrope", "sans-serif"],
+                "mono": ["JetBrains Mono", "monospace"],
+                },
+                borderRadius: {"DEFAULT": "1rem", "lg": "1.5rem", "xl": "2rem", "2xl": "3rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>.code-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        .code-scroll::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: rgba(14, 165, 233, 0.3);
+            border-radius: 4px;
+        }
+        .code-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(14, 165, 233, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
+<header class="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-slate-700 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-[1600px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<div class="size-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h1 class="text-xl font-extrabold tracking-tight hidden sm:block">Snip-it</h1>
+</div>
+<div class="flex-1 max-w-xl px-4 hidden md:block">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border-none rounded-xl bg-gray-100 dark:bg-slate-800 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary transition-all" placeholder="Search questions, tags, users..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3 md:gap-4">
+<button aria-label="Saves" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+<button aria-label="Issues" class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary transition-colors ring-2 ring-primary/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">error</span>
+</button>
+<button class="hidden sm:flex items-center gap-2 px-4 h-10 bg-primary hover:bg-primary/90 text-white rounded-full font-bold text-sm transition-transform active:scale-95 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>New Snippet</span>
+</button>
+<button class="sm:hidden flex items-center justify-center w-10 h-10 bg-primary hover:bg-primary/90 text-white rounded-full shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-colors" data-alt="User profile avatar showing a smiling person">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQR_ogkrb6vnEnS5_tCcGhdi4_SLpe344ZzGI9A5S60I9AZUtQq2hCpG3E0wsC2nuKd7WYZFg4L1YS4VzXLU0fmeFD5ijeGX-vtpDgsymPfCU31ds-j6smgXkBOqW4JI_enItnX-Wa_gzPzXKKDoYhaAuuG_ylKKqIlvwaqnXClUfgM0DmYZgGukdYr4xSZWPQTBSRlyMar3wb1JQNpd1poFgYf4QVy2R9Q6DqwQGZAY33q0GsWsERxJKwKjhs4ZmmHQNFBvAWK_Y"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex-1 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pt-6 px-4 lg:px-8 pb-10">
+<aside class="hidden lg:block lg:col-span-3 xl:col-span-2 sticky top-24 h-[calc(100vh-8rem)] overflow-y-auto pr-2">
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Following</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">code</span>
+<span>Frontend</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">dns</span>
+<span>Backend</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">data_usage</span>
+<span>Data Science</span>
+</a>
+</nav>
+<div class="mt-10">
+<h3 class="px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-4">Your Libraries</h3>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-400 text-sm transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+<span>react-hooks</span>
+</div>
+<span class="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">12</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-400 text-sm transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+<span>python-utils</span>
+</div>
+<span class="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">8</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-400 text-sm transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-purple-500"></span>
+<span>ui-components</span>
+</div>
+<span class="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">24</span>
+</a>
+</nav>
+</div>
+</aside>
+<main class="col-span-1 lg:col-span-9 xl:col-span-7 flex flex-col gap-6">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Top Questions</h2>
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/25 transition-all active:scale-95 flex items-center gap-2 w-fit">
+<span class="material-symbols-outlined text-[20px]">add_comment</span>
+                        Ask Question
+                    </button>
+</div>
+<div class="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 pb-1">
+<div class="flex gap-1">
+<button class="px-4 py-2 text-sm font-bold text-gray-900 dark:text-white border-b-2 border-primary">Interesting</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-t-lg transition-colors">Hot</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-t-lg transition-colors">Week</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-t-lg transition-colors">Month</button>
+</div>
+<button class="hidden sm:flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+                    </button>
+</div>
+<div class="flex flex-col gap-4">
+<article class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm hover:border-primary/30 dark:hover:border-primary/30 transition-all group cursor-pointer">
+<div class="flex gap-4 sm:gap-6">
+<div class="flex flex-col gap-2 shrink-0 items-end min-w-[60px] text-sm pt-1">
+<div class="text-gray-900 dark:text-gray-200 font-medium">142 <span class="text-xs font-normal text-gray-500">votes</span></div>
+<div class="text-white font-medium border border-green-600 bg-green-600 rounded px-2 py-0.5 shadow-sm shadow-green-900/20">12 <span class="text-xs font-normal opacity-90">ans</span></div>
+<div class="text-gray-400 text-xs mt-1">2k views</div>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-lg font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 mb-2 leading-snug group-hover:underline decoration-2 underline-offset-2">
+                                How to properly type 'useEffect' dependency array in TypeScript?
+                            </h3>
+<p class="text-sm text-gray-600 dark:text-slate-400 line-clamp-2 mb-3">
+                                I'm getting a lint warning when trying to pass a custom object into the dependency array. It says "The 'config' object makes the dependencies of useEffect hook change on every render". I tried using useMemo but...
+                            </p>
+<div class="flex flex-wrap items-center justify-between gap-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">typescript</span>
+<span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">react</span>
+<span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">hooks</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
+<div class="w-5 h-5 rounded-full bg-gray-300 dark:bg-slate-700 overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDi0y5GEb9KfWympq3d1m986ItcF7VVcwzD1HLbBKApuRLZJnoSyY7v3qx0WFkLTEU9PfszkRqtmifaTy8c3Hzeivsg1PJzusvKVl_46J8NDxYfIJTiBQtJM673ITElFNiJ8xT0U6mIv3GfE05i4i1cjZ2pXCembU3M0Bw5XOYv8kIFzY5f5SVZ_wvER5-6VHruP3l3PpMnrNDWRPUpQAQirgLGtiflxHXvNpgKQJde0NCnJB9o3d6a6dSWOT9zV2U3ZN91iGORerk"/>
+</div>
+<span class="font-bold text-gray-700 dark:text-gray-300">Sarah Jenkins</span>
+<span>asked 3 hours ago</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm hover:border-primary/30 dark:hover:border-primary/30 transition-all group cursor-pointer">
+<div class="flex gap-4 sm:gap-6">
+<div class="flex flex-col gap-2 shrink-0 items-end min-w-[60px] text-sm pt-1">
+<div class="text-gray-900 dark:text-gray-200 font-medium">85 <span class="text-xs font-normal text-gray-500">votes</span></div>
+<div class="text-green-600 dark:text-green-400 font-medium border border-green-600 dark:border-green-400 rounded px-2 py-0.5 bg-green-50 dark:bg-green-900/20">5 <span class="text-xs font-normal">ans</span></div>
+<div class="text-gray-400 text-xs mt-1">856 views</div>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-lg font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 mb-2 leading-snug group-hover:underline decoration-2 underline-offset-2">
+                                Centering a div absolute position in Tailwind CSS not working as expected
+                            </h3>
+<p class="text-sm text-gray-600 dark:text-slate-400 line-clamp-2 mb-3">
+                                I'm using `absolute inset-0 m-auto` but the div is stuck at the top left corner. My parent container has `relative` position. What am I missing here? I also tried using flexbox but...
+                            </p>
+<div class="flex flex-wrap items-center justify-between gap-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-300 border border-teal-100 dark:border-teal-800 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-teal-100 dark:hover:bg-teal-900/40 transition-colors">tailwind</span>
+<span class="bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-300 border border-orange-100 dark:border-orange-800 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">css</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
+<div class="w-5 h-5 rounded-full bg-gray-300 dark:bg-slate-700 overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo1EHC2uK9yN94kk3o7-1sAP_cryTYoxEEAPaLJcOqRhHoJ42muiF8kwFjKEg8RZkP5pjJnf1A7m8MBSQBW8tf8sRFGSgH3xSdpXh9sGkJmv3O_eTryWCopDNeD1n5nDCpkIRK8elx2kE724ZJ_BJObO1Ljos7Vavjc2Le5690yk-_ex5Rq9q1PgUsneMXXBuvayXRFwY5LT6d-RjfvKid8a76YgjMgO5aI9JT8ik2TgABzRsR5Gd82RHNVO57ce4KF0hT8G6Bvmo"/>
+</div>
+<span class="font-bold text-gray-700 dark:text-gray-300">Alex Rivera</span>
+<span>asked 5 hours ago</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm hover:border-primary/30 dark:hover:border-primary/30 transition-all group cursor-pointer">
+<div class="flex gap-4 sm:gap-6">
+<div class="flex flex-col gap-2 shrink-0 items-end min-w-[60px] text-sm pt-1">
+<div class="text-gray-500 dark:text-gray-400 font-medium">4 <span class="text-xs font-normal">votes</span></div>
+<div class="text-gray-500 dark:text-gray-400 font-medium border border-transparent rounded px-2 py-0.5">0 <span class="text-xs font-normal">ans</span></div>
+<div class="text-gray-400 text-xs mt-1">32 views</div>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-lg font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 mb-2 leading-snug group-hover:underline decoration-2 underline-offset-2">
+                                Rust Async/Await: "future cannot be sent between threads safely" with MutexGuard
+                            </h3>
+<p class="text-sm text-gray-600 dark:text-slate-400 line-clamp-2 mb-3">
+                                I'm using `std::sync::Mutex` inside an async function and awaiting something while holding the lock. The compiler gives me an error about Send trait not being implemented. Should I use `tokio::sync::Mutex` instead?
+                            </p>
+<div class="flex flex-wrap items-center justify-between gap-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-100 dark:border-orange-800 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">rust</span>
+<span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">async</span>
+<span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">concurrency</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
+<div class="w-5 h-5 rounded-full bg-gray-300 dark:bg-slate-700 overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqQb2TbwhZX96hIViSspGDrdHydCyrqJL283rfyJJibMVXSohP0pb_yevsMokR4lJLX6TIJOHZRVspWEkDjOifk_uA3z9K04yu6nVq_e-Mid1qwnbf_81XMugrQDELPBGgN1Jw4Cv4LCKRrnxaM7Xt-P51Z9--RgTN2Coq92PhMNoRviyrrlxZgjPBK-_1e5TFabdUeSp845_jbRWIkVWnsI3ne-EhBfc4tWyHqHcfkgKQOcNtOOty5b112mBjzUfLbE-zOyhR8bM"/>
+</div>
+<span class="font-bold text-gray-700 dark:text-gray-300">Marcus Neo</span>
+<span>asked 1 day ago</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm hover:border-primary/30 dark:hover:border-primary/30 transition-all group cursor-pointer">
+<div class="flex gap-4 sm:gap-6">
+<div class="flex flex-col gap-2 shrink-0 items-end min-w-[60px] text-sm pt-1">
+<div class="text-gray-900 dark:text-gray-200 font-medium">32 <span class="text-xs font-normal text-gray-500">votes</span></div>
+<div class="text-green-600 dark:text-green-400 font-medium border border-green-600 dark:border-green-400 rounded px-2 py-0.5 bg-green-50 dark:bg-green-900/20">2 <span class="text-xs font-normal">ans</span></div>
+<div class="text-gray-400 text-xs mt-1">156 views</div>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-lg font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 mb-2 leading-snug group-hover:underline decoration-2 underline-offset-2">
+                                Best practices for error handling in Python 3.11+
+                            </h3>
+<p class="text-sm text-gray-600 dark:text-slate-400 line-clamp-2 mb-3">
+                                With the introduction of ExceptionGroups and `except*`, how should we structure our try/except blocks for concurrent code using `asyncio.TaskGroup`? Any patterns or examples would be appreciated.
+                            </p>
+<div class="flex flex-wrap items-center justify-between gap-y-3">
+<div class="flex flex-wrap gap-2">
+<span class="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border border-yellow-100 dark:border-yellow-800 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors">python</span>
+<span class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700 text-xs px-2.5 py-1 rounded-md font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">best-practices</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
+<div class="w-5 h-5 rounded-full bg-gray-300 dark:bg-slate-700 overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8UvINMliWBpEZJathNMpyN79un9BXJGovwjFUi-6OJYIMPMd5DigocPV9gLHfaZi8sWbimVRQW4HXaBprwIOe23-up9m8-ewm8YfOaV5vNL2RAOndewKv4uv3k8YoYDLYlCodyElTonDcVJozF2XZ5hTp9A6QRO3iFy1kMAUfc53Eg9nMtDaqGMWSTdACP1HFE2aHDJbn-ZDWyJ7bZRDc5XpVrnQ2CGMoDVREMYWh1cahrI4dPCuK1FwTY1xQpJ1SNoK4amI51TE"/>
+</div>
+<span class="font-bold text-gray-700 dark:text-gray-300">Elena Code</span>
+<span>asked 2 days ago</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+</div>
+<div class="flex justify-center py-6">
+<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+</div>
+</main>
+<aside class="hidden xl:block xl:col-span-3 sticky top-24 h-[calc(100vh-8rem)]">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-slate-700 p-5 mb-6">
+<h3 class="font-extrabold text-lg mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+<span class="material-symbols-outlined text-primary">trending_up</span>
+                    Trending Repos
+                </h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-start justify-between group cursor-pointer">
+<div>
+<p class="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors">facebook/react</p>
+<p class="text-xs text-gray-500 mt-1">v19.0.0-rc release notes</p>
+</div>
+<span class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">+12%</span>
+</div>
+<div class="w-full h-px bg-gray-100 dark:bg-slate-700"></div>
+<div class="flex items-start justify-between group cursor-pointer">
+<div>
+<p class="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors">rust-lang/rust</p>
+<p class="text-xs text-gray-500 mt-1">Async traits stabilized</p>
+</div>
+<span class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">+8%</span>
+</div>
+<div class="w-full h-px bg-gray-100 dark:bg-slate-700"></div>
+<div class="flex items-start justify-between group cursor-pointer">
+<div>
+<p class="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors">openai/gpt-3</p>
+<p class="text-xs text-gray-500 mt-1">New fine-tuning docs</p>
+</div>
+<span class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">+24%</span>
+</div>
+</div>
+<button class="w-full mt-5 py-2 text-sm text-primary font-bold hover:bg-primary/10 rounded-lg transition-colors">
+                    View all trending
+                </button>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+<h3 class="font-extrabold text-lg mb-4 text-gray-900 dark:text-white">Who to follow</h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-gray-700 overflow-hidden" data-alt="Avatar of Tech Lead">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqQb2TbwhZX96hIViSspGDrdHydCyrqJL283rfyJJibMVXSohP0pb_yevsMokR4lJLX6TIJOHZRVspWEkDjOifk_uA3z9K04yu6nVq_e-Mid1qwnbf_81XMugrQDELPBGgN1Jw4Cv4LCKRrnxaM7Xt-P51Z9--RgTN2Coq92PhMNoRviyrrlxZgjPBK-_1e5TFabdUeSp845_jbRWIkVWnsI3ne-EhBfc4tWyHqHcfkgKQOcNtOOty5b112mBjzUfLbE-zOyhR8bM"/>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">Marcus Neo</span>
+<span class="text-xs text-gray-500">@marcus_dev</span>
+</div>
+</div>
+<button class="text-primary hover:text-white hover:bg-primary border border-primary p-1.5 rounded-full transition-all">
+<span class="material-symbols-outlined text-[18px] block">add</span>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-gray-700 overflow-hidden" data-alt="Avatar of Senior Dev">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8UvINMliWBpEZJathNMpyN79un9BXJGovwjFUi-6OJYIMPMd5DigocPV9gLHfaZi8sWbimVRQW4HXaBprwIOe23-up9m8-ewm8YfOaV5vNL2RAOndewKv4uv3k8YoYDLYlCodyElTonDcVJozF2XZ5hTp9A6QRO3iFy1kMAUfc53Eg9nMtDaqGMWSTdACP1HFE2aHDJbn-ZDWyJ7bZRDc5XpVrnQ2CGMoDVREMYWh1cahrI4dPCuK1FwTY1xQpJ1SNoK4amI51TE"/>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">Elena Code</span>
+<span class="text-xs text-gray-500">@elenacodes</span>
+</div>
+</div>
+<button class="text-primary hover:text-white hover:bg-primary border border-primary p-1.5 rounded-full transition-all">
+<span class="material-symbols-outlined text-[18px] block">add</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-6 flex flex-wrap gap-x-4 gap-y-2 px-2">
+<a class="text-xs text-gray-500 hover:underline" href="#">Privacy</a>
+<a class="text-xs text-gray-500 hover:underline" href="#">Terms</a>
+<a class="text-xs text-gray-500 hover:underline" href="#">API</a>
+<a class="text-xs text-gray-500 hover:underline" href="#">About</a>
+<p class="text-xs text-gray-600 dark:text-gray-400 mt-2 w-full">© 2023 Snip-it Inc.</p>
+</div>
+</aside>
+</div>
+
+</body></html>
