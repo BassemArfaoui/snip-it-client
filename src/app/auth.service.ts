@@ -21,6 +21,16 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
 export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
@@ -145,5 +155,19 @@ export class AuthService {
    */
   isAuthenticated(): boolean {
     return !!this.getAccessToken();
+  }
+
+  /**
+   * Request password reset OTP
+   */
+  forgotPassword(request: ForgotPasswordRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/forgot-password`, request);
+  }
+
+  /**
+   * Reset password using link token (invalidates all refresh tokens)
+   */
+  resetPassword(request: ResetPasswordRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/reset-password`, request);
   }
 }
