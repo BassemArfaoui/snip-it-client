@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Snip-it Question Details</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#0ea5e9", 
+                "background-light": "#f0f9ff",
+                "background-dark": "#0f172a",
+                "card-dark": "#1e293b",
+                "card-light": "#ffffff",
+                },
+                fontFamily: {
+                "display": ["Manrope", "sans-serif"],
+                "mono": ["JetBrains Mono", "monospace"],
+                },
+                borderRadius: {"DEFAULT": "1rem", "lg": "1.5rem", "xl": "2rem", "2xl": "3rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+        .code-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        .code-scroll::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: rgba(14, 165, 233, 0.3);
+            border-radius: 4px;
+        }
+        .code-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(14, 165, 233, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
+<header class="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-slate-700 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-[1600px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<a class="size-8 text-primary" href="#">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</a>
+<h1 class="text-xl font-extrabold tracking-tight hidden sm:block">Snip-it</h1>
+</div>
+<div class="flex-1 max-w-xl px-4 hidden md:block">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border-none rounded-xl bg-gray-100 dark:bg-slate-800 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary transition-all" placeholder="Search snippets, tags, users..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3 md:gap-4">
+<button aria-label="Saves" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+<button aria-label="Q&amp;A Forum" class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary transition-colors">
+<span class="material-symbols-outlined">forum</span>
+</button>
+<button class="hidden sm:flex items-center gap-2 px-4 h-10 bg-primary hover:bg-primary/90 text-white rounded-full font-bold text-sm transition-transform active:scale-95 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>New Snippet</span>
+</button>
+<button class="sm:hidden flex items-center justify-center w-10 h-10 bg-primary hover:bg-primary/90 text-white rounded-full shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-colors" data-alt="User profile avatar showing a smiling person">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQR_ogkrb6vnEnS5_tCcGhdi4_SLpe344ZzGI9A5S60I9AZUtQq2hCpG3E0wsC2nuKd7WYZFg4L1YS4VzXLU0fmeFD5ijeGX-vtpDgsymPfCU31ds-j6smgXkBOqW4JI_enItnX-Wa_gzPzXKKDoYhaAuuG_ylKKqIlvwaqnXClUfgM0DmYZgGukdYr4xSZWPQTBSRlyMar3wb1JQNpd1poFgYf4QVy2R9Q6DqwQGZAY33q0GsWsERxJKwKjhs4ZmmHQNFBvAWK_Y"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex-1 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pt-6 px-4 lg:px-8 pb-10">
+<aside class="hidden lg:block lg:col-span-3 xl:col-span-2 sticky top-24 h-[calc(100vh-8rem)] overflow-y-auto pr-2">
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Following</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">code</span>
+<span>Frontend</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">dns</span>
+<span>Backend</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">data_usage</span>
+<span>Data Science</span>
+</a>
+</nav>
+<div class="mt-10">
+<h3 class="px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-4">Your Libraries</h3>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-400 text-sm transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+<span>react-hooks</span>
+</div>
+<span class="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">12</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-400 text-sm transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+<span>python-utils</span>
+</div>
+<span class="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">8</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-400 text-sm transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-purple-500"></span>
+<span>ui-components</span>
+</div>
+<span class="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">24</span>
+</a>
+</nav>
+</div>
+</aside>
+<main class="col-span-1 lg:col-span-9 xl:col-span-7 flex flex-col gap-6">
+<nav class="flex items-center text-sm font-medium text-gray-500 dark:text-slate-400 mb-2 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
+<a class="hover:text-primary transition-colors" href="#">Forum</a>
+<span class="mx-2 text-gray-300 dark:text-slate-600">/</span>
+<a class="hover:text-primary transition-colors" href="#">JavaScript</a>
+<span class="mx-2 text-gray-300 dark:text-slate-600">/</span>
+<span class="text-gray-900 dark:text-white truncate">How to handle async errors in React useEffect?</span>
+</nav>
+<article class="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
+<div class="p-6 md:p-8 border-b border-gray-100 dark:border-slate-700/50">
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">React</span>
+<span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-300 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">JavaScript</span>
+<span class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Error Handling</span>
+</div>
+<h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+                        How to properly handle async/await errors inside React's useEffect hook without triggering unhandled promise rejections?
+                    </h1>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden ring-2 ring-white dark:ring-slate-800">
+<img alt="Marcus Neo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqQb2TbwhZX96hIViSspGDrdHydCyrqJL283rfyJJibMVXSohP0pb_yevsMokR4lJLX6TIJOHZRVspWEkDjOifk_uA3z9K04yu6nVq_e-Mid1qwnbf_81XMugrQDELPBGgN1Jw4Cv4LCKRrnxaM7Xt-P51Z9--RgTN2Coq92PhMNoRviyrrlxZgjPBK-_1e5TFabdUeSp845_jbRWIkVWnsI3ne-EhBfc4tWyHqHcfkgKQOcNtOOty5b112mBjzUfLbE-zOyhR8bM"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-bold text-gray-900 dark:text-white text-sm">Marcus Neo</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">AUTHOR</span>
+</div>
+<div class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Asked 5 hours ago</div>
+</div>
+</div>
+<div class="flex items-center gap-6 text-sm text-gray-500 dark:text-slate-400">
+<div class="flex items-center gap-1.5" title="Views">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span class="font-semibold text-gray-700 dark:text-gray-200">1,240</span>
+</div>
+<div class="flex items-center gap-1.5" title="Comments">
+<span class="material-symbols-outlined text-[18px]">comment</span>
+<span class="font-semibold text-gray-700 dark:text-gray-200">2</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 md:p-8">
+<div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
+<p>I am building a dashboard widget that fetches data from an API when the component mounts. I'm using <code>async/await</code> syntax for cleaner code, but I'm struggling with error handling inside <code>useEffect</code>.</p>
+<p>The linter warns me about not making the effect callback async, but when I define an inner async function, I sometimes get unhandled promise rejections if the component unmounts before the fetch completes.</p>
+<p>Here is my current implementation:</p>
+</div>
+<div class="relative group/code my-6">
+<div class="absolute right-4 top-4 opacity-0 group-hover/code:opacity-100 transition-opacity z-10">
+<button class="bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-2 shadow-lg backdrop-blur-sm bg-opacity-80 transition-colors">
+<span class="material-symbols-outlined text-[14px]">content_copy</span> Copy
+                            </button>
+</div>
+<div class="bg-[#020617] rounded-xl p-5 overflow-x-auto code-scroll font-mono text-sm leading-6 border border-slate-700 shadow-inner">
+<pre><code class="language-javascript"><span class="text-[#f97583]">useEffect</span>(() =&gt; {
+  <span class="text-[#f97583]">const</span> <span class="text-[#79c0ff]">fetchData</span> = <span class="text-[#f97583]">async</span> () =&gt; {
+    <span class="text-[#f97583]">try</span> {
+      <span class="text-[#f97583]">const</span> response = <span class="text-[#f97583]">await</span> <span class="text-[#79c0ff]">api.get</span>(<span class="text-primary">'/widgets/stats'</span>);
+      <span class="text-[#79c0ff]">setData</span>(response.data);
+    } <span class="text-[#f97583]">catch</span> (err) {
+      <span class="text-[#79c0ff]">setError</span>(err.message);
+    }
+  };
+  <span class="text-[#79c0ff]">fetchData</span>();
+}, []);</code></pre>
+</div>
+</div>
+<p class="text-gray-700 dark:text-gray-300 leading-relaxed">Is there a standard pattern or best practice to handle this gracefully, including cancellation support?</p>
+</div>
+<div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 shadow-sm overflow-hidden">
+<button class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-300 transition-colors border-r border-gray-200 dark:border-slate-600/50">
+<span class="material-symbols-outlined text-lg block">expand_less</span>
+</button>
+<span class="font-bold text-sm px-3 text-gray-900 dark:text-white min-w-[2rem] text-center">24</span>
+<button class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-300 transition-colors border-l border-gray-200 dark:border-slate-600/50">
+<span class="material-symbols-outlined text-lg block">expand_more</span>
+</button>
+</div>
+<button class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span>
+                            Add Comment
+                        </button>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-gray-400 hover:text-primary p-2 rounded-full hover:bg-primary/10 transition-colors" title="Save">
+<span class="material-symbols-outlined block">bookmark_border</span>
+</button>
+<button class="text-gray-400 hover:text-primary p-2 rounded-full hover:bg-primary/10 transition-colors" title="Share">
+<span class="material-symbols-outlined block">share</span>
+</button>
+<button class="text-gray-400 hover:text-red-500 p-2 rounded-full hover:bg-red-500/10 transition-colors" title="Report">
+<span class="material-symbols-outlined block">flag</span>
+</button>
+</div>
+</div>
+</article>
+<div class="flex items-center justify-between mt-4 pb-2 border-b border-gray-200 dark:border-slate-700">
+<h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    2 Answers
+                </h2>
+<div class="relative">
+<select class="appearance-none bg-transparent pl-3 pr-8 py-1 text-sm font-bold text-gray-700 dark:text-gray-300 border-none focus:ring-0 cursor-pointer hover:text-primary transition-colors">
+<option>Highest Score</option>
+<option>Date Created</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+</div>
+<article class="relative bg-card-light dark:bg-card-dark rounded-2xl border-2 border-primary/20 shadow-sm overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-blue-600"></div>
+<div class="bg-primary/5 dark:bg-primary/10 px-6 py-2 border-b border-primary/10 flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-xs font-bold uppercase tracking-wide">Accepted Answer</span>
+</div>
+<div class="p-6 md:p-8">
+<div class="flex items-start justify-between mb-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden ring-2 ring-primary/20">
+<img alt="Sarah Jenkins" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDi0y5GEb9KfWympq3d1m986ItcF7VVcwzD1HLbBKApuRLZJnoSyY7v3qx0WFkLTEU9PfszkRqtmifaTy8c3Hzeivsg1PJzusvKVl_46J8NDxYfIJTiBQtJM673ITElFNiJ8xT0U6mIv3GfE05i4i1cjZ2pXCembU3M0Bw5XOYv8kIFzY5f5SVZ_wvER5-6VHruP3l3PpMnrNDWRPUpQAQirgLGtiflxHXvNpgKQJde0NCnJB9o3d6a6dSWOT9zV2U3ZN91iGORerk"/>
+</div>
+<div>
+<div class="font-bold text-gray-900 dark:text-white text-sm">Sarah Jenkins</div>
+<div class="text-xs text-gray-500 dark:text-slate-400">Answered 2 hours ago</div>
+</div>
+</div>
+</div>
+<div class="text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
+<p>You should use an <code>AbortController</code> to handle the cleanup properly. This is the standard way to cancel fetch requests in <code>useEffect</code> when the component unmounts.</p>
+<p>Here's how you can refactor your code:</p>
+</div>
+<div class="bg-[#020617] rounded-xl p-5 my-4 overflow-x-auto code-scroll font-mono text-sm leading-6 border border-slate-700">
+<pre><code class="language-javascript"><span class="text-[#f97583]">useEffect</span>(() =&gt; {
+  <span class="text-[#f97583]">const</span> controller = <span class="text-[#f97583]">new</span> <span class="text-[#79c0ff]">AbortController</span>();
+  <span class="text-[#f97583]">const</span> <span class="text-[#79c0ff]">fetchData</span> = <span class="text-[#f97583]">async</span> () =&gt; {
+    <span class="text-[#f97583]">try</span> {
+      <span class="text-[#f97583]">const</span> response = <span class="text-[#f97583]">await</span> <span class="text-[#79c0ff]">api.get</span>(<span class="text-primary">'/widgets/stats'</span>, {
+        <span class="text-primary">signal</span>: controller.signal
+      });
+      <span class="text-[#79c0ff]">setData</span>(response.data);
+    } <span class="text-[#f97583]">catch</span> (err) {
+      <span class="text-[#f97583]">if</span> (err.name !== <span class="text-primary">'CanceledError'</span>) {
+        <span class="text-[#79c0ff]">setError</span>(err.message);
+      }
+    }
+  };
+  <span class="text-[#79c0ff]">fetchData</span>();
+  <span class="text-[#f97583]">return</span> () =&gt; controller.<span class="text-[#79c0ff]">abort</span>();
+}, []);</code></pre>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-800/50">
+<div class="flex items-center gap-4">
+<div class="flex items-center border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 shadow-sm overflow-hidden">
+<button class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-300 transition-colors border-r border-gray-200 dark:border-slate-600/50">
+<span class="material-symbols-outlined text-lg block">expand_less</span>
+</button>
+<span class="font-bold text-sm px-3 text-gray-900 dark:text-white min-w-[2rem] text-center">45</span>
+<button class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-300 transition-colors border-l border-gray-200 dark:border-slate-600/50">
+<span class="material-symbols-outlined text-lg block">expand_more</span>
+</button>
+</div>
+<button class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">Reply</button>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</article>
+<article class="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
+<div class="p-6 md:p-8">
+<div class="flex items-start justify-between mb-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden">
+<img alt="Elena Code" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8UvINMliWBpEZJathNMpyN79un9BXJGovwjFUi-6OJYIMPMd5DigocPV9gLHfaZi8sWbimVRQW4HXaBprwIOe23-up9m8-ewm8YfOaV5vNL2RAOndewKv4uv3k8YoYDLYlCodyElTonDcVJozF2XZ5hTp9A6QRO3iFy1kMAUfc53Eg9nMtDaqGMWSTdACP1HFE2aHDJbn-ZDWyJ7bZRDc5XpVrnQ2CGMoDVREMYWh1cahrI4dPCuK1FwTY1xQpJ1SNoK4amI51TE"/>
+</div>
+<div>
+<div class="font-bold text-gray-900 dark:text-white text-sm">Elena Code</div>
+<div class="text-xs text-gray-500 dark:text-slate-400">Answered 40 mins ago</div>
+</div>
+</div>
+</div>
+<div class="text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
+<p>Another simple workaround if you are using Axios is to check if the component is mounted using a ref, although the AbortController method suggested by Sarah is more modern and cleaner.</p>
+<p>Just adding this for completeness if you are in an older environment that doesn't support AbortController fully yet.</p>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-800/50">
+<div class="flex items-center gap-4">
+<div class="flex items-center border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 shadow-sm overflow-hidden">
+<button class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-300 transition-colors border-r border-gray-200 dark:border-slate-600/50">
+<span class="material-symbols-outlined text-lg block">expand_less</span>
+</button>
+<span class="font-bold text-sm px-3 text-gray-900 dark:text-white min-w-[2rem] text-center">8</span>
+<button class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-300 transition-colors border-l border-gray-200 dark:border-slate-600/50">
+<span class="material-symbols-outlined text-lg block">expand_more</span>
+</button>
+</div>
+<button class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">Reply</button>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</article>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-slate-700 p-6 md:p-8 shadow-sm">
+<h3 class="font-bold text-lg mb-4 text-gray-900 dark:text-white">Your Answer</h3>
+<div class="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all">
+<div class="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-2 flex gap-1">
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded text-gray-600 dark:text-gray-400 transition-colors" title="Bold">
+<span class="material-symbols-outlined text-[20px] block">format_bold</span>
+</button>
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded text-gray-600 dark:text-gray-400 transition-colors" title="Italic">
+<span class="material-symbols-outlined text-[20px] block">format_italic</span>
+</button>
+<div class="w-px h-6 bg-gray-300 dark:bg-slate-600 mx-1 self-center"></div>
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded text-gray-600 dark:text-gray-400 transition-colors" title="Code Block">
+<span class="material-symbols-outlined text-[20px] block">code</span>
+</button>
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded text-gray-600 dark:text-gray-400 transition-colors" title="Link">
+<span class="material-symbols-outlined text-[20px] block">link</span>
+</button>
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-700 rounded text-gray-600 dark:text-gray-400 transition-colors" title="Image">
+<span class="material-symbols-outlined text-[20px] block">image</span>
+</button>
+</div>
+<textarea class="w-full bg-white dark:bg-slate-900 border-0 focus:ring-0 text-gray-900 dark:text-white placeholder-gray-500 h-48 p-4 resize-y text-sm leading-relaxed" placeholder="Type your solution here... details matter!"></textarea>
+</div>
+<div class="flex justify-between items-center mt-4">
+<p class="text-xs text-gray-500 dark:text-gray-400">
+                        Markdown is supported.
+                    </p>
+<button class="bg-primary hover:bg-primary/90 text-white font-bold py-2.5 px-6 rounded-full transition-all shadow-lg shadow-primary/25 active:scale-95 flex items-center gap-2">
+<span>Post Answer</span>
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</main>
+<aside class="hidden xl:block xl:col-span-3 sticky top-24 h-[calc(100vh-8rem)]">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-slate-700 p-5 mb-6">
+<h3 class="font-extrabold text-lg mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+<span class="material-symbols-outlined text-primary">trending_up</span>
+                    Trending Repos
+                </h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-start justify-between group cursor-pointer">
+<div>
+<p class="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors">facebook/react</p>
+<p class="text-xs text-gray-500 mt-1">v19.0.0-rc release notes</p>
+</div>
+<span class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">+12%</span>
+</div>
+<div class="w-full h-px bg-gray-100 dark:bg-slate-700"></div>
+<div class="flex items-start justify-between group cursor-pointer">
+<div>
+<p class="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors">rust-lang/rust</p>
+<p class="text-xs text-gray-500 mt-1">Async traits stabilized</p>
+</div>
+<span class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">+8%</span>
+</div>
+<div class="w-full h-px bg-gray-100 dark:bg-slate-700"></div>
+<div class="flex items-start justify-between group cursor-pointer">
+<div>
+<p class="font-bold text-sm text-gray-800 dark:text-gray-200 group-hover:text-primary transition-colors">openai/gpt-3</p>
+<p class="text-xs text-gray-500 mt-1">New fine-tuning docs</p>
+</div>
+<span class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">+24%</span>
+</div>
+</div>
+<button class="w-full mt-5 py-2 text-sm text-primary font-bold hover:bg-primary/10 rounded-lg transition-colors">
+                    View all trending
+                </button>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+<h3 class="font-extrabold text-lg mb-4 text-gray-900 dark:text-white">Who to follow</h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-gray-700 overflow-hidden" data-alt="Avatar of Tech Lead">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqQb2TbwhZX96hIViSspGDrdHydCyrqJL283rfyJJibMVXSohP0pb_yevsMokR4lJLX6TIJOHZRVspWEkDjOifk_uA3z9K04yu6nVq_e-Mid1qwnbf_81XMugrQDELPBGgN1Jw4Cv4LCKRrnxaM7Xt-P51Z9--RgTN2Coq92PhMNoRviyrrlxZgjPBK-_1e5TFabdUeSp845_jbRWIkVWnsI3ne-EhBfc4tWyHqHcfkgKQOcNtOOty5b112mBjzUfLbE-zOyhR8bM"/>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">Marcus Neo</span>
+<span class="text-xs text-gray-500">@marcus_dev</span>
+</div>
+</div>
+<button class="text-primary hover:text-white hover:bg-primary border border-primary p-1.5 rounded-full transition-all">
+<span class="material-symbols-outlined text-[18px] block">add</span>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-gray-700 overflow-hidden" data-alt="Avatar of Senior Dev">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8UvINMliWBpEZJathNMpyN79un9BXJGovwjFUi-6OJYIMPMd5DigocPV9gLHfaZi8sWbimVRQW4HXaBprwIOe23-up9m8-ewm8YfOaV5vNL2RAOndewKv4uv3k8YoYDLYlCodyElTonDcVJozF2XZ5hTp9A6QRO3iFy1kMAUfc53Eg9nMtDaqGMWSTdACP1HFE2aHDJbn-ZDWyJ7bZRDc5XpVrnQ2CGMoDVREMYWh1cahrI4dPCuK1FwTY1xQpJ1SNoK4amI51TE"/>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">Elena Code</span>
+<span class="text-xs text-gray-500">@elenacodes</span>
+</div>
+</div>
+<button class="text-primary hover:text-white hover:bg-primary border border-primary p-1.5 rounded-full transition-all">
+<span class="material-symbols-outlined text-[18px] block">add</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-6 flex flex-wrap gap-x-4 gap-y-2 px-2">
+<a class="text-xs text-gray-500 hover:underline" href="#">Privacy</a>
+<a class="text-xs text-gray-500 hover:underline" href="#">Terms</a>
+<a class="text-xs text-gray-500 hover:underline" href="#">API</a>
+<a class="text-xs text-gray-500 hover:underline" href="#">About</a>
+<p class="text-xs text-gray-600 dark:text-gray-400 mt-2 w-full">© 2023 Snip-it Inc.</p>
+</div>
+</aside>
+</div>
+
+</body></html>
