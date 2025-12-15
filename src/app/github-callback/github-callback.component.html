@@ -1,0 +1,20 @@
+<section class="auth-shell" aria-label="GitHub Callback">
+  <div class="auth-card">
+    <div class="card-header">
+      <p class="eyebrow">GitHub Authentication</p>
+      <h1>Completing sign in...</h1>
+    </div>
+
+    @if (loading) {
+      <div class="loading-section">
+        <div class="spinner"></div>
+        <p>Authenticating with GitHub...</p>
+      </div>
+    } @else if (error) {
+      <div class="error-section">
+        <p class="error-message">{{ error }}</p>
+        <p class="info-text">Redirecting to login in {{ countdown }} second<span *ngIf="countdown !== 1">s</span>...</p>
+      </div>
+    }
+  </div>
+</section>

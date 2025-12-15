@@ -16,6 +16,7 @@
     }
     @if (isLoggedIn()) {
       <nav class="primary-nav" aria-label="User">
+        <span class="username">{{ username() }}</span>
         <a (click)="handleLogout()" class="link">Log out</a>
       </nav>
     }

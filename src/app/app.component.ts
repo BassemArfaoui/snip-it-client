@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { isLoggedIn, logout } from './auth.store';
+import { isLoggedIn, logout, username, setAuthService, getUsername } from './auth.store';
+import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-root',
@@ -8,11 +9,24 @@ import { isLoggedIn, logout } from './auth.store';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'client';
-  // expose the signal to the template so it can be read as `isLoggedIn()`
+  // expose the signals to the template
   isLoggedIn = isLoggedIn;
-  constructor(private router: Router) {}
+  username = username;
+  
+  constructor(private router: Router, private authService: AuthService) {}
+
+  ngOnInit() {
+    // Provide AuthService to auth store
+    setAuthService(this.authService);
+    
+    // Initialize username from token if logged in
+    if (this.isLoggedIn()) {
+      const user = getUsername();
+      this.username.set(user);
+    }
+  }
 
   // convenience wrapper used by the template — clears auth and navigates
   handleLogout() {

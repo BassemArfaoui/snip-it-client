@@ -43,6 +43,13 @@
 .primary-nav {
 	display: flex;
 	gap: 1rem;
+	align-items: center;
+}
+
+.username {
+	color: rgba(248, 250, 252, 0.75);
+	font-weight: 600;
+	padding: 0.35rem 0.75rem;
 }
 
 .primary-nav a {

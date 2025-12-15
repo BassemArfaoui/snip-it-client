@@ -5,6 +5,7 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { HomeComponent } from './home/home.component';
 import { AuthGuard } from './auth.guard';
+import { GitHubCallbackComponent } from './github-callback/github-callback.component';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -12,6 +13,7 @@ export const routes: Routes = [
 	{ path: 'signup', component: SignupPageComponent },
 	{ path: 'forgot-password', component: ForgotPasswordComponent },
 	{ path: 'reset-password', component: ResetPasswordComponent },
+	{ path: 'auth-success', component: GitHubCallbackComponent },
 	{ path: 'dashboard', component: HomeComponent, canActivate: [AuthGuard] },
 	{ path: '**', redirectTo: 'login' }
 ];

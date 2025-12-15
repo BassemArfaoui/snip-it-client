@@ -55,6 +55,36 @@ export class AuthService {
   }
 
   /**
+   * Decode JWT token payload (without signature verification)
+   */
+  private decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Extract username from access token
+   */
+  getUsername(): string | null {
+    const accessToken = this.getAccessToken();
+    if (!accessToken) return null;
+    
+    const decoded = this.decodeToken(accessToken);
+    return decoded?.username || null;
+  }
+
+  /**
    * Initialize tokens from localStorage on service creation
    */
   private initializeTokens(): void {
