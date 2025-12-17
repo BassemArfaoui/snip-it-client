@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser } from '../services/profile.service';
+import { getUserId } from '../auth.store';
 
 @Component({
   selector: 'app-profile',
@@ -13,7 +14,8 @@ import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser } from '..
 export class ProfileComponent implements OnInit {
   userId: number = 1;
   profile: ProfileSummary | null = null;
-  activeTab: string = 'overview';
+  activeTab: string = 'posts';
+  isOwnProfile = false;
   
   // Tab data
   posts: Post[] = [];
@@ -36,6 +38,9 @@ export class ProfileComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       this.userId = id ? parseInt(id, 10) : 1;
+      const currentUserId = getUserId();
+      this.isOwnProfile = !!currentUserId && currentUserId === this.userId;
+      this.activeTab = 'posts';
       this.loadProfile();
     });
   }
