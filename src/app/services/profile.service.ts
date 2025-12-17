@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface ProfileSummary {
   name: string;
@@ -47,58 +48,51 @@ export class ProfileService {
 
   constructor(private http: HttpClient) {}
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('jwt_token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   getProfile(userId: number): Observable<ProfileSummary> {
-    return this.http.get<ProfileSummary>(`${this.apiUrl}/${userId}`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 
   getSavedPosts(userId: number): Observable<Post[]> {
-    return this.http.get<Post[]>(`${this.apiUrl}/${userId}/saved_posts`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}/saved_posts`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 
   getBadges(userId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/${userId}/bagdes`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}/bagdes`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 
   getUserPosts(userId: number): Observable<Post[]> {
-    return this.http.get<Post[]>(`${this.apiUrl}/${userId}/posts`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}/posts`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 
   getUserIssues(userId: number): Observable<Issue[]> {
-    return this.http.get<Issue[]>(`${this.apiUrl}/${userId}/issues`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}/issues`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 
   getContributionGraph(userId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${userId}/contrubution_graph`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}/contrubution_graph`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 
   getStreak(userId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${userId}/streak`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}/streak`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 
   getLeaderBoard(userId: number): Observable<LeaderBoardUser[]> {
-    return this.http.get<LeaderBoardUser[]>(`${this.apiUrl}/${userId}/leader_board`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<any>(`${this.apiUrl}/${userId}/leader_board`).pipe(
+      map((response: any) => response.data || response)
+    );
   }
 }
