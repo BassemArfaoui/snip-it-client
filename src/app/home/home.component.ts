@@ -6,9 +6,17 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section style="display:flex;align-items:center;justify-content:center;height:80vh">
-      <h1>Hello, world</h1>
-    </section>
+    <main class="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+      <div class="flex items-center justify-center min-h-[60vh]">
+        <div class="text-center">
+          <div class="bg-primary p-4 rounded-2xl text-black inline-block mb-4 shadow-lg">
+            <span class="material-symbols-outlined text-5xl">code</span>
+          </div>
+          <h1 class="text-4xl font-bold text-text-main dark:text-white mb-4">Welcome to Snip-it</h1>
+          <p class="text-lg text-text-muted dark:text-gray-400">Your dashboard is loading...</p>
+        </div>
+      </div>
+    </main>
   `
 })
 export class HomeComponent {}

@@ -1,16 +1,4 @@
-:host {
-  display: block;
-  width: 100%;
-}
-
-.auth-shell {
-  min-height: calc(100vh - 72px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1.5rem 3rem;
-  background: linear-gradient(180deg, #050714, #0d1020 65%, #111a2f 100%);
-}
+/* All styles handled by Tailwind */
 
 .auth-card {
   width: min(460px, 100%);
