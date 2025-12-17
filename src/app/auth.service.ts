@@ -41,6 +41,11 @@ export interface AuthResponse {
   tokens?: TokenResponse;
 }
 
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -92,8 +97,13 @@ export class AuthService {
     if (!accessToken) return null;
 
     const decoded = this.decodeToken(accessToken);
+    console.log('JWT Decoded:', decoded);
     const id = decoded?.sub ?? decoded?.id ?? decoded?.userId;
-    return typeof id === 'number' ? id : null;
+    console.log('Extracted ID:', id, 'Type:', typeof id);
+    // Accept both string and number IDs
+    if (typeof id === 'number') return id;
+    if (typeof id === 'string') return parseInt(id, 10) || null;
+    return null;
   }
 
   /**
@@ -117,11 +127,13 @@ export class AuthService {
   /**
    * Verify email with OTP code
    */
-  verifyEmail(request: VerifyEmailRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/verify-email`, request).pipe(
+  verifyEmail(request: VerifyEmailRequest): Observable<ApiResponse<AuthResponse>> {
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/verify-email`, request).pipe(
       tap((response) => {
-        if (response.tokens) {
-          this.setTokens(response.tokens);
+        // Extract tokens from wrapped response
+        const responseData = response.data || response as any;
+        if (responseData.tokens) {
+          this.setTokens(responseData.tokens);
         }
       })
     );
@@ -137,9 +149,13 @@ export class AuthService {
   /**
    * Login with email/username and password (requires verified email)
    */
-  login(request: LoginRequest): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap((tokens) => {
+  login(request: LoginRequest): Observable<ApiResponse<TokenResponse>> {
+    return this.http.post<ApiResponse<TokenResponse>>(`${this.apiUrl}/login`, request).pipe(
+      tap((response) => {
+        // Extract tokens from wrapped response (backend wraps in {data: tokens, message: 'success'})
+        const tokens = response.data || response as any;
+        console.log('Login response:', response);
+        console.log('Extracted tokens:', tokens);
         this.setTokens(tokens);
       })
     );
@@ -148,13 +164,15 @@ export class AuthService {
   /**
    * Refresh access and refresh tokens
    */
-  refresh(): Observable<TokenResponse> {
+  refresh(): Observable<ApiResponse<TokenResponse>> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
       throw new Error('No refresh token available');
     }
-    return this.http.post<TokenResponse>(`${this.apiUrl}/refresh`, { refreshToken }).pipe(
-      tap((tokens) => {
+    return this.http.post<ApiResponse<TokenResponse>>(`${this.apiUrl}/refresh`, { refreshToken }).pipe(
+      tap((response) => {
+        // Extract tokens from wrapped response
+        const tokens = response.data || response as any;
         this.setTokens(tokens);
       })
     );
@@ -178,9 +196,11 @@ export class AuthService {
    * Store tokens in localStorage and update the subject
    */
   private setTokens(tokens: TokenResponse): void {
+    console.log('Storing tokens:', tokens);
     localStorage.setItem('accessToken', tokens.accessToken);
     localStorage.setItem('refreshToken', tokens.refreshToken);
     this.accessTokenSubject.next(tokens.accessToken);
+    console.log('Tokens stored. AccessToken from localStorage:', localStorage.getItem('accessToken')?.substring(0, 20));
   }
 
   /**
