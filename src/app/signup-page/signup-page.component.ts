@@ -47,6 +47,7 @@ export class SignupPageComponent implements OnInit {
     this.signupForm = this.fb.group(
       {
         fullName: ['', [Validators.required, Validators.minLength(3)]],
+        username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(8)]],
         confirm: ['', [Validators.required, Validators.minLength(8)]],
@@ -62,6 +63,10 @@ export class SignupPageComponent implements OnInit {
 
   get fullName() {
     return this.signupForm.get('fullName');
+  }
+
+  get username() {
+    return this.signupForm.get('username');
   }
 
   get email() {
@@ -95,7 +100,7 @@ export class SignupPageComponent implements OnInit {
 
     this.authService.register({
       email: formVal.email,
-      username: formVal.email.split('@')[0],
+      username: formVal.username,
       password: formVal.password,
       fullName: formVal.fullName
     }).subscribe({

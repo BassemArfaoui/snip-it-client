@@ -51,6 +51,28 @@
             }
           </div>
 
+          <!-- Username Input -->
+          <div>
+            <label for="username" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              formControlName="username"
+              autocomplete="username"
+              placeholder="jordansmith"
+              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              [class.border-red-500]="username?.invalid && username?.touched"
+            />
+            @if (username?.hasError('required') && username?.touched) {
+              <span class="text-red-500 text-xs mt-1 block">Username is required</span>
+            }
+            @if (username?.hasError('minlength') && username?.touched) {
+              <span class="text-red-500 text-xs mt-1 block">Username must be at least 3 characters</span>
+            }
+          </div>
+
           <!-- Email Input -->
           <div>
             <label for="email" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
