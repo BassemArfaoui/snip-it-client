@@ -85,6 +85,18 @@ export class AuthService {
   }
 
   /**
+   * Extract numeric user id from access token
+   */
+  getUserId(): number | null {
+    const accessToken = this.getAccessToken();
+    if (!accessToken) return null;
+
+    const decoded = this.decodeToken(accessToken);
+    const id = decoded?.sub ?? decoded?.id ?? decoded?.userId;
+    return typeof id === 'number' ? id : null;
+  }
+
+  /**
    * Initialize tokens from localStorage on service creation
    */
   private initializeTokens(): void {

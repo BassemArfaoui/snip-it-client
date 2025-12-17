@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { isLoggedIn, logout, username, setAuthService, getUsername } from './auth.store';
+import { isLoggedIn, logout, username, userId, setAuthService, getUsername, getUserId } from './auth.store';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -14,6 +14,7 @@ export class AppComponent implements OnInit {
   // expose the signals to the template
   isLoggedIn = isLoggedIn;
   username = username;
+  userId = userId;
   
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -25,6 +26,8 @@ export class AppComponent implements OnInit {
     if (this.isLoggedIn()) {
       const user = getUsername();
       this.username.set(user);
+      const id = getUserId();
+      this.userId.set(id);
     }
   }
 

@@ -10,7 +10,9 @@
       @if (isLoggedIn()) {
         <nav class="hidden md:flex items-center gap-6">
           <a routerLink="/dashboard" routerLinkActive="text-primary" class="text-sm font-medium hover:text-primary transition-colors">Dashboard</a>
-          <a [routerLink]="['/profile', username()]" routerLinkActive="text-primary" class="text-sm font-medium hover:text-primary transition-colors">Profile</a>
+          @if (userId()) {
+            <a [routerLink]="['/profile', userId()]" routerLinkActive="text-primary" class="text-sm font-medium hover:text-primary transition-colors">Profile</a>
+          }
         </nav>
       }
     </div>
