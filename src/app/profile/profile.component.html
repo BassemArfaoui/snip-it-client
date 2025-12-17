@@ -1,0 +1,231 @@
+@if (!loading && profile) {
+<main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+  <!-- Profile Header Card -->
+  <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 mb-8 relative overflow-hidden group">
+    <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-500"></div>
+    <div class="relative flex flex-col md:flex-row items-center md:items-start gap-8 z-10">
+      <!-- Avatar (initial fallback) -->
+      <div class="relative">
+        <div class="size-32 rounded-full border-4 border-white dark:border-card-dark shadow-lg bg-gray-100 flex items-center justify-center text-4xl font-bold text-text-main">
+          {{ profile.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="absolute bottom-1 right-1 bg-primary text-black text-xs font-bold px-2 py-0.5 rounded-full border-2 border-white">LVL {{ profile.score }}</div>
+      </div>
+      <!-- Info -->
+      <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left gap-2">
+        <div class="flex flex-col md:flex-row items-center gap-3">
+          <h1 class="text-3xl font-bold text-text-main dark:text-white leading-tight">{{ profile.name }}</h1>
+          <span class="bg-primary/20 text-yellow-700 dark:text-yellow-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">&#64;{{ profile.username }}</span>
+        </div>
+        <div class="flex items-center gap-2 mt-1 text-sm text-text-muted dark:text-gray-500">
+          <span class="material-symbols-outlined text-[18px]">verified</span>
+          <span>Posts: {{ profile.posts }}</span>
+          <span class="mx-1">•</span>
+          <span>Issues: {{ profile.issues }}</span>
+        </div>
+        <div class="flex gap-3 mt-4 w-full md:w-auto">
+          <button class="flex-1 md:flex-none bg-primary hover:bg-[#e6e205] text-black font-bold h-10 px-6 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm">
+            <span>Follow</span>
+          </button>
+          <button class="flex-1 md:flex-none bg-gray-100 dark:bg-white/10 hover:bg-gray-200 text-text-main dark:text-white font-semibold h-10 px-6 rounded-full transition-colors border border-transparent dark:border-white/10">
+            Message
+          </button>
+        </div>
+      </div>
+      <!-- Quick Stats -->
+      <div class="flex gap-6 md:gap-8 md:pl-8 md:border-l border-gray-100 dark:border-white/10 pt-4 md:pt-2">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-text-main dark:text-white">{{ profile.followers }}</div>
+          <div class="text-sm text-text-muted">Followers</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-text-main dark:text-white">{{ profile.followedBy }}</div>
+          <div class="text-sm text-text-muted">Following</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-text-main dark:text-white">{{ profile.score }}</div>
+          <div class="text-sm text-text-muted">XP Score</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feed Toggles (Posts/Issues) -->
+  <div class="bg-white dark:bg-card-dark rounded-full shadow-soft p-1.5 flex w-full sm:w-fit mb-6">
+    <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
+            [class.bg-primary]="activeTab === 'posts'" [class.text-black]="activeTab === 'posts'"
+            [class.text-text-muted]="activeTab !== 'posts'" (click)="switchTab('posts')">Posts ({{ profile.posts }})</button>
+    <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
+            [class.bg-primary]="activeTab === 'issues'" [class.text-black]="activeTab === 'issues'"
+            [class.text-text-muted]="activeTab !== 'issues'" (click)="switchTab('issues')">Issues ({{ profile.issues }})</button>
+    <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-medium text-text-muted"
+            (click)="switchTab('saved')">Saved</button>
+  </div>
+
+  <!-- 3 Column Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left Column: Badges -->
+    <div class="lg:col-span-3 flex flex-col gap-6 order-2 lg:order-1">
+      <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg text-text-main dark:text-white">Badges</h3>
+        </div>
+        <div class="flex flex-col gap-3">
+          @if (badges.length > 0) {
+            @for (badge of badges; track badge.id) {
+              <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center text-yellow-700 dark:text-yellow-200">
+                  <span class="material-symbols-outlined filled-icon">military_tech</span>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-text-main dark:text-white leading-tight">{{ badge.name }}</p>
+                  <p class="text-xs text-text-muted">{{ badge.description }}</p>
+                </div>
+              </div>
+            }
+          }
+          @if (badges.length === 0) {
+            <p class="text-sm text-text-muted">No badges earned yet</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Column: Feed -->
+    <div class="lg:col-span-6 flex flex-col gap-6 order-1 lg:order-2">
+      <!-- Posts -->
+      @if (activeTab === 'posts') {
+        @if (posts.length === 0) {
+          <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No posts yet</div>
+        }
+        @for (post of posts; track post.id) {
+          <article class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all">
+            <h3 class="text-xl font-bold text-text-main dark:text-white mb-2">{{ post.title }}</h3>
+            <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-4">{{ post.description }}</p>
+            <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/10 text-sm text-text-muted">
+              <div class="flex gap-4">
+                <span>👁️ {{ post.viewsCount || 0 }}</span>
+                <span>❤️ {{ post.likesCount || 0 }}</span>
+                <span>💬 {{ post.commentsCount || 0 }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      }
+
+      <!-- Issues -->
+      @if (activeTab === 'issues') {
+        @if (issues.length === 0) {
+          <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No issues yet</div>
+        }
+        @for (issue of issues; track issue.id) {
+          <article class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold" [class]="issue.isResolved ? 'text-green-700 bg-green-100 px-2 py-0.5 rounded-full' : 'text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full'">
+                  {{ issue.isResolved ? 'Resolved' : 'Open' }}
+                </span>
+              </div>
+            </div>
+            <h3 class="text-lg font-bold text-text-main dark:text-white mb-2">{{ issue.language }}</h3>
+            <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-4">{{ issue.content }}</p>
+            <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/10 text-sm text-text-muted">
+              <span>💡 {{ issue.solutionsCount }} solutions</span>
+            </div>
+          </article>
+        }
+      }
+
+      <!-- Saved (as list) -->
+      @if (activeTab === 'saved') {
+        @if (savedPosts.length === 0) {
+          <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No saved posts</div>
+        }
+        @for (post of savedPosts; track post.id) {
+          <article class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all">
+            <h3 class="text-xl font-bold text-text-main dark:text-white mb-2">{{ post.title }}</h3>
+            <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-2">{{ post.description }}</p>
+            <div class="flex items-center gap-4 text-sm text-text-muted">
+              <span>👁️ {{ post.viewsCount || 0 }}</span>
+              <span>❤️ {{ post.likesCount || 0 }}</span>
+            </div>
+          </article>
+        }
+      }
+    </div>
+
+    <!-- Right Column: Actions + Saved Widget -->
+    <div class="lg:col-span-3 flex flex-col gap-6 order-3">
+      <!-- Contribution & Streak quick actions -->
+      <div class="flex flex-col gap-3">
+        <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="bg-green-100 dark:bg-green-900/30 text-green-600 p-2 rounded-lg">
+              <span class="material-symbols-outlined">dataset</span>
+            </div>
+            <span class="font-bold text-sm">Contribution Graph</span>
+          </div>
+          <span class="text-xs text-text-muted">@if (contributionGraph === null) { Coming soon } @if (contributionGraph) { {{ contributionGraph }} }</span>
+        </div>
+        <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 p-2 rounded-lg">
+              <span class="material-symbols-outlined">local_fire_department</span>
+            </div>
+            <div class="flex flex-col items-start">
+              <span class="font-bold text-sm">Daily Streak</span>
+              <span class="text-xs text-text-muted">@if (streak === null) { Coming soon } @if (streak) { {{ streak }} }</span>
+            </div>
+          </div>
+        </div>
+        <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 p-2 rounded-lg">
+              <span class="material-symbols-outlined">leaderboard</span>
+            </div>
+            <span class="font-bold text-sm">Global Leaderboard</span>
+          </div>
+          <span class="text-xs text-text-muted">Top: @if (leaderboard.length > 0) { {{ leaderboard[0].name }} ({{ leaderboard[0].score }}) } @if (leaderboard.length === 0) { N/A }</span>
+        </div>
+      </div>
+
+      <!-- Saved Posts Widget (same data) -->
+      <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg text-text-main dark:text-white">Saved Posts</h3>
+        </div>
+        <div class="flex flex-col gap-4">
+          @if (savedPosts.length === 0) {
+            <p class="text-sm text-text-muted">No saved posts</p>
+          }
+          @for (post of savedPosts; track post.id) {
+            <div class="flex gap-3">
+              <div class="size-12 rounded-lg bg-gray-100 dark:bg-white/10 shrink-0"></div>
+              <div class="flex flex-col">
+                <h4 class="text-sm font-bold text-text-main dark:text-white line-clamp-2">{{ post.title }}</h4>
+                <span class="text-xs text-text-muted mt-1">❤️ {{ post.likesCount || 0 }} • 👁️ {{ post.viewsCount || 0 }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+}
+
+<!-- Loading State -->
+@if (loading) {
+  <div class="loading-container flex items-center justify-center py-24">
+    <div class="spinner mr-3"></div>
+    <p>Loading profile...</p>
+  </div>
+}
+
+<!-- Error State -->
+@if (error && !loading) {
+  <div class="error-container p-6 bg-red-50 text-red-700 rounded-xl">
+    <p class="error-message font-semibold">{{ error }}</p>
+    <button class="retry-button mt-3 bg-black text-white px-4 py-2 rounded-lg" (click)="loadProfile()">Retry</button>
+  </div>
+}
