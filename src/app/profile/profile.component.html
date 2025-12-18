@@ -164,9 +164,12 @@
             <div class="bg-green-100 dark:bg-green-900/30 text-green-600 p-2 rounded-lg">
               <span class="material-symbols-outlined">dataset</span>
             </div>
-            <span class="font-bold text-sm">Contribution Graph</span>
+            <div class="flex flex-col">
+              <span class="font-bold text-sm">Contribution Graph</span>
+              <span class="text-xs text-text-muted">Heatmap for the past year</span>
+            </div>
           </div>
-          <span class="text-xs text-text-muted">@if (contributionGraph === null) { Coming soon } @if (contributionGraph) { {{ contributionGraph }} }</span>
+          <button class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-black" (click)="toggleGraph()">{{ showGraphCard ? 'Hide' : 'View' }}</button>
         </div>
         <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -175,20 +178,148 @@
             </div>
             <div class="flex flex-col items-start">
               <span class="font-bold text-sm">Daily Streak</span>
-              <span class="text-xs text-text-muted">@if (streak === null) { Coming soon } @if (streak) { {{ streak }} }</span>
+              <span class="text-xs text-text-muted">See current and longest streak</span>
             </div>
           </div>
+          <button class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-black" (click)="toggleStreak()">{{ showStreakCard ? 'Hide' : 'View' }}</button>
         </div>
         <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 p-2 rounded-lg">
               <span class="material-symbols-outlined">leaderboard</span>
             </div>
-            <span class="font-bold text-sm">Global Leaderboard</span>
+            <div class="flex flex-col">
+              <span class="font-bold text-sm">Global Leaderboard</span>
+              <span class="text-xs text-text-muted">Top creators by XP</span>
+            </div>
           </div>
-          <span class="text-xs text-text-muted">Top: @if (leaderboard.length > 0) { {{ leaderboard[0].name }} ({{ leaderboard[0].score }}) } @if (leaderboard.length === 0) { N/A }</span>
+          <button class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-black" (click)="toggleLeaderboard()">{{ showLeaderboardCard ? 'Hide' : 'View' }}</button>
         </div>
       </div>
+
+      @if (showGraphCard) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="toggleGraph()"></div>
+          <div class="relative w-full max-w-4xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
+            <button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="toggleGraph()">
+              <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+            <div class="flex items-center justify-between mb-4 pr-10">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-600">insights</span>
+                <h3 class="font-bold text-lg text-text-main dark:text-white">Contribution Graph</h3>
+              </div>
+              @if (graphLoading) { <span class="text-xs text-text-muted">Loading...</span> }
+            </div>
+            @if (!graphLoading && contributionGraph.length === 0) {
+              <p class="text-sm text-text-muted">No contributions yet.</p>
+            }
+            @if (contributionGraph.length > 0) {
+              <div class="overflow-x-auto">
+                <div class="flex gap-1 pb-2 min-w-[520px]">
+                  @for (week of graphWeeks; track $index) {
+                    <div class="flex flex-col gap-1">
+                      @for (day of week; track day.date) {
+                        <div class="w-3 h-3 rounded-sm" [ngClass]="contributionColor(day.count)" [title]="formatDateLabel(day.date) + ' • ' + day.count + ' contributions'"></div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="flex items-center gap-2 mt-3 text-xs text-text-muted">
+                <span>Less</span>
+                <div class="w-3 h-3 rounded-sm bg-gray-100 dark:bg-white/10"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-200 dark:bg-green-900/40"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-400 dark:bg-green-800/70"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-500 dark:bg-green-700"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-600 dark:bg-green-600"></div>
+                <span>More</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (showStreakCard) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="toggleStreak()"></div>
+          <div class="relative w-full max-w-2xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
+            <button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="toggleStreak()">
+              <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+            <div class="flex items-center justify-between mb-4 pr-10">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-orange-600">local_fire_department</span>
+                <h3 class="font-bold text-lg text-text-main dark:text-white">Daily Streak</h3>
+              </div>
+              @if (streakLoading) { <span class="text-xs text-text-muted">Loading...</span> }
+            </div>
+            @if (!streakLoading && streak === null) {
+              <p class="text-sm text-text-muted">No streak data yet.</p>
+            }
+            @if (streak) {
+              <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                  <p class="text-xs text-text-muted">Current streak</p>
+                  <p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.currentStreak }} days</p>
+                </div>
+                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                  <p class="text-xs text-text-muted">Longest streak</p>
+                  <p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.longestStreak }} days</p>
+                </div>
+                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                  <p class="text-xs text-text-muted">Last contribution</p>
+                  <p class="text-lg font-bold text-text-main dark:text-white">{{ streak.lastContributionDate ? formatDateLabel(streak.lastContributionDate) : 'Never' }}</p>
+                </div>
+                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                  <p class="text-xs text-text-muted">Total contributions</p>
+                  <p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.totalContributions }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (showLeaderboardCard) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="toggleLeaderboard()"></div>
+          <div class="relative w-full max-w-3xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
+            <button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="toggleLeaderboard()">
+              <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+            <div class="flex items-center justify-between mb-4 pr-10">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600">leaderboard</span>
+                <h3 class="font-bold text-lg text-text-main dark:text-white">Global Leaderboard</h3>
+              </div>
+              @if (leaderboardLoading) { <span class="text-xs text-text-muted">Loading...</span> }
+            </div>
+            @if (!leaderboardLoading && leaderboard.length === 0) {
+              <p class="text-sm text-text-muted">No leaderboard entries yet.</p>
+            }
+            @if (leaderboard.length > 0) {
+              <div class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1">
+                @for (user of leaderboard; track user.id) {
+                  <div class="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-blue-200 dark:bg-white/10 flex items-center justify-center font-bold text-blue-800">{{ user.rank || '-' }}</div>
+                      <div class="flex flex-col">
+                        <span class="font-bold text-text-main dark:text-white">{{ user.name }}</span>
+                        <span class="text-xs text-text-muted">&#64;{{ user.username }}</span>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-sm font-bold text-text-main dark:text-white">{{ user.score }} XP</p>
+                      <p class="text-xs text-text-muted">Posts {{ user.postsCount || 0 }} • Issues {{ user.issuesCount || 0 }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
 
       @if (isOwnProfile) {
         <!-- Saved Posts Widget (same data) -->

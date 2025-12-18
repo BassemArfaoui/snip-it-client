@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -38,6 +38,23 @@ export interface LeaderBoardUser {
   name: string;
   username: string;
   score: number;
+  rank?: number;
+  postsCount?: number;
+  issuesCount?: number;
+  followers?: number;
+  imageProfile?: string | null;
+}
+
+export interface ContributionDay {
+  date: string;
+  count: number;
+}
+
+export interface StreakStats {
+  currentStreak: number;
+  longestStreak: number;
+  lastContributionDate: string | null;
+  totalContributions: number;
 }
 
 @Injectable({
@@ -78,13 +95,13 @@ export class ProfileService {
     );
   }
 
-  getContributionGraph(userId: number): Observable<any> {
+  getContributionGraph(userId: number): Observable<ContributionDay[]> {
     return this.http.get<any>(`${this.apiUrl}/${userId}/contrubution_graph`).pipe(
       map((response: any) => response.data || response)
     );
   }
 
-  getStreak(userId: number): Observable<any> {
+  getStreak(userId: number): Observable<StreakStats> {
     return this.http.get<any>(`${this.apiUrl}/${userId}/streak`).pipe(
       map((response: any) => response.data || response)
     );
