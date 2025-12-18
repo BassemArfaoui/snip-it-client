@@ -1,19 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats } from '../services/profile.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload } from '../services/profile.service';
 import { getUserId } from '../auth.store';
+
+type ProfileDetail = ProfileSummary & { email?: string; imageProfile?: string | null };
+interface Badge {
+  id?: number;
+  name: string;
+  description: string;
+}
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
   userId: number = 1;
-  profile: ProfileSummary | null = null;
+  profile: ProfileDetail | null = null;
   activeTab: string = 'posts';
   isOwnProfile = false;
   
@@ -21,7 +29,7 @@ export class ProfileComponent implements OnInit {
   posts: Post[] = [];
   issues: Issue[] = [];
   savedPosts: Post[] = [];
-  badges: any[] = [];
+  badges: Badge[] = [];
   leaderboard: LeaderBoardUser[] = [];
   contributionGraph: ContributionDay[] = [];
   streak: StreakStats | null = null;
@@ -29,19 +37,35 @@ export class ProfileComponent implements OnInit {
   showGraphCard = false;
   showStreakCard = false;
   showLeaderboardCard = false;
+  showEditModal = false;
+  imagePreview: string | null = null;
+  newImageData: string | null = null;
+  readonly maxUploadSize = 2 * 1024 * 1024; // 2MB client-side limit
+  readonly maxImageDimension = 512; // pixels
 
   graphWeeks: { date: string; count: number; }[][] = [];
   graphLoading = false;
   streakLoading = false;
   leaderboardLoading = false;
+  editForm: FormGroup;
+  editLoading = false;
+  editError = '';
+  editSuccess = '';
 
   loading: boolean = false;
   error: string = '';
 
   constructor(
     private route: ActivatedRoute,
-    private profileService: ProfileService
-  ) {}
+    private profileService: ProfileService,
+    private fb: FormBuilder
+  ) {
+    this.editForm = this.fb.group({
+      username: ['', [Validators.minLength(3)]],
+      email: ['', [Validators.email]],
+      imageProfile: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -62,6 +86,13 @@ export class ProfileComponent implements OnInit {
       next: (data) => {
         this.profile = data;
         this.loading = false;
+        this.editForm.patchValue({
+          username: data.username || '',
+          email: data.email || '',
+          imageProfile: ''
+        });
+        this.imagePreview = data.imageProfile || null;
+        this.newImageData = null;
         this.loadTabData(this.activeTab);
       },
       error: (err) => {
@@ -196,6 +227,122 @@ export class ProfileComponent implements OnInit {
     if (this.showLeaderboardCard && this.leaderboard.length === 0 && !this.leaderboardLoading) {
       this.loadLeaderboard();
     }
+  }
+
+  openEditModal(): void {
+    if (!this.profile) return;
+    this.editError = '';
+    this.editSuccess = '';
+    this.editForm.patchValue({
+      username: this.profile.username || '',
+      email: this.profile.email || '',
+      imageProfile: ''
+    });
+    this.imagePreview = this.profile.imageProfile || null;
+    this.newImageData = null;
+    this.showEditModal = true;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+
+    if (file.size > this.maxUploadSize) {
+      this.editError = 'Image is too large. Please select a file under 2 MB.';
+      return;
+    }
+
+    this.editError = '';
+
+    this.resizeImage(file)
+      .then((dataUrl) => {
+        this.newImageData = dataUrl;
+        this.imagePreview = dataUrl;
+      })
+      .catch(() => {
+        this.editError = 'Could not process image. Please try a smaller image.';
+      });
+  }
+
+  private resizeImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('No canvas context'));
+            return;
+          }
+
+          let { width, height } = img;
+          const maxDim = this.maxImageDimension;
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height >= width && height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+          resolve(dataUrl);
+        };
+        img.onerror = () => reject(new Error('Image load error'));
+        img.src = reader.result as string;
+      };
+      reader.onerror = () => reject(new Error('File read error'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  submitProfileUpdate(): void {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    const { username, email } = this.editForm.value;
+    const payload: UpdateProfilePayload = {};
+    if (username && username.trim().length > 0) payload.username = username.trim();
+    if (email && email.trim().length > 0) payload.email = email.trim();
+    if (this.newImageData !== null) payload.imageProfile = this.newImageData;
+
+    this.editLoading = true;
+    this.editError = '';
+    this.editSuccess = '';
+
+    this.profileService.updateProfile(payload).subscribe({
+      next: (res) => {
+        if (this.profile) {
+          this.profile = {
+            ...this.profile,
+            username: res.username ?? this.profile.username,
+            email: res.email ?? this.profile.email,
+            imageProfile: res.imageProfile ?? this.profile.imageProfile,
+          };
+          this.imagePreview = this.profile.imageProfile || null;
+          this.newImageData = null;
+        }
+        this.editSuccess = res.message || 'Profile updated successfully';
+        this.editLoading = false;
+      },
+      error: (err) => {
+        this.editError = err?.error?.message || 'Failed to update profile';
+        this.editLoading = false;
+      }
+    });
   }
 
   buildGraphWeeks(data: ContributionDay[]): { date: string; count: number; }[][] {

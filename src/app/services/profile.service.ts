@@ -11,6 +11,8 @@ export interface ProfileSummary {
   posts: number;
   issues: number;
   score: number;
+  email?: string;
+  imageProfile?: string | null;
 }
 
 export interface Post {
@@ -55,6 +57,12 @@ export interface StreakStats {
   longestStreak: number;
   lastContributionDate: string | null;
   totalContributions: number;
+}
+
+export interface UpdateProfilePayload {
+  imageProfile?: string;
+  username?: string;
+  email?: string;
 }
 
 @Injectable({
@@ -109,6 +117,12 @@ export class ProfileService {
 
   getLeaderBoard(userId: number): Observable<LeaderBoardUser[]> {
     return this.http.get<any>(`${this.apiUrl}/${userId}/leader_board`).pipe(
+      map((response: any) => response.data || response)
+    );
+  }
+
+  updateProfile(payload: UpdateProfilePayload): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}`, payload).pipe(
       map((response: any) => response.data || response)
     );
   }
