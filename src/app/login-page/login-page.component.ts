@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { login, isLoggedIn } from '../auth.store';
 
@@ -16,24 +16,39 @@ export class LoginPageComponent implements OnInit {
   loginForm!: FormGroup;
   loading = false;
   error: string | null = null;
+  sessionExpired = false;
+  redirectUrl: string | null = null;
   // `remember` removed: this option was UI-only and caused invalid payloads.
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Initialize form first (before any async operations)
+    this.loginForm = this.fb.group({
+      identifier: ['', [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.required, Validators.minLength(8)]]
+    });
+
     // Redirect to dashboard if already logged in
     if (isLoggedIn()) {
       this.router.navigate(['/dashboard']);
       return;
     }
 
-    this.loginForm = this.fb.group({
-      identifier: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(8)]]
+    // Get the redirect URL from localStorage
+    this.redirectUrl = localStorage.getItem('redirectUrl');
+
+    // Check if redirected due to token expiration
+    this.route.queryParams.subscribe(params => {
+      if (params['expired'] === 'true') {
+        this.sessionExpired = true;
+        this.error = 'Your session has expired. Please log in again.';
+      }
     });
   }
 
@@ -60,7 +75,13 @@ export class LoginPageComponent implements OnInit {
       next: (tokens) => {
         this.loading = false;
         login();
-        this.router.navigate(['/dashboard']);
+        
+        // Redirect to the original URL if available
+        const redirectTo = this.redirectUrl || '/dashboard';
+        if (this.redirectUrl) {
+          localStorage.removeItem('redirectUrl');
+        }
+        this.router.navigateByUrl(redirectTo);
       },
       error: (err) => {
         this.loading = false;

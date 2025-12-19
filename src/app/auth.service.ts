@@ -209,7 +209,15 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('redirectUrl');
     this.accessTokenSubject.next(null);
+  }
+
+  /**
+   * Clear expired session data
+   */
+  clearExpiredSession(): void {
+    this.logout();
   }
 
   /**

@@ -15,13 +15,29 @@
     <!-- Login Card -->
     <div class="bg-white dark:bg-card-dark rounded-2xl shadow-soft p-8 backdrop-blur-sm border border-gray-100 dark:border-white/10">
       <div class="text-center mb-6">
-        <h1 class="text-2xl font-bold text-text-main dark:text-white mb-2">Welcome Back</h1>
-        <p class="text-text-muted dark:text-gray-400">Access your workspace and continue editing snippets</p>
+        @if (sessionExpired) {
+          <h1 class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">Session Expired</h1>
+          <p class="text-text-muted dark:text-gray-400">Your session has timed out. Please log in again to continue.</p>
+        } @else {
+          <h1 class="text-2xl font-bold text-text-main dark:text-white mb-2">Welcome Back</h1>
+          <p class="text-text-muted dark:text-gray-400">Access your workspace and continue editing snippets</p>
+        }
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
+        <!-- Session Expired Warning -->
+        @if (sessionExpired) {
+          <div class="flex items-center gap-2 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg text-orange-700 dark:text-orange-300">
+            <span class="material-symbols-outlined text-xl">schedule</span>
+            <div>
+              <p class="font-semibold">Session Expired</p>
+              <p class="text-sm">Your session has expired. Please log in again to continue.</p>
+            </div>
+          </div>
+        }
+        
         <!-- Error Message -->
-        @if (error) {
+        @if (error && !sessionExpired) {
           <div class="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
             <span class="material-symbols-outlined text-lg">error</span>
             <span>{{ error }}</span>
