@@ -1,3 +1,13 @@
+@if (error && !loading) {
+<main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+  <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 text-center">
+    <div class="text-6xl mb-4">😕</div>
+    <h2 class="text-2xl font-bold text-red-800 dark:text-red-200 mb-2">{{ error }}</h2>
+    <p class="text-red-600 dark:text-red-300">The user you're looking for doesn't exist or has been removed.</p>
+  </div>
+</main>
+}
+
 @if (!loading && profile) {
 <main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
   <!-- Profile Header Card -->
@@ -112,7 +122,13 @@
     <div class="lg:col-span-6 flex flex-col gap-6 order-1 lg:order-2">
       <!-- Posts -->
       @if (activeTab === 'posts') {
-        @if (posts.length === 0) {
+        @if (postsError) {
+          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+            <p class="text-red-600 dark:text-red-300 font-semibold">{{ postsError }}</p>
+            <button class="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" (click)="loadPosts()">Retry</button>
+          </div>
+        }
+        @if (!postsError && posts.length === 0) {
           <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No posts yet</div>
         }
         @for (post of posts; track post.id) {
@@ -132,7 +148,13 @@
 
       <!-- Issues -->
       @if (activeTab === 'issues') {
-        @if (issues.length === 0) {
+        @if (issuesError) {
+          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+            <p class="text-red-600 dark:text-red-300 font-semibold">{{ issuesError }}</p>
+            <button class="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" (click)="loadIssues()">Retry</button>
+          </div>
+        }
+        @if (!issuesError && issues.length === 0) {
           <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No issues yet</div>
         }
         @for (issue of issues; track issue.id) {
@@ -155,7 +177,13 @@
 
       <!-- Saved (as list) -->
       @if (isOwnProfile && activeTab === 'saved') {
-        @if (savedPosts.length === 0) {
+        @if (savedPostsError) {
+          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+            <p class="text-red-600 dark:text-red-300 font-semibold">{{ savedPostsError }}</p>
+            <button class="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" (click)="loadSavedPosts()">Retry</button>
+          </div>
+        }
+        @if (!savedPostsError && savedPosts.length === 0) {
           <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No saved posts</div>
         }
         @for (post of savedPosts; track post.id) {
@@ -227,7 +255,13 @@
               </div>
               @if (graphLoading) { <span class="text-xs text-text-muted">Loading...</span> }
             </div>
-            @if (!graphLoading && contributionGraph.length === 0) {
+            @if (graphError) {
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p class="text-red-600 dark:text-red-300">{{ graphError }}</p>
+                <button class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" (click)="loadContributionGraph()">Retry</button>
+              </div>
+            }
+            @if (!graphLoading && !graphError && contributionGraph.length === 0) {
               <p class="text-sm text-text-muted">No contributions yet.</p>
             }
             @if (contributionGraph.length > 0) {
@@ -270,7 +304,13 @@
               </div>
               @if (streakLoading) { <span class="text-xs text-text-muted">Loading...</span> }
             </div>
-            @if (!streakLoading && streak === null) {
+            @if (streakError) {
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p class="text-red-600 dark:text-red-300">{{ streakError }}</p>
+                <button class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" (click)="loadStreak()">Retry</button>
+              </div>
+            }
+            @if (!streakLoading && !streakError && streak === null) {
               <p class="text-sm text-text-muted">No streak data yet.</p>
             }
             @if (streak) {
@@ -311,7 +351,13 @@
               </div>
               @if (leaderboardLoading) { <span class="text-xs text-text-muted">Loading...</span> }
             </div>
-            @if (!leaderboardLoading && leaderboard.length === 0) {
+            @if (leaderboardError) {
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p class="text-red-600 dark:text-red-300">{{ leaderboardError }}</p>
+                <button class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" (click)="loadLeaderboard()">Retry</button>
+              </div>
+            }
+            @if (!leaderboardLoading && !leaderboardError && leaderboard.length === 0) {
               <p class="text-sm text-text-muted">No leaderboard entries yet.</p>
             }
             @if (leaderboard.length > 0) {

@@ -62,6 +62,13 @@ export class ProfileComponent implements OnInit {
 
   loading: boolean = false;
   error: string = '';
+  postsError: string = '';
+  issuesError: string = '';
+  savedPostsError: string = '';
+  badgesError: string = '';
+  leaderboardError: string = '';
+  graphError: string = '';
+  streakError: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -110,7 +117,12 @@ export class ProfileComponent implements OnInit {
         this.loadTabData(this.activeTab);
       },
       error: (err) => {
-        this.error = 'Failed to load profile. Please try again.';
+        const status = err?.status;
+        if (status === 404) {
+          this.error = 'User not found';
+        } else {
+          this.error = err?.error?.message || 'Failed to load profile. Please try again.';
+        }
         this.loading = false;
         console.error('Profile error:', err);
       }
@@ -152,72 +164,148 @@ export class ProfileComponent implements OnInit {
   }
 
   loadPosts(): void {
+    this.postsError = '';
     this.profileService.getUserPosts(this.userId).subscribe({
-      next: (data) => this.posts = data,
-      error: (err) => console.error('Posts error:', err)
+      next: (data) => {
+        this.posts = data || [];
+        this.postsError = '';
+      },
+      error: (err) => {
+        console.error('Posts error:', err);
+        this.posts = [];
+        const status = err?.status;
+        if (status === 404) {
+          this.postsError = 'User not found';
+        } else if (status === 403) {
+          this.postsError = 'Access denied';
+        } else {
+          this.postsError = err?.error?.message || 'Failed to load posts';
+        }
+      }
     });
   }
 
   loadIssues(): void {
+    this.issuesError = '';
     this.profileService.getUserIssues(this.userId).subscribe({
-      next: (data) => this.issues = data,
-      error: (err) => console.error('Issues error:', err)
+      next: (data) => {
+        this.issues = data || [];
+        this.issuesError = '';
+      },
+      error: (err) => {
+        console.error('Issues error:', err);
+        this.issues = [];
+        const status = err?.status;
+        if (status === 404) {
+          this.issuesError = 'User not found';
+        } else if (status === 403) {
+          this.issuesError = 'Access denied';
+        } else {
+          this.issuesError = err?.error?.message || 'Failed to load issues';
+        }
+      }
     });
   }
 
   loadSavedPosts(): void {
+    this.savedPostsError = '';
     this.profileService.getSavedPosts(this.userId).subscribe({
-      next: (data) => this.savedPosts = data,
-      error: (err) => console.error('Saved posts error:', err)
+      next: (data) => {
+        this.savedPosts = data || [];
+        this.savedPostsError = '';
+      },
+      error: (err) => {
+        console.error('Saved posts error:', err);
+        this.savedPosts = [];
+        const status = err?.status;
+        if (status === 403) {
+          this.savedPostsError = 'You can only view your own saved posts';
+        } else if (status === 401) {
+          this.savedPostsError = 'Please log in to view saved posts';
+        } else {
+          this.savedPostsError = err?.error?.message || 'Failed to load saved posts';
+        }
+      }
     });
   }
 
   loadBadges(): void {
+    this.badgesError = '';
     this.profileService.getBadges(this.userId).subscribe({
-      next: (data) => this.badges = data,
-      error: (err) => console.error('Badges error:', err)
+      next: (data) => {
+        this.badges = data || [];
+        this.badgesError = '';
+      },
+      error: (err) => {
+        console.error('Badges error:', err);
+        this.badges = [];
+        this.badgesError = err?.error?.message || 'Failed to load badges';
+      }
     });
   }
 
   loadLeaderboard(): void {
     this.leaderboardLoading = true;
+    this.leaderboardError = '';
     this.profileService.getLeaderBoard(this.userId).subscribe({
       next: (data) => {
-        this.leaderboard = data;
+        this.leaderboard = data || [];
         this.leaderboardLoading = false;
+        this.leaderboardError = '';
       },
       error: (err) => {
         console.error('Leaderboard error:', err);
+        this.leaderboard = [];
         this.leaderboardLoading = false;
+        this.leaderboardError = err?.error?.message || 'Failed to load leaderboard';
       }
     });
   }
 
   loadContributionGraph(): void {
     this.graphLoading = true;
+    this.graphError = '';
     this.profileService.getContributionGraph(this.userId).subscribe({
       next: (data) => {
         this.contributionGraph = data || [];
         this.graphWeeks = this.buildGraphWeeks(this.contributionGraph);
         this.graphLoading = false;
+        this.graphError = '';
       },
       error: (err) => {
         console.error('Contribution graph error:', err);
+        this.contributionGraph = [];
+        this.graphWeeks = [];
         this.graphLoading = false;
+        const status = err?.status;
+        if (status === 404) {
+          this.graphError = 'User not found';
+        } else {
+          this.graphError = err?.error?.message || 'Failed to load contribution graph';
+        }
       }
     });
   }
 
   loadStreak(): void {
     this.streakLoading = true;
+    this.streakError = '';
     this.profileService.getStreak(this.userId).subscribe({
       next: (data) => {
         this.streak = data;
         this.streakLoading = false;
+        this.streakError = '';
       },
       error: (err) => {
         console.error('Streak error:', err);
+        this.streak = null;
         this.streakLoading = false;
+        const status = err?.status;
+        if (status === 404) {
+          this.streakError = 'User not found';
+        } else {
+          this.streakError = err?.error?.message || 'Failed to load streak data';
+        }
       }
     });
   }
@@ -355,11 +443,26 @@ export class ProfileComponent implements OnInit {
           }
         }
         this.editSuccess = res.message || 'Profile updated successfully';
+        this.editError = '';
         this.editLoading = false;
+        setTimeout(() => this.closeEditModal(), 2000);
       },
       error: (err) => {
-        this.editError = err?.error?.message || 'Failed to update profile';
+        const status = err?.status;
+        if (status === 409) {
+          this.editError = 'Username or email already taken';
+        } else if (status === 400) {
+          this.editError = err?.error?.message || 'Invalid profile data';
+        } else if (status === 403) {
+          this.editError = 'Access denied';
+        } else if (status === 401) {
+          this.editError = 'Please log in to update your profile';
+        } else {
+          this.editError = err?.error?.message || 'Failed to update profile. Please try again.';
+        }
+        this.editSuccess = '';
         this.editLoading = false;
+        console.error('Update profile error:', err);
       }
     });
   }
@@ -437,17 +540,31 @@ export class ProfileComponent implements OnInit {
     this.profileService.updatePassword(payload).subscribe({
       next: (res) => {
         this.passwordSuccess = res.message || 'Password updated successfully';
+        this.passwordError = '';
         this.passwordLoading = false;
         if (res.requiresEmailVerification) {
           setTimeout(() => {
             this.showPasswordModal = false;
             this.showEmailVerificationPrompt = true;
           }, 2000);
+        } else {
+          setTimeout(() => this.closePasswordModal(), 2000);
         }
       },
       error: (err) => {
-        this.passwordError = err?.error?.message || 'Failed to update password';
+        const status = err?.status;
+        if (status === 401) {
+          this.passwordError = 'Current password is incorrect';
+        } else if (status === 400) {
+          this.passwordError = err?.error?.message || 'Invalid password data';
+        } else if (status === 403) {
+          this.passwordError = 'Access denied';
+        } else {
+          this.passwordError = err?.error?.message || 'Failed to update password. Please try again.';
+        }
+        this.passwordSuccess = '';
         this.passwordLoading = false;
+        console.error('Update password error:', err);
       }
     });
   }
@@ -480,6 +597,17 @@ export class ProfileComponent implements OnInit {
       },
       error: (err) => {
         console.error('Follow/unfollow failed:', err);
+        const status = err?.status;
+        let errorMsg = 'Failed to update follow status';
+        if (status === 401) {
+          errorMsg = 'Please log in to follow users';
+        } else if (status === 400) {
+          errorMsg = err?.error?.message || 'Invalid request';
+        } else if (status === 404) {
+          errorMsg = 'User not found';
+        }
+        // Show error to user (you can add a toast notification here)
+        alert(errorMsg);
         this.followLoading = false;
       }
     });
