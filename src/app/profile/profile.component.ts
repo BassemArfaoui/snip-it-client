@@ -450,7 +450,10 @@ export class ProfileComponent implements OnInit {
   }
 
   goToEmailVerification(): void {
-    // Navigate to email verification page - adjust route as needed
+    // Save email to localStorage for pre-fill on verify page
+    if (this.profile?.email) {
+      localStorage.setItem('pendingVerificationEmail', this.profile.email);
+    }
     window.location.href = '/verify-email';
   }
 }
