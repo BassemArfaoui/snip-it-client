@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload, UpdatePasswordPayload } from '../services/profile.service';
+import { SubscriptionService } from '../services/subscription.service';
 import { getUserId, updateUsername } from '../auth.store';
 
 type ProfileDetail = ProfileSummary & { email?: string; imageProfile?: string | null };
@@ -57,6 +58,7 @@ export class ProfileComponent implements OnInit {
   passwordError = '';
   passwordSuccess = '';
   showEmailVerificationPrompt = false;
+  followLoading = false;
 
   loading: boolean = false;
   error: string = '';
@@ -64,6 +66,7 @@ export class ProfileComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private profileService: ProfileService,
+    private subscriptionService: SubscriptionService,
     private fb: FormBuilder
   ) {
     this.editForm = this.fb.group({
@@ -455,5 +458,30 @@ export class ProfileComponent implements OnInit {
       localStorage.setItem('pendingVerificationEmail', this.profile.email);
     }
     window.location.href = '/verify-email';
+  }
+
+  toggleFollow(): void {
+    if (!this.profile || this.followLoading) return;
+
+    this.followLoading = true;
+    const isCurrentlyFollowing = this.profile.isFollowing;
+
+    const action = isCurrentlyFollowing
+      ? this.subscriptionService.unfollow(this.userId)
+      : this.subscriptionService.follow(this.userId);
+
+    action.subscribe({
+      next: (response) => {
+        if (this.profile) {
+          this.profile.isFollowing = !isCurrentlyFollowing;
+          this.profile.followers = response.followers;
+        }
+        this.followLoading = false;
+      },
+      error: (err) => {
+        console.error('Follow/unfollow failed:', err);
+        this.followLoading = false;
+      }
+    });
   }
 }

@@ -13,6 +13,7 @@ export interface ProfileSummary {
   score: number;
   email?: string;
   imageProfile?: string | null;
+  isFollowing?: boolean;
 }
 
 export interface Post {
