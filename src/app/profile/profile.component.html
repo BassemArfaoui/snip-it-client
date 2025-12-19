@@ -9,8 +9,12 @@
     <div class="relative flex flex-col md:flex-row items-center md:items-start gap-8 z-10">
       <!-- Avatar (initial fallback) -->
       <div class="relative">
-        <div class="size-32 rounded-full border-4 border-white dark:border-card-dark shadow-lg bg-gray-100 flex items-center justify-center text-4xl font-bold text-text-main">
-          {{ profile.name.charAt(0).toUpperCase() }}
+        <div class="size-32 rounded-full border-4 border-white dark:border-card-dark shadow-lg bg-gray-100 flex items-center justify-center text-4xl font-bold text-text-main overflow-hidden">
+          @if (profile.imageProfile) {
+            <img [src]="profile.imageProfile" alt="{{ profile.name }}" class="w-full h-full object-cover" />
+          } @else {
+            {{ profile.name.charAt(0).toUpperCase() }}
+          }
         </div>
         <div class="absolute bottom-1 right-1 bg-primary text-black text-xs font-bold px-2 py-0.5 rounded-full border-2 border-white">LVL {{ profile.score }}</div>
       </div>
