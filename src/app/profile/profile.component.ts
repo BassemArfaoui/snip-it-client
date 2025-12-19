@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload, UpdatePasswordPayload } from '../services/profile.service';
-import { getUserId } from '../auth.store';
+import { getUserId, updateUsername } from '../auth.store';
 
 type ProfileDetail = ProfileSummary & { email?: string; imageProfile?: string | null };
 interface Badge {
@@ -345,6 +345,11 @@ export class ProfileComponent implements OnInit {
           };
           this.imagePreview = this.profile.imageProfile || null;
           this.newImageData = null;
+          
+          // Update username in auth store if it changed
+          if (res.usernameChanged && res.username) {
+            updateUsername(res.username);
+          }
         }
         this.editSuccess = res.message || 'Profile updated successfully';
         this.editLoading = false;

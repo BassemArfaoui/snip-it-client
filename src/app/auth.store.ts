@@ -60,6 +60,10 @@ export const logout = () => {
   userId.set(null);
 };
 
+export const updateUsername = (newUsername: string) => {
+  username.set(newUsername);
+};
+
 /**
  * Initialize auth state from localStorage on app startup
  */
