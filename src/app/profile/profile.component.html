@@ -42,11 +42,11 @@
             <button 
               (click)="toggleFollow()" 
               [disabled]="followLoading"
-              [class]="profile?.isFollowing 
+              [class]="profile.isFollowing 
                 ? 'flex-1 md:flex-none bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-black dark:text-white font-bold h-10 px-6 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm'
                 : 'flex-1 md:flex-none bg-primary hover:bg-[#e6e205] text-black font-bold h-10 px-6 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm'
               ">
-              <span>{{ followLoading ? 'Loading...' : (profile?.isFollowing ? 'Unfollow' : 'Follow') }}</span>
+              <span>{{ followLoading ? 'Loading...' : (profile.isFollowing ? 'Unfollow' : 'Follow') }}</span>
             </button>
           </div>
         }
