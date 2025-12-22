@@ -36,19 +36,13 @@ export const getUserId = (): number | null => {
 };
 
 export const login = () => {
-  console.log('login() called');
   isLoggedIn.set(true);
   // Update username from token
   if (authService) {
     const user = authService.getUsername();
-    console.log('Username from token:', user);
     username.set(user);
     const id = authService.getUserId();
-    console.log('UserID from token:', id);
     userId.set(id);
-    console.log('userId signal set to:', id);
-  } else {
-    console.warn('authService is null in login()');
   }
 };
 
@@ -69,15 +63,12 @@ export const updateUsername = (newUsername: string) => {
  */
 export const initializeAuthState = () => {
   const hasToken = !!localStorage.getItem('accessToken');
-  console.log('initializeAuthState() called. hasToken:', hasToken, 'authService:', !!authService);
   isLoggedIn.set(hasToken);
   // Username will be extracted from token when needed
   if (hasToken && authService) {
     const user = authService.getUsername();
     const id = authService.getUserId();
-    console.log('On app startup - username:', user, 'userId:', id);
     username.set(user);
     userId.set(id);
   }
 };
-

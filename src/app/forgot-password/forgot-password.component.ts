@@ -57,7 +57,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
         // Start countdown and redirect to login after 3 seconds
         this.startCountdown();
       },
-      error: (err) => {
+      error: (_err: unknown) => {
         this.loading = false;
         // Server doesn't reveal if email exists (security)
         // Show same generic message on error to maintain security

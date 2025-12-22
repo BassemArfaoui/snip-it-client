@@ -50,7 +50,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/auth'; // Adjust to your backend URL
+  private apiUrl = 'http://localhost:3000/auth'; 
 
   private accessTokenSubject = new BehaviorSubject<string | null>(this.getAccessToken());
   public accessToken$ = this.accessTokenSubject.asObservable();
@@ -97,9 +97,7 @@ export class AuthService {
     if (!accessToken) return null;
 
     const decoded = this.decodeToken(accessToken);
-    console.log('JWT Decoded:', decoded);
     const id = decoded?.sub ?? decoded?.id ?? decoded?.userId;
-    console.log('Extracted ID:', id, 'Type:', typeof id);
     // Accept both string and number IDs
     if (typeof id === 'number') return id;
     if (typeof id === 'string') return parseInt(id, 10) || null;
@@ -154,8 +152,6 @@ export class AuthService {
       tap((response) => {
         // Extract tokens from wrapped response (backend wraps in {data: tokens, message: 'success'})
         const tokens = response.data || response as any;
-        console.log('Login response:', response);
-        console.log('Extracted tokens:', tokens);
         this.setTokens(tokens);
       })
     );
@@ -200,7 +196,6 @@ export class AuthService {
     localStorage.setItem('accessToken', tokens.accessToken);
     localStorage.setItem('refreshToken', tokens.refreshToken);
     this.accessTokenSubject.next(tokens.accessToken);
-    console.log('Tokens stored. AccessToken from localStorage:', localStorage.getItem('accessToken')?.substring(0, 20));
   }
 
   /**
@@ -221,10 +216,21 @@ export class AuthService {
   }
 
   /**
-   * Check if user is authenticated (has access token)
+   * Check if user is authenticated (has valid, non-expired access token)
    */
   isAuthenticated(): boolean {
-    return !!this.getAccessToken();
+    const token = this.getAccessToken();
+    if (!token) return false;
+
+    // Check if token is expired (with 5 minute buffer)
+    const decoded = this.decodeToken(token);
+    if (!decoded?.exp) return false;
+
+    const expiryTime = decoded.exp * 1000; // Convert to ms
+    const now = Date.now();
+    const bufferMs = 5 * 60 * 1000; // 5 minutes
+
+    return now < (expiryTime - bufferMs);
   }
 
   /**

@@ -18,15 +18,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       Authorization: `Bearer ${token}`
     }
   });
-
-  console.log('Auth interceptor adding token to request:', req.url);
   
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // Handle 401 Unauthorized - token expired or invalid
       if (error.status === 401) {
-        console.warn('Token expired or invalid. Redirecting to login...');
-        
         // Clear stored tokens
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
