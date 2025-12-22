@@ -1,20 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { isLoggedIn } from '../auth.store';
-
-/**
- * Custom validator: passwords must match
- */
-function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-  const password = control.get('password');
-  const confirm = control.get('confirm');
-
-  if (!password || !confirm) return null;
-  return password.value === confirm.value ? null : { passwordMismatch: true };
-}
+import { BaseAuthComponent } from '../shared/base-auth.component';
+import { passwordMatchValidator } from '../shared/validators';
 
 @Component({
   selector: 'snip-it-reset-password',
@@ -23,10 +13,8 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css']
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent extends BaseAuthComponent implements OnInit {
   resetForm!: FormGroup;
-  loading = false;
-  error: string | null = null;
   success = false;
   private linkEmail: string | null = null;
   private linkToken: string | null = null;
@@ -34,23 +22,21 @@ export class ResetPasswordComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
+    router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) {
+    super(router);
+  }
 
   ngOnInit(): void {
-    // Redirect to dashboard if already logged in
-    if (isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-      return;
-    }
+    this.redirectIfLoggedIn();
 
     this.resetForm = this.fb.group(
       {
         password: ['', [Validators.required, Validators.minLength(8)]],
         confirm: ['', [Validators.required, Validators.minLength(8)]]
       },
-      { validators: passwordMatchValidator }
+      { validators: passwordMatchValidator() }
     );
 
     const qp = this.route.snapshot.queryParamMap;
@@ -99,8 +85,7 @@ export class ResetPasswordComponent implements OnInit {
         this.success = true;
       },
       error: (err) => {
-        this.loading = false;
-        this.error = err.error?.message || 'Password reset failed. Please check your details and try again.';
+        this.handleError(err, 'Password reset failed. Please check your details and try again.');
       }
     });
   }

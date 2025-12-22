@@ -1,20 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { login, isLoggedIn } from '../auth.store';
-
-/**
- * Custom validator: passwords must match
- */
-function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-  const password = control.get('password');
-  const confirm = control.get('confirm');
-
-  if (!password || !confirm) return null;
-  return password.value === confirm.value ? null : { passwordMismatch: true };
-}
+import { login } from '../auth.store';
+import { BaseAuthComponent } from '../shared/base-auth.component';
+import { passwordMatchValidator } from '../shared/validators';
 
 @Component({
   selector: 'snip-it-signup-page',
@@ -23,26 +14,22 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
   templateUrl: './signup-page.component.html',
   styleUrls: ['./signup-page.component.css']
 })
-export class SignupPageComponent implements OnInit {
+export class SignupPageComponent extends BaseAuthComponent implements OnInit {
   signupForm!: FormGroup;
   otpForm!: FormGroup;
-  loading = false;
-  error: string | null = null;
   showOtpVerification = false;
   userEmail = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
-  ) {}
+    router: Router
+  ) {
+    super(router);
+  }
 
   ngOnInit(): void {
-    // Redirect to dashboard if already logged in
-    if (isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-      return;
-    }
+    this.redirectIfLoggedIn();
 
     this.signupForm = this.fb.group(
       {
@@ -57,7 +44,7 @@ export class SignupPageComponent implements OnInit {
     );
 
     this.otpForm = this.fb.group({
-      otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
+      otp: ['', [Validators.required, Vali()dators.pattern(/^\d{6}$/)]]
     });
   }
 
@@ -109,8 +96,7 @@ export class SignupPageComponent implements OnInit {
         this.showOtpVerification = true;
       },
       error: (err) => {
-        this.loading = false;
-        this.error = err.error?.message || 'Registration failed. Please try again.';
+        this.handleError(err, 'Registration failed. Please try again.');
       }
     });
   }
@@ -132,8 +118,7 @@ export class SignupPageComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.message || 'OTP verification failed. Please try again.';
-      }
+        this.handleError(err, 'OTP verification failed. Please try again.')
     });
   }
 
@@ -151,7 +136,6 @@ export class SignupPageComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.error = err.error?.message || 'Failed to resend OTP.';
-      }
-    });
+      }handleError(err, 'Failed to resend OTP.')
   }
 }

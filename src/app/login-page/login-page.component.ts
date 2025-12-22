@@ -62,7 +62,6 @@ export class LoginPageComponent implements OnInit {
     this.error = null;
 
     const formData = this.loginForm.value;
-    // Only send identifier and password to API, keep remember local
     this.authService.login({
       identifier: formData.identifier,
       password: formData.password
