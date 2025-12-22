@@ -30,12 +30,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         // Update auth state signal
         isLoggedIn.set(false);
         
-        // Store the attempted URL for redirect after login
-        const currentUrl = window.location.pathname;
-        if (currentUrl && currentUrl !== '/login' && currentUrl !== '/signup') {
-          localStorage.setItem('redirectUrl', currentUrl);
-        }
-        
         // Redirect to login page
         router.navigate(['/login'], { 
           queryParams: { expired: 'true' }

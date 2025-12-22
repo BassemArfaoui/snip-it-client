@@ -17,8 +17,6 @@ export class LoginPageComponent implements OnInit {
   loading = false;
   error: string | null = null;
   sessionExpired = false;
-  redirectUrl: string | null = null;
-  // `remember` removed: this option was UI-only and caused invalid payloads.
 
   constructor(
     private fb: FormBuilder,
@@ -39,9 +37,6 @@ export class LoginPageComponent implements OnInit {
       this.router.navigate(['/dashboard']);
       return;
     }
-
-    // Get the redirect URL from localStorage
-    this.redirectUrl = localStorage.getItem('redirectUrl');
 
     // Check if redirected due to token expiration
     this.route.queryParams.subscribe(params => {
@@ -72,16 +67,10 @@ export class LoginPageComponent implements OnInit {
       identifier: formData.identifier,
       password: formData.password
     }).subscribe({
-      next: (tokens) => {
+      next: () => {
         this.loading = false;
         login();
-        
-        // Redirect to the original URL if available
-        const redirectTo = this.redirectUrl || '/dashboard';
-        if (this.redirectUrl) {
-          localStorage.removeItem('redirectUrl');
-        }
-        this.router.navigateByUrl(redirectTo);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.loading = false;
