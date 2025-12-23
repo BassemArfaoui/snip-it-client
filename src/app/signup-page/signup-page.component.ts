@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { AuthService } from '../auth.service';
 import { login } from '../auth.store';
 import { BaseAuthComponent } from '../shared/base-auth.component';
 import { passwordMatchValidator } from '../shared/validators';
+import { CountdownService } from '../shared/countdown.service';
 
 @Component({
   selector: 'snip-it-signup-page',
@@ -14,7 +15,7 @@ import { passwordMatchValidator } from '../shared/validators';
   templateUrl: './signup-page.component.html',
   styleUrls: ['./signup-page.component.css']
 })
-export class SignupPageComponent extends BaseAuthComponent implements OnInit {
+export class SignupPageComponent extends BaseAuthComponent implements OnInit, OnDestroy {
   signupForm!: FormGroup;
   otpForm!: FormGroup;
   showOtpVerification = false;
@@ -23,9 +24,10 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    router: Router
+    router: Router,
+    countdownService: CountdownService
   ) {
-    super(router);
+    super(router, countdownService);
   }
 
   ngOnInit(): void {
@@ -44,7 +46,7 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit {
     );
 
     this.otpForm = this.fb.group({
-      otp: ['', [Validators.required, Vali()dators.pattern(/^\d{6}$/)]]
+      otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
     });
   }
 
@@ -117,8 +119,8 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.loading = false;
-        this.handleError(err, 'OTP verification failed. Please try again.')
+        this.handleError(err, 'OTP verification failed. Please try again.');
+      }
     });
   }
 
@@ -134,8 +136,12 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit {
         this.error = null;
       },
       error: (err) => {
-        this.loading = false;
-        this.error = err.error?.message || 'Failed to resend OTP.';
-      }handleError(err, 'Failed to resend OTP.')
+        this.handleError(err, 'Failed to resend OTP.');
+      }
+    });
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
   }
 }

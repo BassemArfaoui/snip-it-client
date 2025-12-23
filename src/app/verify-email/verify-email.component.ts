@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { BaseAuthComponent } from '../shared/base-auth.component';
+import { CountdownService } from '../shared/countdown.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -11,18 +13,17 @@ import { AuthService } from '../auth.service';
   templateUrl: './verify-email.component.html',
   styleUrl: './verify-email.component.css'
 })
-export class VerifyEmailComponent implements OnInit {
+export class VerifyEmailComponent extends BaseAuthComponent implements OnInit, OnDestroy {
   verifyForm: FormGroup;
-  loading = false;
-  error = '';
-  success = '';
   email = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    router: Router,
+    countdownService: CountdownService
   ) {
+    super(router, countdownService);
     this.verifyForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       otp: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]]
@@ -46,14 +47,14 @@ export class VerifyEmailComponent implements OnInit {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
+    this.success = false;
 
     const { email, otp } = this.verifyForm.value;
 
     this.authService.verifyEmail({ email, otp }).subscribe({
       next: (response) => {
-        this.success = response.message || 'Email verified successfully!';
         this.loading = false;
+        this.success = true;
         localStorage.removeItem('pendingVerificationEmail');
         
         setTimeout(() => {
@@ -61,8 +62,7 @@ export class VerifyEmailComponent implements OnInit {
         }, 2000);
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Verification failed. Please check your code and try again.';
-        this.loading = false;
+        this.handleError(err, 'Verification failed. Please check your code and try again.');
       }
     });
   }
@@ -76,17 +76,20 @@ export class VerifyEmailComponent implements OnInit {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
+    this.success = false;
 
     this.authService.resendOtp(email).subscribe({
       next: (response) => {
-        this.success = response.message || 'Verification code sent to your email!';
         this.loading = false;
+        this.success = true;
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Failed to resend code. Please try again.';
-        this.loading = false;
+        this.handleError(err, 'Failed to resend code. Please try again.');
       }
     });
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
   }
 }

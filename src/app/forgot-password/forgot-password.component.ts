@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { isLoggedIn } from '../auth.store';
+import { BaseAuthComponent } from '../shared/base-auth.component';
+import { CountdownService } from '../shared/countdown.service';
 
 @Component({
   selector: 'snip-it-forgot-password',
@@ -12,27 +13,19 @@ import { isLoggedIn } from '../auth.store';
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.css']
 })
-export class ForgotPasswordComponent implements OnInit, OnDestroy {
+export class ForgotPasswordComponent extends BaseAuthComponent implements OnInit, OnDestroy {
   emailForm!: FormGroup;
-  loading = false;
-  error: string | null = null;
-  success = false;
-  countdown = 3;
-  private countdownInterval: any;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
-  ) {}
+    router: Router,
+    countdownService: CountdownService
+  ) {
+    super(router, countdownService);
+  }
 
   ngOnInit(): void {
-    // Redirect to dashboard if already logged in
-    if (isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-      return;
-    }
-
     this.emailForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
@@ -54,31 +47,17 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
       next: () => {
         this.loading = false;
         this.success = true;
-        //  redirect to login after 3 seconds
-        this.startCountdown();
+        this.startCountdown(3, '/login');
       },
       error: (_err: unknown) => {
         this.loading = false;
         this.success = true;
-        this.startCountdown();
+        this.startCountdown(3, '/login');
       }
     });
   }
 
-  private startCountdown(): void {
-    this.countdown = 3;
-    this.countdownInterval = setInterval(() => {
-      this.countdown--;
-      if (this.countdown <= 0) {
-        clearInterval(this.countdownInterval);
-        this.router.navigate(['/login']);
-      }
-    }, 1000);
-  }
-
-  ngOnDestroy(): void {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
   }
 }

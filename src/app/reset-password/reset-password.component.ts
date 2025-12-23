@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { BaseAuthComponent } from '../shared/base-auth.component';
 import { passwordMatchValidator } from '../shared/validators';
+import { CountdownService } from '../shared/countdown.service';
 
 @Component({
   selector: 'snip-it-reset-password',
@@ -13,9 +14,8 @@ import { passwordMatchValidator } from '../shared/validators';
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css']
 })
-export class ResetPasswordComponent extends BaseAuthComponent implements OnInit {
+export class ResetPasswordComponent extends BaseAuthComponent implements OnInit, OnDestroy {
   resetForm!: FormGroup;
-  success = false;
   private linkEmail: string | null = null;
   private linkToken: string | null = null;
 
@@ -23,9 +23,10 @@ export class ResetPasswordComponent extends BaseAuthComponent implements OnInit 
     private fb: FormBuilder,
     private authService: AuthService,
     router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    countdownService: CountdownService
   ) {
-    super(router);
+    super(router, countdownService);
   }
 
   ngOnInit(): void {
@@ -92,5 +93,9 @@ export class ResetPasswordComponent extends BaseAuthComponent implements OnInit 
 
   onLoginRedirect(): void {
     this.router.navigate(['/login']);
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
   }
 }

@@ -1,14 +1,19 @@
+import { Directive, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { isLoggedIn } from './auth.store';
+import { isLoggedIn } from '../auth.store';
+import { CountdownService } from './countdown.service';
 
 /**
  * Base class for auth pages to reduce duplication
  */
-export abstract class BaseAuthComponent {
+@Directive()
+export abstract class BaseAuthComponent implements OnDestroy {
   loading = false;
   error: string | null = null;
+  success = false;
+  countdown = 0;
 
-  constructor(protected router: Router) {
+  constructor(protected router: Router, protected countdownService: CountdownService) {
     this.redirectIfLoggedIn();
   }
 
@@ -31,21 +36,19 @@ export abstract class BaseAuthComponent {
 
   /**
    * Start countdown to redirect to another page
+   * @param duration - Duration in seconds (default 3)
+   * @param redirectPath - Path to navigate to (default /login)
    */
-  protected createCountdown(
-    duration: number,
-    redirectPath: string,
-    onCountdownChange?: (count: number) => void
-  ): NodeJS.Timeout {
-    let countdown = duration;
-    const interval = setInterval(() => {
-      countdown--;
-      onCountdownChange?.(countdown);
-      if (countdown <= 0) {
-        clearInterval(interval);
-        this.router.navigate([redirectPath]);
-      }
-    }, 1000);
-    return interval;
+  protected startCountdown(duration: number = 3, redirectPath: string = '/login'): void {
+    this.countdownService.startCountdown(duration, redirectPath, (count) => {
+      this.countdown = count;
+    });
+  }
+
+  /**
+   * Cleanup on component destroy
+   */
+  ngOnDestroy(): void {
+    this.countdownService.clearCountdown();
   }
 }
