@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, UserDto } from './admin.service';
 import { AuthService } from '../auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'snip-it-admin',
@@ -18,7 +19,7 @@ import { AuthService } from '../auth.service';
       <section class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
         <h3 class="text-lg font-semibold mb-3">Users</h3>
         <div *ngIf="loading" class="text-text-muted">Loading users...</div>
-        <table *ngIf="!loading" class="w-full text-left">
+        <table *ngIf="!loading && users && users.length > 0" class="w-full text-left">
           <thead>
             <tr class="text-sm text-text-muted border-b">
               <th class="py-2">ID</th>
@@ -44,48 +45,10 @@ import { AuthService } from '../auth.service';
             </tr>
           </tbody>
         </table>
+        <div *ngIf="!loading && (!users || users.length === 0)" class="text-text-muted">No users found.</div>
       </section>
 
-      <section class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-        <h3 class="text-lg font-semibold mb-3">Content moderation</h3>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm mb-1">Post ID</label>
-            <input [(ngModel)]="postId" class="input" placeholder="Post ID" />
-            <div class="mt-2">
-              <button class="btn-primary mr-2" (click)="deletePost()">Delete Post</button>
-              <button class="btn-secondary" (click)="restorePost()">Restore Post</button>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm mb-1">Comment ID</label>
-            <input [(ngModel)]="commentId" class="input" placeholder="Comment ID" />
-            <div class="mt-2">
-              <button class="btn-primary mr-2" (click)="deleteComment()">Delete Comment</button>
-              <button class="btn-secondary" (click)="restoreComment()">Restore Comment</button>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm mb-1">Solution ID</label>
-            <input [(ngModel)]="solutionId" class="input" placeholder="Solution ID" />
-            <div class="mt-2">
-              <button class="btn-primary" (click)="deleteSolution()">Delete Solution</button>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm mb-1">Issue ID</label>
-            <input [(ngModel)]="issueId" class="input" placeholder="Issue ID" />
-            <div class="mt-2">
-              <button class="btn-primary mr-2" (click)="deleteIssue()">Delete Issue</button>
-              <button class="btn-secondary" (click)="restoreIssue()">Restore Issue</button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- Content moderation removed: moderation is done per-item in lists -->
     </main>
   `
 })
@@ -95,31 +58,46 @@ export class AdminComponent implements OnInit {
   username: string | null = null;
   role: string | null = null;
 
-  postId: number | null = null;
-  commentId: number | null = null;
-  solutionId: number | null = null;
-  issueId: number | null = null;
+  // content moderation removed — controls are available per-item in lists
 
-  constructor(private admin: AdminService, private auth: AuthService) {}
+  constructor(private admin: AdminService, private auth: AuthService, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.username = this.auth.getUsername();
     this.role = this.auth.getUserRole();
-    // if not admin, redirect away (defensive)
-    if (!this.role || this.role.toLowerCase() !== 'admin') {
-      // don't throw — admin guard should prevent this, but handle gracefully
+    // Prefer client-side role check, but server is authoritative — attempt load if token exists
+    const token = this.auth.getAccessToken();
+    const isClientAdmin = !!(this.role && this.role.toString().toLowerCase() === 'admin');
+    if (!token) {
       this.users = [];
       this.loading = false;
       return;
     }
+    // Attempt to load users; server will return 403 if not allowed
     this.loadUsers();
   }
 
   loadUsers() {
     this.loading = true;
+    console.log('Admin: requesting users...');
     this.admin.listUsers().subscribe({
-      next: (u) => { this.users = u; this.loading = false; },
+      next: (u) => {
+        console.log('Admin: users response', u);
+        // Support wrapped responses (e.g., { data: [...] }) and plain arrays
+        if (Array.isArray(u)) {
+          this.users = u as UserDto[];
+        } else if ((u as any)?.data && Array.isArray((u as any).data)) {
+          this.users = (u as any).data as UserDto[];
+        } else {
+          // Fallback: try common fields
+          this.users = (u as any).items || (u as any).users || [];
+        }
+        this.loading = false;
+        // ensure UI updates
+        try { this.cd.detectChanges(); } catch (e) { /* ignore */ }
+      },
       error: (err) => {
+        console.error('Admin: users error', err);
         // If backend responds 403, clear and stop
         if (err?.status === 403) {
           this.users = [];
@@ -135,14 +113,5 @@ export class AdminComponent implements OnInit {
   unban(u: UserDto) { this.admin.unbanUser(u.id).subscribe(() => this.loadUsers()); }
   deleteUser(u: UserDto) { this.admin.deleteUser(u.id).subscribe(() => this.loadUsers()); }
 
-  deletePost() { if (this.postId) this.admin.deletePost(this.postId).subscribe(() => this.postId = null); }
-  restorePost(){ if (this.postId) this.admin.restorePost(this.postId).subscribe(() => this.postId = null); }
-
-  deleteComment(){ if (this.commentId) this.admin.deleteComment(this.commentId).subscribe(() => this.commentId = null); }
-  restoreComment(){ if (this.commentId) this.admin.restoreComment(this.commentId).subscribe(() => this.commentId = null); }
-
-  deleteSolution(){ if (this.solutionId) this.admin.deleteSolution(this.solutionId).subscribe(() => this.solutionId = null); }
-
-  deleteIssue(){ if (this.issueId) this.admin.deleteIssue(this.issueId).subscribe(() => this.issueId = null); }
-  restoreIssue(){ if (this.issueId) this.admin.restoreIssue(this.issueId).subscribe(() => this.issueId = null); }
+  // moderation helpers removed
 }

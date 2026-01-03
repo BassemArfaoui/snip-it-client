@@ -26,7 +26,9 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   listUsers(): Observable<UserDto[]> {
-    return this.http.get<UserDto[]>(`${this.base}/users`);
+    // Add timestamp query to avoid 304 cached responses in browser
+    const url = `${this.base}/users?ts=${Date.now()}`;
+    return this.http.get<UserDto[]>(url);
   }
 
   promote(userId: number) {
