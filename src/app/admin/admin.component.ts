@@ -35,12 +35,23 @@ import { ChangeDetectorRef } from '@angular/core';
               <td class="py-2">{{ u.username }}</td>
               <td class="py-2">{{ u.email }}</td>
               <td class="py-2">{{ u.role }}</td>
-              <td class="py-2 space-x-2">
-                <button class="btn-primary" (click)="promote(u)">Promote</button>
-                <button class="btn-secondary" (click)="demote(u)">Demote</button>
-                <button class="btn-danger" (click)="ban(u)">Ban</button>
-                <button class="btn-ghost" (click)="unban(u)">Unban</button>
-                <button class="btn-ghost" (click)="deleteUser(u)">Delete</button>
+              <td class="py-2 space-x-2 flex items-center">
+                <!-- Hide self-actions for the currently signed-in admin -->
+                <ng-container *ngIf="u.id !== auth.getUserId()">
+                  <!-- Promote or Demote depending on role -->
+                  <button *ngIf="u.role?.toLowerCase() !== 'admin'" class="bg-primary text-black font-bold px-3 py-1 rounded-full text-sm" (click)="promote(u)">Promote</button>
+                  <button *ngIf="u.role?.toLowerCase() === 'admin'" class="bg-gray-200 dark:bg-gray-700 dark:text-white text-black font-bold px-3 py-1 rounded-full text-sm" (click)="demote(u)">Demote</button>
+
+                  <!-- Ban / Unban depending on isBanned flag -->
+                  <button *ngIf="!u.isBanned" class="bg-red-600 text-white font-bold px-3 py-1 rounded-full text-sm" (click)="ban(u)">Ban</button>
+                  <button *ngIf="u.isBanned" class="bg-green-600 text-white font-bold px-3 py-1 rounded-full text-sm" (click)="unban(u)">Unban</button>
+
+                  <!-- Delete always available (server prevents self-delete) -->
+                  <button class="bg-transparent border border-gray-200 text-sm px-2 py-1 rounded" (click)="deleteUser(u)">Delete</button>
+                </ng-container>
+                <ng-container *ngIf="u.id === auth.getUserId()">
+                  <span class="text-xs text-text-muted">(you)</span>
+                </ng-container>
               </td>
             </tr>
           </tbody>
@@ -60,7 +71,7 @@ export class AdminComponent implements OnInit {
 
   // content moderation removed — controls are available per-item in lists
 
-  constructor(private admin: AdminService, private auth: AuthService, private cd: ChangeDetectorRef) {}
+  constructor(private admin: AdminService, public auth: AuthService, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.username = this.auth.getUsername();
@@ -92,6 +103,8 @@ export class AdminComponent implements OnInit {
           // Fallback: try common fields
           this.users = (u as any).items || (u as any).users || [];
         }
+        // keep table consistently sorted by id
+        this.users = (this.users || []).slice().sort((a,b) => (a?.id ?? 0) - (b?.id ?? 0));
         this.loading = false;
         // ensure UI updates
         try { this.cd.detectChanges(); } catch (e) { /* ignore */ }

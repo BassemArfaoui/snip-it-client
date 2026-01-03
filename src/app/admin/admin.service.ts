@@ -15,6 +15,7 @@ export interface UserDto {
   followingCount?: number;
   postsCount?: number;
   solutionsCount?: number;
+  isBanned?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
