@@ -25,6 +25,8 @@ export interface Post {
   likesCount: number;
   commentsCount: number;
   createdAt?: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 }
 
 export interface Issue {

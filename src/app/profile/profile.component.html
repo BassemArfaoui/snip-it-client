@@ -54,6 +54,9 @@
           <div class="flex gap-3 mt-4 w-full md:w-auto">
             <button type="button" class="bg-black text-white dark:bg-white dark:text-black text-sm font-bold px-4 py-2 rounded-full shadow hover:opacity-90" (click)="openEditModal()">Edit Profile</button>
             <button type="button" class="bg-gray-700 text-white dark:bg-gray-600 dark:text-white text-sm font-bold px-4 py-2 rounded-full shadow hover:opacity-90" (click)="openPasswordModal()">Change Password</button>
+            @if (profile?.role?.toLowerCase() === 'admin') {
+              <a class="bg-primary text-black text-sm font-bold px-4 py-2 rounded-full shadow hover:opacity-90" [routerLink]="['/admin']">Admin Dashboard</a>
+            }
           </div>
         }
       </div>
@@ -132,7 +135,7 @@
           <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No posts yet</div>
         }
         @for (post of posts; track post.id) {
-          <article class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all">
+          <article [class]="post.isDeleted ? 'bg-white/60 dark:bg-card-dark/60 rounded-xl shadow-inner p-5 border border-dashed border-red-300 relative' : 'bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all relative'">
             <h3 class="text-xl font-bold text-text-main dark:text-white mb-2">{{ post.title }}</h3>
             <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-4">{{ post.description }}</p>
             <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/10 text-sm text-text-muted">
@@ -141,6 +144,24 @@
                 <span>❤️ {{ post.likesCount || 0 }}</span>
                 <span>💬 {{ post.commentsCount || 0 }}</span>
               </div>
+              <!-- Admin three-dot menu -->
+              @if (isAdminViewer) {
+                <div class="relative">
+                  <button class="text-sm px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" (click)="togglePostMenu(post.id)">⋯</button>
+                  @if (openPostMenuId === post.id) {
+                    <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-card-dark rounded shadow-lg z-20 p-2">
+                      @if (!post.isDeleted) {
+                        <button class="w-full text-left text-sm px-2 py-1 hover:bg-gray-50" (click)="adminDeletePost(post.id)">Delete Post</button>
+                      } @else {
+                        <button class="w-full text-left text-sm px-2 py-1 hover:bg-gray-50" (click)="adminRestorePost(post.id)">Restore Post</button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+              @if (post.isDeleted) {
+                <div class="absolute top-3 left-3 bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">Deleted</div>
+              }
             </div>
           </article>
         }

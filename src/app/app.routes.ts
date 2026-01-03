@@ -7,6 +7,8 @@ import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 import { AuthGuard } from './auth.guard';
+import { AdminComponent } from './admin/admin.component';
+import { AdminGuard } from './admin/admin.guard';
 import { GitHubCallbackComponent } from './github-callback/github-callback.component';
 
 export const routes: Routes = [
@@ -18,6 +20,7 @@ export const routes: Routes = [
 	{ path: 'reset-password', component: ResetPasswordComponent },
 	{ path: 'auth-success', component: GitHubCallbackComponent },
 	{ path: 'dashboard', component: HomeComponent, canActivate: [AuthGuard] },
+	{ path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] },
 	{ path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
 	{ path: '**', redirectTo: 'login' }
 ];

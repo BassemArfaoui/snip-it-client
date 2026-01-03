@@ -105,6 +105,16 @@ export class AuthService {
   }
 
   /**
+   * Extract role from access token
+   */
+  getUserRole(): string | null {
+    const accessToken = this.getAccessToken();
+    if (!accessToken) return null;
+    const decoded = this.decodeToken(accessToken);
+    return decoded?.role ?? null;
+  }
+
+  /**
    * Initialize tokens from localStorage on service creation
    */
   private initializeTokens(): void {
