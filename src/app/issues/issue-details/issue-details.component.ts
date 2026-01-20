@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { IssuesService, IssueDetails } from '../../services/issues.service';
 import { SolutionsService, Solution } from '../../services/solutions.service';
 import { VotesService, VoteType } from '../../services/votes.service';
+import { CommentsService, Comment } from '../../services/comments.service';
 import { AuthService } from '../../auth.service';
 import { LanguageBadgeComponent } from '../../shared/language-badge/language-badge.component';
 import { ResolvedBadgeComponent } from '../../shared/resolved-badge/resolved-badge.component';
@@ -53,12 +54,18 @@ export class IssueDetailsComponent implements OnInit {
   showDeleteSolutionDialog = false;
   deletingSolutionId: number | null = null;
 
+  // Comments
+  solutionComments: { [solutionId: number]: Comment[] } = {};
+  showCommentsFor: number | null = null;
+  submittingComment: { [solutionId: number]: boolean } = {};
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private issuesService: IssuesService,
     private solutionsService: SolutionsService,
     private votesService: VotesService,
+    private commentsService: CommentsService,
     private authService: AuthService
   ) {}
 
@@ -168,6 +175,23 @@ export class IssueDetailsComponent implements OnInit {
       this.solutionExternalLink = '';
       this.solutionError = null;
     }
+  }
+
+  isSolutionFormValid(): boolean {
+    const textContent = this.solutionTextContent.trim();
+    const externalLink = this.solutionExternalLink.trim();
+
+    // At least one field must have content
+    if (!textContent && !externalLink) {
+      return false;
+    }
+
+    // If text content is provided, it must be at least 10 characters
+    if (textContent && textContent.length < 10) {
+      return false;
+    }
+
+    return true;
   }
 
   submitSolution() {
@@ -316,5 +340,91 @@ export class IssueDetailsComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  // Comments methods
+  toggleComments(solutionId: number) {
+    if (this.showCommentsFor === solutionId) {
+      this.showCommentsFor = null;
+    } else {
+      this.showCommentsFor = solutionId;
+      // Initialize submitting state for this solution
+      if (this.submittingComment[solutionId] === undefined) {
+        this.submittingComment[solutionId] = false;
+      }
+      // Always load comments to ensure fresh data
+      this.loadComments(solutionId);
+    }
+  }
+
+  loadComments(solutionId: number) {
+    this.commentsService.getSolutionComments(solutionId).subscribe({
+      next: (response: any) => {
+        // Handle nested response structure: response.data.data contains the array
+        // or response.data if it's directly the array
+        const comments = Array.isArray(response.data) ? response.data : response.data?.data || [];
+        this.solutionComments[solutionId] = comments;
+      },
+      error: (err) => {
+        console.error('Error loading comments:', err);
+        this.solutionComments[solutionId] = []; // Set empty array on error
+      }
+    });
+  }
+
+
+  submitCommentFromTextarea(solutionId: number, textarea: HTMLTextAreaElement) {
+    const content = textarea.value?.trim();
+    if (!content) {
+      alert('Please enter a comment');
+      return;
+    }
+
+    this.submittingComment[solutionId] = true;
+
+    this.commentsService.createSolutionComment(solutionId, { content }).subscribe({
+      next: (comment) => {
+        if (!this.solutionComments[solutionId]) {
+          this.solutionComments[solutionId] = [];
+        }
+        this.solutionComments[solutionId].unshift(comment);
+        textarea.value = '';
+        this.submittingComment[solutionId] = false;
+
+        // Reload solutions to update comment count
+        if (this.issue) {
+          this.loadSolutions(this.issue.id);
+        }
+      },
+      error: (err) => {
+        console.error('Error submitting comment:', err);
+        this.submittingComment[solutionId] = false;
+      }
+    });
+  }
+
+
+  deleteComment(solutionId: number, commentId: number) {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+
+    this.commentsService.deleteComment(commentId).subscribe({
+      next: () => {
+        this.solutionComments[solutionId] = this.solutionComments[solutionId].filter(
+          c => c.id !== commentId
+        );
+
+        // Reload solutions to update comment count
+        if (this.issue) {
+          this.loadSolutions(this.issue.id);
+        }
+      },
+      error: (err) => {
+        console.error('Error deleting comment:', err);
+      }
+    });
+  }
+
+  isCommentOwner(comment: Comment): boolean {
+    return comment.user.id === this.currentUserId;
   }
 }

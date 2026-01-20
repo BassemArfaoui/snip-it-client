@@ -99,7 +99,7 @@
       @if (showSolutionForm) {
         <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft border border-gray-100 dark:border-white/10 p-6 mb-6">
           <h3 class="text-lg font-semibold text-text-main dark:text-white mb-4">Add Your Solution</h3>
-          
+
           @if (solutionError) {
             <div class="mb-4 p-3 bg-danger-light dark:bg-danger-dark/20 border border-danger-light dark:border-danger-dark rounded-lg text-danger-dark dark:text-danger-light text-sm">
               {{ solutionError }}
@@ -134,7 +134,7 @@
             <div class="flex gap-3">
               <button
                 (click)="submitSolution()"
-                [disabled]="submittingSolution"
+                [disabled]="!isSolutionFormValid() || submittingSolution"
                 class="px-4 py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {{ submittingSolution ? 'Submitting...' : 'Submit Solution' }}
@@ -271,9 +271,80 @@
                     [dislikesCount]="solution.dislikesCount"
                     (vote)="voteOnSolution(solution, $event)"
                   ></app-vote-buttons>
-                  <div class="flex items-center gap-1.5 text-sm text-text-muted dark:text-gray-400">
+                  <button
+                    (click)="toggleComments(solution.id)"
+                    class="flex items-center gap-1.5 text-sm text-text-muted dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
+                  >
                     <span class="material-symbols-outlined text-lg">comment</span>
                     <span>{{ solution.commentsCount }} comments</span>
+                  </button>
+                </div>
+              }
+
+              <!-- Comments Section -->
+              @if (showCommentsFor === solution.id) {
+                <div class="mt-4 pt-4 border-t border-gray-100 dark:border-white/10">
+                  <!-- Add Comment Form -->
+                  @if (isAuthenticated) {
+                    <div class="mb-4">
+                      <textarea
+                        #commentTextarea
+                        rows="3"
+                        placeholder="Add a comment..."
+                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-background-dark text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                      ></textarea>
+                      <div class="flex justify-end mt-2">
+                        <button
+                          type="button"
+                          (click)="submitCommentFromTextarea(solution.id, commentTextarea)"
+                          [disabled]="submittingComment[solution.id]"
+                          class="px-4 py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {{ submittingComment[solution.id] ? 'Posting...' : 'Post Comment' }}
+                        </button>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Comments List -->
+                  <div class="space-y-3">
+                    @if (!solutionComments[solution.id]) {
+                      <div class="flex justify-center py-4">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      </div>
+                    } @else if (solutionComments[solution.id].length === 0) {
+                      <p class="text-sm text-text-muted dark:text-gray-400 text-center py-4">
+                        No comments yet. Be the first to comment!
+                      </p>
+                    } @else {
+                      @for (comment of solutionComments[solution.id]; track comment.id) {
+                        <div class="bg-gray-50 dark:bg-background-dark rounded-lg p-3">
+                          <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2 text-sm">
+                              <span class="font-medium text-text-main dark:text-white">
+                                {{ comment.user.username }}
+                              </span>
+                              <span class="text-text-muted dark:text-gray-400">•</span>
+                              <span class="text-text-muted dark:text-gray-400 text-xs">
+                                {{ formatDate(comment.createdAt) }}
+                              </span>
+                            </div>
+                            @if (isCommentOwner(comment)) {
+                              <button
+                                (click)="deleteComment(solution.id, comment.id)"
+                                class="p-1 rounded hover:bg-danger-light dark:hover:bg-danger-dark/20 transition-colors text-danger"
+                                title="Delete comment"
+                              >
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                              </button>
+                            }
+                          </div>
+                          <p class="text-sm text-text-main dark:text-white whitespace-pre-wrap">
+                            {{ comment.content }}
+                          </p>
+                        </div>
+                      }
+                    }
                   </div>
                 </div>
               }
