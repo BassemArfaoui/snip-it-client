@@ -1,52 +1,63 @@
-<div class="min-h-screen bg-background-light dark:bg-background-dark py-8">
+<div class="min-h-screen bg-gradient-to-b from-background-light to-white dark:from-background-dark dark:to-card-dark py-8">
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
     @if (loading) {
-      <div class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div class="flex flex-col items-center justify-center py-24">
+        <div class="relative">
+          <div class="w-16 h-16 border-4 border-primary/20 rounded-full"></div>
+          <div class="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+        </div>
+        <p class="mt-4 text-text-muted dark:text-gray-400 animate-pulse">Loading issue...</p>
       </div>
     } @else {
       <!-- Header -->
       <div class="mb-8">
-        <a
-          [routerLink]="['/issues', issueId]"
-          class="inline-flex items-center gap-1 text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-white transition-colors mb-4"
-        >
-          <span class="material-symbols-outlined">arrow_back</span>
-          <span>Back to Issue</span>
-        </a>
-        <h1 class="text-3xl font-bold text-text-main dark:text-white mb-2">Edit Issue</h1>
-        <p class="text-text-muted dark:text-gray-400">
+        <nav class="flex items-center gap-2 mb-6 text-sm">
+          <a
+            [routerLink]="['/issues', issueId]"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-text-muted dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all group"
+          >
+            <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+            <span class="font-medium">Issue</span>
+          </a>
+          <span class="text-text-muted/40 dark:text-gray-600">/</span>
+          <span class="text-text-main dark:text-white font-medium">Edit</span>
+        </nav>
+        <h1 class="text-4xl font-bold text-text-main dark:text-white tracking-tight mb-2">Edit Issue</h1>
+        <p class="text-text-muted dark:text-gray-400 text-lg">
           Update your issue details
         </p>
       </div>
 
       <!-- Form Card -->
-      <div class="bg-white dark:bg-card-dark rounded-2xl shadow-soft border border-gray-100 dark:border-white/10 p-8">
+      <div class="bg-white dark:bg-card-dark rounded-2xl shadow-soft p-8">
         @if (error) {
-          <div class="mb-6 flex items-center gap-2 p-4 bg-danger-light dark:bg-danger-dark/20 border border-danger-light dark:border-danger-dark rounded-lg text-danger-dark dark:text-danger-light">
-            <span class="material-symbols-outlined">error</span>
-            <span>{{ error }}</span>
+          <div class="mb-6 flex items-center gap-3 p-4 bg-danger-light dark:bg-danger-dark/20 rounded-xl text-danger-dark dark:text-danger-light">
+            <span class="material-symbols-outlined text-xl">error</span>
+            <span class="font-medium">{{ error }}</span>
           </div>
         }
 
-        <form [formGroup]="issueForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <form [formGroup]="issueForm" (ngSubmit)="onSubmit()" class="space-y-8">
           <!-- Content Field -->
           <div>
             <label for="content" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Issue Description *
+              Issue Description <span class="text-danger">*</span>
             </label>
             <textarea
               id="content"
               formControlName="content"
               rows="8"
-              class="w-full px-4 py-3 rounded-lg border text-text-main dark:text-white bg-white dark:bg-background-dark transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
-              [class.border-gray-300]="!content?.invalid || !content?.touched"
-              [class.border-red-500]="content?.invalid && content?.touched"
+              class="w-full px-4 py-3 rounded-xl border-2 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark resize-none"
+              [ngClass]="{
+                'border-gray-200 dark:border-white/10': !content?.invalid || !content?.touched,
+                'border-danger': content?.invalid && content?.touched
+              }"
               placeholder="Describe the problem you're facing in detail...">
             </textarea>
-            
+
             @if (content?.invalid && content?.touched) {
-              <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+              <p class="mt-2 text-sm text-danger flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">info</span>
                 @if (content?.errors?.['required']) {
                   Issue description is required
                 } @else if (content?.errors?.['minlength']) {
@@ -55,53 +66,59 @@
               </p>
             }
             <p class="mt-2 text-sm text-text-muted dark:text-gray-400">
-              {{ content?.value?.length || 0 }} characters (minimum 10)
+              {{ content?.value?.length || 0 }} / 10+ characters
             </p>
           </div>
 
           <!-- Language Field -->
           <div>
             <label for="language" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Programming Language *
+              Programming Language <span class="text-danger">*</span>
             </label>
-            <select
-              id="language"
-              formControlName="language"
-              class="w-full px-4 py-3 rounded-lg border text-text-main dark:text-white bg-white dark:bg-background-dark transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
-              [class.border-gray-300]="!language?.invalid || !language?.touched"
-              [class.border-red-500]="language?.invalid && language?.touched">
-              <option value="" disabled>Select a language</option>
-              @for (lang of languages; track lang) {
-                <option [value]="lang">{{ lang }}</option>
-              }
-            </select>
-            
+            <div class="relative">
+              <select
+                id="language"
+                formControlName="language"
+                class="w-full px-4 py-3 rounded-xl border-2 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark appearance-none cursor-pointer"
+                [ngClass]="{
+                  'border-gray-200 dark:border-white/10': !language?.invalid || !language?.touched,
+                  'border-danger': language?.invalid && language?.touched
+                }">
+                <option value="" disabled>Select a language</option>
+                @for (lang of languages; track lang) {
+                  <option [value]="lang">{{ lang }}</option>
+                }
+              </select>
+              <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
+            </div>
+
             @if (language?.invalid && language?.touched) {
-              <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+              <p class="mt-2 text-sm text-danger flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">info</span>
                 Please select a programming language
               </p>
             }
           </div>
 
           <!-- Submit Buttons -->
-          <div class="flex gap-3 pt-4">
+          <div class="flex gap-4 pt-4">
             <button
               type="submit"
               [disabled]="submitting"
-              class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-xl shadow-soft hover:shadow-lg hover:shadow-primary/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               @if (submitting) {
-                <span class="animate-spin material-symbols-outlined">progress_activity</span>
+                <span class="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
                 <span>Saving...</span>
               } @else {
                 <span class="material-symbols-outlined">save</span>
                 <span>Save Changes</span>
               }
             </button>
-            
+
             <a
               [routerLink]="['/issues', issueId]"
-              class="px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-lg transition-colors text-center"
+              class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] text-center"
             >
               Cancel
             </a>

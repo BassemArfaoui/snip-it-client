@@ -41,6 +41,8 @@ export class IssueDetailsComponent implements OnInit {
   showSolutionForm = false;
   solutionTextContent = '';
   solutionExternalLink = '';
+  solutionImagePreview: string | null = null;
+  solutionImageData: string | null = null;
   submittingSolution = false;
   solutionError: string | null = null;
 
@@ -58,6 +60,22 @@ export class IssueDetailsComponent implements OnInit {
   solutionComments: { [solutionId: number]: Comment[] } = {};
   showCommentsFor: number | null = null;
   submittingComment: { [solutionId: number]: boolean } = {};
+
+  // Image modal
+  showImageModal = false;
+  selectedImageUrl: string | null = null;
+
+  // Toast notifications
+  toastMessage: string | null = null;
+  toastType: 'success' | 'error' | 'info' = 'info';
+  private toastTimeout: any;
+
+  // Accept solution loading
+  acceptingSolutionId: number | null = null;
+
+  // Image upload settings
+  readonly maxUploadSize = 2 * 1024 * 1024; // 2MB
+  readonly maxImageDimension = 1024; // pixels
 
   constructor(
     private route: ActivatedRoute,
@@ -173,6 +191,8 @@ export class IssueDetailsComponent implements OnInit {
     if (!this.showSolutionForm) {
       this.solutionTextContent = '';
       this.solutionExternalLink = '';
+      this.solutionImagePreview = null;
+      this.solutionImageData = null;
       this.solutionError = null;
     }
   }
@@ -180,9 +200,10 @@ export class IssueDetailsComponent implements OnInit {
   isSolutionFormValid(): boolean {
     const textContent = this.solutionTextContent.trim();
     const externalLink = this.solutionExternalLink.trim();
+    const hasImage = !!this.solutionImageData;
 
     // At least one field must have content
-    if (!textContent && !externalLink) {
+    if (!textContent && !externalLink && !hasImage) {
       return false;
     }
 
@@ -200,10 +221,11 @@ export class IssueDetailsComponent implements OnInit {
     // Trim values first
     const textContent = this.solutionTextContent.trim();
     const externalLink = this.solutionExternalLink.trim();
+    const imageUrl = this.solutionImageData;
 
     // Validate that at least one field has content
-    if (!textContent && !externalLink) {
-      this.solutionError = 'Please provide either text content or an external link';
+    if (!textContent && !externalLink && !imageUrl) {
+      this.solutionError = 'Please provide text content, an external link, or an image';
       return;
     }
 
@@ -224,11 +246,15 @@ export class IssueDetailsComponent implements OnInit {
     if (externalLink) {
       request.externalLink = externalLink;
     }
+    if (imageUrl) {
+      request.imageUrl = imageUrl;
+    }
 
     this.solutionsService.createSolution(this.issue.id, request).subscribe({
       next: () => {
         this.submittingSolution = false;
         this.toggleSolutionForm();
+        this.showToast('Solution submitted successfully!', 'success');
         this.loadSolutions(this.issue!.id);
         this.loadIssue(this.issue!.id);
       },
@@ -288,26 +314,33 @@ export class IssueDetailsComponent implements OnInit {
       next: () => {
         this.showDeleteSolutionDialog = false;
         this.deletingSolutionId = null;
+        this.showToast('Solution deleted', 'success');
         if (this.issue) {
           this.loadSolutions(this.issue.id);
           this.loadIssue(this.issue.id);
         }
       },
       error: (err) => {
+        this.showToast('Failed to delete solution', 'error');
         console.error('Error deleting solution:', err);
       }
     });
   }
 
   acceptSolution(solutionId: number) {
+    this.acceptingSolutionId = solutionId;
     this.solutionsService.acceptSolution(solutionId).subscribe({
       next: () => {
+        this.acceptingSolutionId = null;
+        this.showToast('Solution accepted successfully!', 'success');
         if (this.issue) {
           this.loadIssue(this.issue.id);
           this.loadSolutions(this.issue.id);
         }
       },
       error: (err) => {
+        this.acceptingSolutionId = null;
+        this.showToast('Failed to accept solution', 'error');
         console.error('Error accepting solution:', err);
       }
     });
@@ -323,9 +356,11 @@ export class IssueDetailsComponent implements OnInit {
 
     this.issuesService.deleteIssue(this.issue.id).subscribe({
       next: () => {
-        this.router.navigate(['/issues']);
+        this.showToast('Issue deleted successfully', 'success');
+        setTimeout(() => this.router.navigate(['/issues']), 500);
       },
       error: (err) => {
+        this.showToast('Failed to delete issue', 'error');
         console.error('Error deleting issue:', err);
       }
     });
@@ -340,6 +375,38 @@ export class IssueDetailsComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  getRelativeTime(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return 'just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    } else {
+      return this.formatDate(dateString);
+    }
+  }
+
+  showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+    this.toastMessage = message;
+    this.toastType = type;
+    this.toastTimeout = setTimeout(() => {
+      this.toastMessage = null;
+    }, 4000);
   }
 
   // Comments methods
@@ -426,5 +493,76 @@ export class IssueDetailsComponent implements OnInit {
 
   isCommentOwner(comment: Comment): boolean {
     return comment.user.id === this.currentUserId;
+  }
+
+  // Image methods
+  onSolutionImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+
+    if (file.size > this.maxUploadSize) {
+      this.solutionError = 'Image is too large. Please select a file under 2 MB.';
+      return;
+    }
+
+    this.solutionError = null;
+    this.resizeImage(file)
+      .then((dataUrl) => {
+        this.solutionImageData = dataUrl;
+        this.solutionImagePreview = dataUrl;
+      })
+      .catch(() => {
+        this.solutionError = 'Could not process image. Please try a smaller image.';
+      });
+  }
+
+  removeSolutionImage(): void {
+    this.solutionImagePreview = null;
+    this.solutionImageData = null;
+  }
+
+  private resizeImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > this.maxImageDimension || height > this.maxImageDimension) {
+            if (width > height) {
+              height = (height / width) * this.maxImageDimension;
+              width = this.maxImageDimension;
+            } else {
+              width = (width / height) * this.maxImageDimension;
+              height = this.maxImageDimension;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.onerror = reject;
+        img.src = reader.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  openImageModal(imageUrl: string): void {
+    this.selectedImageUrl = imageUrl;
+    this.showImageModal = true;
+  }
+
+  closeImageModal(): void {
+    this.showImageModal = false;
+    this.selectedImageUrl = null;
   }
 }

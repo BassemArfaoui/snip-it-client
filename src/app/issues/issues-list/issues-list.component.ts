@@ -6,6 +6,7 @@ import { IssuesService, Issue, IssueFilters } from '../../services/issues.servic
 import { AuthService } from '../../auth.service';
 import { LanguageBadgeComponent } from '../../shared/language-badge/language-badge.component';
 import { ResolvedBadgeComponent } from '../../shared/resolved-badge/resolved-badge.component';
+import { DropdownComponent, DropdownOption } from '../../shared/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-issues-list',
@@ -15,7 +16,8 @@ import { ResolvedBadgeComponent } from '../../shared/resolved-badge/resolved-bad
     RouterModule,
     FormsModule,
     LanguageBadgeComponent,
-    ResolvedBadgeComponent
+    ResolvedBadgeComponent,
+    DropdownComponent
   ],
   templateUrl: './issues-list.component.html'
 })
@@ -23,27 +25,35 @@ export class IssuesListComponent implements OnInit {
   issues: Issue[] = [];
   loading = false;
   error: string | null = null;
-  
+
   // Filters
   selectedLanguage = '';
   resolvedFilter = 'all'; // 'all', 'resolved', 'unresolved'
   currentPage = 1;
   limit = 10;
-  
-  // Available languages for filter
-  languages = [
-    'typescript',
-    'javascript',
-    'python',
-    'java',
-    'csharp',
-    'go',
-    'rust',
-    'php',
-    'ruby',
-    'cpp'
+
+
+  // Dropdown options
+  languageOptions: DropdownOption[] = [
+    { value: '', label: 'All Languages' },
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'javascript', label: 'JavaScript' },
+    { value: 'python', label: 'Python' },
+    { value: 'java', label: 'Java' },
+    { value: 'csharp', label: 'C#' },
+    { value: 'go', label: 'Go' },
+    { value: 'rust', label: 'Rust' },
+    { value: 'php', label: 'PHP' },
+    { value: 'ruby', label: 'Ruby' },
+    { value: 'cpp', label: 'C++' }
   ];
-  
+
+  resolvedOptions: DropdownOption[] = [
+    { value: 'all', label: 'All Issues' },
+    { value: 'unresolved', label: 'Unresolved' },
+    { value: 'resolved', label: 'Resolved' }
+  ];
+
   isAuthenticated = false;
 
   constructor(
@@ -59,20 +69,20 @@ export class IssuesListComponent implements OnInit {
   loadIssues() {
     this.loading = true;
     this.error = null;
-    
+
     const filters: IssueFilters = {
       page: this.currentPage,
       limit: this.limit
     };
-    
+
     if (this.selectedLanguage) {
       filters.language = this.selectedLanguage;
     }
-    
+
     if (this.resolvedFilter !== 'all') {
       filters.is_resolved = this.resolvedFilter === 'resolved';
     }
-    
+
     this.issuesService.getIssues(filters).subscribe({
       next: (issues) => {
         this.issues = issues;
@@ -95,16 +105,16 @@ export class IssuesListComponent implements OnInit {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
     if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     });
   }
 }

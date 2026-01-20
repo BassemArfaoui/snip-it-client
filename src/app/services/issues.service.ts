@@ -12,6 +12,7 @@ export interface Issue {
   id: number;
   content: string;
   language: string;
+  imageUrl?: string;
   solutions_count: number;
   is_resolved: boolean;
   likesCount: number;
@@ -27,11 +28,13 @@ export interface IssueDetails extends Issue {
 export interface CreateIssueRequest {
   content: string;
   language: string;
+  imageUrl?: string;
 }
 
 export interface UpdateIssueRequest {
   content?: string;
   language?: string;
+  imageUrl?: string;
 }
 
 export interface IssueFilters {
@@ -51,7 +54,7 @@ export class IssuesService {
 
   getIssues(filters?: IssueFilters): Observable<Issue[]> {
     let params = new HttpParams();
-    
+
     if (filters) {
       if (filters.language) {
         params = params.set('language', filters.language);

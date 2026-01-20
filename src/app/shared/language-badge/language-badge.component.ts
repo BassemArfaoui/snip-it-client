@@ -4,8 +4,9 @@ import { Component, Input } from '@angular/core';
   selector: 'app-language-badge',
   standalone: true,
   template: `
-    <span [class]="getBadgeClasses()">
-      {{ language }}
+    <span [class]="getBadgeClasses()" class="transition-colors duration-200">
+      <span class="w-1.5 h-1.5 rounded-full mr-1.5" [style.background-color]="getLanguageColor()"></span>
+      {{ formatLanguage() }}
     </span>
   `,
   styles: []
@@ -13,8 +14,40 @@ import { Component, Input } from '@angular/core';
 export class LanguageBadgeComponent {
   @Input() language: string = '';
 
+  formatLanguage(): string {
+    const nameMap: { [key: string]: string } = {
+      'typescript': 'TypeScript',
+      'javascript': 'JavaScript',
+      'python': 'Python',
+      'java': 'Java',
+      'csharp': 'C#',
+      'go': 'Go',
+      'rust': 'Rust',
+      'php': 'PHP',
+      'ruby': 'Ruby',
+      'cpp': 'C++',
+    };
+    return nameMap[this.language.toLowerCase()] || this.language;
+  }
+
+  getLanguageColor(): string {
+    const colorMap: { [key: string]: string } = {
+      'typescript': '#3178c6',
+      'javascript': '#f7df1e',
+      'python': '#3776ab',
+      'java': '#b07219',
+      'csharp': '#239120',
+      'go': '#00add8',
+      'rust': '#dea584',
+      'php': '#777bb4',
+      'ruby': '#cc342d',
+      'cpp': '#00599c',
+    };
+    return colorMap[this.language.toLowerCase()] || '#6b7280';
+  }
+
   getBadgeClasses(): string {
-    const baseClasses = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+    const baseClasses = 'inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold';
     const colorMap: { [key: string]: string } = {
       'typescript': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
       'javascript': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -27,7 +60,7 @@ export class LanguageBadgeComponent {
       'ruby': 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
       'cpp': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
     };
-    
+
     const colorClass = colorMap[this.language.toLowerCase()] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
     return `${baseClasses} ${colorClass}`;
   }

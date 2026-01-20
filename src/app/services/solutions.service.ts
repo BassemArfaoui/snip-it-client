@@ -14,6 +14,7 @@ export interface Solution {
   contributor: SolutionContributor | null;
   textContent: string | null;
   externalLink: string | null;
+  imageUrl: string | null;
   likesCount: number;
   dislikesCount: number;
   commentsCount: number;
@@ -25,11 +26,13 @@ export interface Solution {
 export interface CreateSolutionRequest {
   textContent?: string;
   externalLink?: string;
+  imageUrl?: string;
 }
 
 export interface UpdateSolutionRequest {
   textContent?: string;
   externalLink?: string;
+  imageUrl?: string;
 }
 
 export interface SolutionListResponse {

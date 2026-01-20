@@ -14,18 +14,22 @@ export class CreateIssueComponent implements OnInit {
   issueForm!: FormGroup;
   submitting = false;
   error: string | null = null;
+  imagePreview: string | null = null;
+  imageData: string | null = null;
+  readonly maxUploadSize = 2 * 1024 * 1024; // 2MB
+  readonly maxImageDimension = 1024; // pixels
 
   languages = [
-    'typescript',
-    'javascript',
-    'python',
-    'java',
-    'csharp',
+    'TypeScript',
+    'JavaScript',
+    'Python',
+    'Java',
+    'C#',
     'go',
-    'rust',
-    'php',
-    'ruby',
-    'cpp'
+    'Rust',
+    'PHP',
+    'Ruby',
+    'C++'
   ];
 
   constructor(
@@ -49,6 +53,66 @@ export class CreateIssueComponent implements OnInit {
     return this.issueForm.get('language');
   }
 
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+
+    if (file.size > this.maxUploadSize) {
+      this.error = 'Image is too large. Please select a file under 2 MB.';
+      return;
+    }
+
+    this.error = null;
+    this.resizeImage(file)
+      .then((dataUrl) => {
+        this.imageData = dataUrl;
+        this.imagePreview = dataUrl;
+      })
+      .catch(() => {
+        this.error = 'Could not process image. Please try a smaller image.';
+      });
+  }
+
+  removeImage(): void {
+    this.imagePreview = null;
+    this.imageData = null;
+  }
+
+  private resizeImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > this.maxImageDimension || height > this.maxImageDimension) {
+            if (width > height) {
+              height = (height / width) * this.maxImageDimension;
+              width = this.maxImageDimension;
+            } else {
+              width = (width / height) * this.maxImageDimension;
+              height = this.maxImageDimension;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.onerror = reject;
+        img.src = reader.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   onSubmit() {
     if (this.issueForm.invalid) {
       Object.keys(this.issueForm.controls).forEach(key => {
@@ -60,7 +124,12 @@ export class CreateIssueComponent implements OnInit {
     this.submitting = true;
     this.error = null;
 
-    this.issuesService.createIssue(this.issueForm.value).subscribe({
+    const requestData = {
+      ...this.issueForm.value,
+      imageUrl: this.imageData || undefined
+    };
+
+    this.issuesService.createIssue(requestData).subscribe({
       next: (issue) => {
         this.router.navigate(['/issues', issue.id]);
       },

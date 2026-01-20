@@ -7,14 +7,14 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     @if (isResolved) {
-      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-dark dark:bg-success-dark/30 dark:text-success-light">
-        <span class="material-symbols-outlined text-sm">check_circle</span>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-success/10 text-success border border-success/30 transition-colors">
+        <span class="material-symbols-outlined text-sm filled-icon">check_circle</span>
         Resolved
       </span>
     } @else {
-      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-light text-warning-dark dark:bg-warning-dark/30 dark:text-warning-light">
-        <span class="material-symbols-outlined text-sm">pending</span>
-        Unresolved
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-warning/10 text-warning-dark dark:text-warning border border-warning/30 transition-colors">
+        <span class="material-symbols-outlined text-sm">help</span>
+        Open
       </span>
     }
   `,
