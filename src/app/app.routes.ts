@@ -8,6 +8,10 @@ import { ProfileComponent } from './profile/profile.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 import { AuthGuard } from './auth.guard';
 import { GitHubCallbackComponent } from './github-callback/github-callback.component';
+import { IssuesListComponent } from './issues/issues-list/issues-list.component';
+import { IssueDetailsComponent } from './issues/issue-details/issue-details.component';
+import { CreateIssueComponent } from './issues/create-issue/create-issue.component';
+import { EditIssueComponent } from './issues/edit-issue/edit-issue.component';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -19,5 +23,9 @@ export const routes: Routes = [
 	{ path: 'auth-success', component: GitHubCallbackComponent },
 	{ path: 'dashboard', component: HomeComponent, canActivate: [AuthGuard] },
 	{ path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
+	{ path: 'issues/new', component: CreateIssueComponent, canActivate: [AuthGuard] },
+	{ path: 'issues/:id/edit', component: EditIssueComponent, canActivate: [AuthGuard] },
+	{ path: 'issues/:id', component: IssueDetailsComponent },
+	{ path: 'issues', component: IssuesListComponent },
 	{ path: '**', redirectTo: 'login' }
 ];

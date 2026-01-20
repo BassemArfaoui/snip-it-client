@@ -1,0 +1,146 @@
+<div class="min-h-screen bg-background-light dark:bg-background-dark">
+  <!-- Header -->
+  <div class="bg-white dark:bg-card-dark border-b border-gray-200 dark:border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-text-main dark:text-white mb-2">Issues</h1>
+          <p class="text-text-muted dark:text-gray-400">Browse and help solve coding problems</p>
+        </div>
+        @if (isAuthenticated) {
+          <a
+            routerLink="/issues/new"
+            class="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors"
+          >
+            <span class="material-symbols-outlined">add</span>
+            New Issue
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white dark:bg-card-dark border-b border-gray-200 dark:border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-wrap gap-4">
+        <!-- Language Filter -->
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium text-text-main dark:text-white mb-1">
+            Language
+          </label>
+          <select
+            [(ngModel)]="selectedLanguage"
+            (change)="onFilterChange()"
+            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-background-dark text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="">All Languages</option>
+            @for (lang of languages; track lang) {
+              <option [value]="lang">{{ lang }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Resolved Status Filter -->
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium text-text-main dark:text-white mb-1">
+            Status
+          </label>
+          <select
+            [(ngModel)]="resolvedFilter"
+            (change)="onFilterChange()"
+            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-background-dark text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="all">All Issues</option>
+            <option value="unresolved">Unresolved</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if (loading) {
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    } @else if (error) {
+      <div class="bg-danger-light dark:bg-danger-dark/20 border border-danger-light dark:border-danger-dark rounded-lg p-4 text-center">
+        <p class="text-danger-dark dark:text-danger-light">{{ error }}</p>
+        <button
+          (click)="loadIssues()"
+          class="mt-3 px-4 py-2 bg-danger hover:bg-danger-dark text-white rounded-lg transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    } @else if (issues.length === 0) {
+      <div class="text-center py-12">
+        <span class="material-symbols-outlined text-6xl text-text-muted dark:text-gray-600 mb-4">
+          help_outline
+        </span>
+        <h3 class="text-xl font-semibold text-text-main dark:text-white mb-2">No issues found</h3>
+        <p class="text-text-muted dark:text-gray-400 mb-6">
+          Try adjusting your filters or create a new issue
+        </p>
+        @if (isAuthenticated) {
+          <a
+            routerLink="/issues/new"
+            class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors"
+          >
+            <span class="material-symbols-outlined">add</span>
+            Create First Issue
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="space-y-4">
+        @for (issue of issues; track issue.id) {
+          <a
+            [routerLink]="['/issues', issue.id]"
+            class="block bg-white dark:bg-card-dark rounded-xl shadow-soft hover:shadow-lg transition-shadow border border-gray-100 dark:border-white/10 p-6"
+          >
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-4 mb-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <app-language-badge [language]="issue.language"></app-language-badge>
+                  <app-resolved-badge [isResolved]="issue.is_resolved"></app-resolved-badge>
+                </div>
+                <p class="text-text-main dark:text-white text-lg line-clamp-2">
+                  {{ issue.content }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="flex items-center gap-6 text-sm text-text-muted dark:text-gray-400">
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-lg">person</span>
+                <span>{{ issue.author?.username || 'Deleted User' }}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-lg">comment</span>
+                <span>{{ issue.solutions_count }} solutions</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-lg text-success">thumb_up</span>
+                <span>{{ issue.likesCount }}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-lg text-danger">thumb_down</span>
+                <span>{{ issue.dislikesCount }}</span>
+              </div>
+              <div class="flex items-center gap-1.5 ml-auto">
+                <span class="material-symbols-outlined text-lg">schedule</span>
+                <span>{{ formatDate(issue.created_at) }}</span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </div>
+</div>

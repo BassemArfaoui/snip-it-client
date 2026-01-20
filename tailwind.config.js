@@ -14,6 +14,22 @@ module.exports = {
         'card-dark': '#2c2b18',
         'text-main': '#181811',
         'text-muted': '#8c8b5f',
+        // Semantic colors for consistent UI
+        success: {
+          light: '#dcfce7',
+          DEFAULT: '#22c55e',
+          dark: '#166534',
+        },
+        danger: {
+          light: '#fef2f2',
+          DEFAULT: '#ef4444',
+          dark: '#991b1b',
+        },
+        warning: {
+          light: '#ffedd5',
+          DEFAULT: '#f97316',
+          dark: '#9a3412',
+        },
       },
       fontFamily: {
         display: ['Spline Sans', 'sans-serif'],

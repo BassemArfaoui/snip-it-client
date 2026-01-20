@@ -1,0 +1,306 @@
+<div class="min-h-screen bg-background-light dark:bg-background-dark pb-12">
+  @if (loading) {
+    <div class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
+  } @else if (error) {
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="bg-danger-light dark:bg-danger-dark/20 border border-danger-light dark:border-danger-dark rounded-lg p-4 text-center">
+        <p class="text-danger-dark dark:text-danger-light">{{ error }}</p>
+      </div>
+    </div>
+  } @else if (issue) {
+    <!-- Issue Header -->
+    <div class="bg-white dark:bg-card-dark border-b border-gray-200 dark:border-white/10">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center gap-3 mb-4">
+          <a
+            routerLink="/issues"
+            class="flex items-center gap-1 text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-white transition-colors"
+          >
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span>Back to Issues</span>
+          </a>
+        </div>
+
+        <div class="flex items-start gap-2 mb-4">
+          <app-language-badge [language]="issue.language"></app-language-badge>
+          <app-resolved-badge [isResolved]="issue.is_resolved"></app-resolved-badge>
+        </div>
+
+        <h1 class="text-2xl font-bold text-text-main dark:text-white mb-4">
+          {{ issue.content }}
+        </h1>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-6 text-sm text-text-muted dark:text-gray-400">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-lg">person</span>
+              <span>{{ issue.author?.username || 'Deleted User' }}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-lg">schedule</span>
+              <span>{{ formatDate(issue.created_at) }}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-lg">comment</span>
+              <span>{{ issue.solutions_count }} solutions</span>
+            </div>
+          </div>
+
+          @if (isAuthenticated) {
+            <div class="flex items-center gap-2">
+              <app-vote-buttons
+                [likesCount]="issue.likesCount"
+                [dislikesCount]="issue.dislikesCount"
+                (vote)="voteOnIssue($event)"
+              ></app-vote-buttons>
+
+              @if (isIssueOwner()) {
+                <a
+                  [routerLink]="['/issues', issue.id, 'edit']"
+                  class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                  title="Edit Issue"
+                >
+                  <span class="material-symbols-outlined text-text-main dark:text-white">edit</span>
+                </a>
+                <button
+                  (click)="confirmDeleteIssue()"
+                  class="p-2 rounded-lg hover:bg-danger-light dark:hover:bg-danger-dark/20 transition-colors text-danger"
+                  title="Delete Issue"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Solutions Section -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-text-main dark:text-white">
+          Solutions ({{ solutions.length }})
+        </h2>
+        @if (isAuthenticated && !showSolutionForm) {
+          <button
+            (click)="toggleSolutionForm()"
+            class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors"
+          >
+            <span class="material-symbols-outlined">add</span>
+            Add Solution
+          </button>
+        }
+      </div>
+
+      <!-- Add Solution Form -->
+      @if (showSolutionForm) {
+        <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft border border-gray-100 dark:border-white/10 p-6 mb-6">
+          <h3 class="text-lg font-semibold text-text-main dark:text-white mb-4">Add Your Solution</h3>
+          
+          @if (solutionError) {
+            <div class="mb-4 p-3 bg-danger-light dark:bg-danger-dark/20 border border-danger-light dark:border-danger-dark rounded-lg text-danger-dark dark:text-danger-light text-sm">
+              {{ solutionError }}
+            </div>
+          }
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-text-main dark:text-white mb-2">
+                Solution Description (Optional)
+              </label>
+              <textarea
+                [(ngModel)]="solutionTextContent"
+                rows="4"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-background-dark text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Explain your solution..."
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-text-main dark:text-white mb-2">
+                External Link (Optional)
+              </label>
+              <input
+                type="url"
+                [(ngModel)]="solutionExternalLink"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-background-dark text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                (click)="submitSolution()"
+                [disabled]="submittingSolution"
+                class="px-4 py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ submittingSolution ? 'Submitting...' : 'Submit Solution' }}
+              </button>
+              <button
+                (click)="toggleSolutionForm()"
+                [disabled]="submittingSolution"
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-main dark:text-white font-medium rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Solutions List -->
+      @if (solutions.length === 0) {
+        <div class="text-center py-12 bg-white dark:bg-card-dark rounded-xl">
+          <span class="material-symbols-outlined text-6xl text-text-muted dark:text-gray-600 mb-4">
+            lightbulb
+          </span>
+          <h3 class="text-xl font-semibold text-text-main dark:text-white mb-2">No solutions yet</h3>
+          <p class="text-text-muted dark:text-gray-400">Be the first to help solve this issue!</p>
+        </div>
+      } @else {
+        <div class="space-y-4">
+          @for (solution of solutions; track solution.id) {
+            <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft border border-gray-100 dark:border-white/10 p-6">
+              @if (solution.isAccepted) {
+                <div class="mb-4">
+                  <app-accepted-badge></app-accepted-badge>
+                </div>
+              }
+
+              <!-- Solution Header -->
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-2 text-sm text-text-muted dark:text-gray-400">
+                  <span class="material-symbols-outlined text-lg">person</span>
+                  <span class="font-medium">{{ solution.contributor?.username || 'Unknown' }}</span>
+                  <span>•</span>
+                  <span>{{ formatDate(solution.createdAt) }}</span>
+                  @if (solution.updatedAt !== solution.createdAt) {
+                    <span class="text-xs">(edited)</span>
+                  }
+                </div>
+
+                <div class="flex items-center gap-2">
+                  @if (isAuthenticated && !solution.isAccepted) {
+                    @if (canAcceptSolution()) {
+                      <button
+                        (click)="acceptSolution(solution.id)"
+                        class="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-text-main dark:text-primary border border-primary rounded-lg transition-colors text-sm font-medium"
+                      >
+                        Accept Solution
+                      </button>
+                    }
+                    @if (canEditSolution(solution) && editingSolutionId !== solution.id) {
+                      <button
+                        (click)="startEditSolution(solution)"
+                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                        title="Edit"
+                      >
+                        <span class="material-symbols-outlined text-text-main dark:text-white">edit</span>
+                      </button>
+                    }
+                    @if (isSolutionOwner(solution)) {
+                      <button
+                        (click)="confirmDeleteSolution(solution.id)"
+                        class="p-2 rounded-lg hover:bg-danger-light dark:hover:bg-danger-dark/20 transition-colors text-danger"
+                        title="Delete"
+                      >
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Solution Content -->
+              @if (editingSolutionId === solution.id) {
+                <div class="space-y-4 mb-4">
+                  <textarea
+                    [(ngModel)]="editSolutionTextContent"
+                    rows="4"
+                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-background-dark text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                  ></textarea>
+                  <input
+                    type="url"
+                    [(ngModel)]="editSolutionExternalLink"
+                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-background-dark text-text-main dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="https://..."
+                  />
+                  <div class="flex gap-3">
+                    <button
+                      (click)="submitEditSolution()"
+                      class="px-4 py-2 bg-primary hover:bg-primary/90 text-black font-medium rounded-lg transition-colors text-sm"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      (click)="cancelEditSolution()"
+                      class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-main dark:text-white font-medium rounded-lg transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                @if (solution.textContent) {
+                  <p class="text-text-main dark:text-white mb-4 whitespace-pre-wrap">
+                    {{ solution.textContent }}
+                  </p>
+                }
+                @if (solution.externalLink) {
+                  <a
+                    [href]="solution.externalLink"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-primary hover:underline mb-4"
+                  >
+                    <span class="material-symbols-outlined text-lg">link</span>
+                    <span>View External Resource</span>
+                    <span class="material-symbols-outlined text-lg">open_in_new</span>
+                  </a>
+                }
+              }
+
+              <!-- Solution Stats -->
+              @if (isAuthenticated) {
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
+                  <app-vote-buttons
+                    [likesCount]="solution.likesCount"
+                    [dislikesCount]="solution.dislikesCount"
+                    (vote)="voteOnSolution(solution, $event)"
+                  ></app-vote-buttons>
+                  <div class="flex items-center gap-1.5 text-sm text-text-muted dark:text-gray-400">
+                    <span class="material-symbols-outlined text-lg">comment</span>
+                    <span>{{ solution.commentsCount }} comments</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Delete Issue Dialog -->
+  <app-confirm-dialog
+    [isOpen]="showDeleteIssueDialog"
+    title="Delete Issue?"
+    message="This action cannot be undone. All solutions will also be deleted."
+    confirmText="Delete"
+    (confirm)="deleteIssue()"
+    (cancel)="showDeleteIssueDialog = false"
+  ></app-confirm-dialog>
+
+  <!-- Delete Solution Dialog -->
+  <app-confirm-dialog
+    [isOpen]="showDeleteSolutionDialog"
+    title="Delete Solution?"
+    message="This action cannot be undone."
+    confirmText="Delete"
+    (confirm)="deleteSolution()"
+    (cancel)="showDeleteSolutionDialog = false; deletingSolutionId = null"
+  ></app-confirm-dialog>
+</div>
