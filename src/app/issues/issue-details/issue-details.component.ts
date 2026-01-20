@@ -4,7 +4,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { IssuesService, IssueDetails } from '../../services/issues.service';
 import { SolutionsService, Solution } from '../../services/solutions.service';
-import { VotesService, VoteType, TargetType } from '../../services/votes.service';
+import { VotesService, VoteType } from '../../services/votes.service';
 import { AuthService } from '../../auth.service';
 import { LanguageBadgeComponent } from '../../shared/language-badge/language-badge.component';
 import { ResolvedBadgeComponent } from '../../shared/resolved-badge/resolved-badge.component';
@@ -32,22 +32,22 @@ export class IssueDetailsComponent implements OnInit {
   solutions: Solution[] = [];
   loading = false;
   error: string | null = null;
-  
+
   currentUserId: number | null = null;
   isAuthenticated = false;
-  
+
   // Solution form
   showSolutionForm = false;
   solutionTextContent = '';
   solutionExternalLink = '';
   submittingSolution = false;
   solutionError: string | null = null;
-  
+
   // Edit solution
   editingSolutionId: number | null = null;
   editSolutionTextContent = '';
   editSolutionExternalLink = '';
-  
+
   // Delete dialogs
   showDeleteIssueDialog = false;
   showDeleteSolutionDialog = false;
@@ -65,7 +65,7 @@ export class IssueDetailsComponent implements OnInit {
   ngOnInit() {
     this.isAuthenticated = !!this.authService.getAccessToken();
     this.currentUserId = this.authService.getUserId();
-    
+
     this.route.params.subscribe(params => {
       const id = +params['id'];
       if (id) {
@@ -78,7 +78,7 @@ export class IssueDetailsComponent implements OnInit {
   loadIssue(id: number) {
     this.loading = true;
     this.error = null;
-    
+
     this.issuesService.getIssueById(id).subscribe({
       next: (issue) => {
         this.issue = issue;
@@ -127,7 +127,7 @@ export class IssueDetailsComponent implements OnInit {
   // Vote on issue
   voteOnIssue(voteType: VoteType) {
     if (!this.isAuthenticated || !this.issue) return;
-    
+
     this.votesService.vote({
       targetId: this.issue.id,
       targetType: 'ISSUE',
@@ -145,7 +145,7 @@ export class IssueDetailsComponent implements OnInit {
   // Vote on solution
   voteOnSolution(solution: Solution, voteType: VoteType) {
     if (!this.isAuthenticated) return;
-    
+
     this.votesService.vote({
       targetId: solution.id,
       targetType: 'SOLUTION',
@@ -172,26 +172,26 @@ export class IssueDetailsComponent implements OnInit {
 
   submitSolution() {
     if (!this.issue) return;
-    
+
     // Trim values first
     const textContent = this.solutionTextContent.trim();
     const externalLink = this.solutionExternalLink.trim();
-    
+
     // Validate that at least one field has content
     if (!textContent && !externalLink) {
       this.solutionError = 'Please provide either text content or an external link';
       return;
     }
-    
+
     // Validate text content length if provided
     if (textContent && textContent.length < 10) {
       this.solutionError = 'Text content must be at least 10 characters';
       return;
     }
-    
+
     this.submittingSolution = true;
     this.solutionError = null;
-    
+
     // Build request with only non-empty values
     const request: any = {};
     if (textContent) {
@@ -200,7 +200,7 @@ export class IssueDetailsComponent implements OnInit {
     if (externalLink) {
       request.externalLink = externalLink;
     }
-    
+
     this.solutionsService.createSolution(this.issue.id, request).subscribe({
       next: () => {
         this.submittingSolution = false;
@@ -230,7 +230,7 @@ export class IssueDetailsComponent implements OnInit {
 
   submitEditSolution() {
     if (this.editingSolutionId === null) return;
-    
+
     const request: any = {};
     if (this.editSolutionTextContent.trim()) {
       request.textContent = this.editSolutionTextContent.trim();
@@ -238,7 +238,7 @@ export class IssueDetailsComponent implements OnInit {
     if (this.editSolutionExternalLink.trim()) {
       request.externalLink = this.editSolutionExternalLink.trim();
     }
-    
+
     this.solutionsService.updateSolution(this.editingSolutionId, request).subscribe({
       next: () => {
         this.cancelEditSolution();
@@ -259,7 +259,7 @@ export class IssueDetailsComponent implements OnInit {
 
   deleteSolution() {
     if (this.deletingSolutionId === null) return;
-    
+
     this.solutionsService.deleteSolution(this.deletingSolutionId).subscribe({
       next: () => {
         this.showDeleteSolutionDialog = false;
@@ -296,7 +296,7 @@ export class IssueDetailsComponent implements OnInit {
 
   deleteIssue() {
     if (!this.issue) return;
-    
+
     this.issuesService.deleteIssue(this.issue.id).subscribe({
       next: () => {
         this.router.navigate(['/issues']);
@@ -309,9 +309,9 @@ export class IssueDetailsComponent implements OnInit {
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'

@@ -17,6 +17,13 @@ export interface VoteResponse {
   message: string;
 }
 
+// Backend DTO format
+interface CreateVoteDto {
+  targetId: number;
+  targetType: TargetType;
+  isDislike: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,7 +33,14 @@ export class VotesService {
   constructor(private http: HttpClient) {}
 
   vote(request: VoteRequest): Observable<any> {
-    return this.http.post<VoteResponse>(this.apiUrl, request).pipe(
+    // Convert frontend format to backend format
+    const dto: CreateVoteDto = {
+      targetId: request.targetId,
+      targetType: request.targetType,
+      isDislike: request.voteType === 'DISLIKE'
+    };
+
+    return this.http.post<VoteResponse>(this.apiUrl, dto).pipe(
       map(response => response.data)
     );
   }
