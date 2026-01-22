@@ -1,0 +1,281 @@
+<div class="sunny-theme min-h-screen bg-[#f8f8f5] text-[#0f0f0f]">
+  <!-- Header -->
+  <div class="border-b border-[#ebe6d3] bg-[radial-gradient(circle_at_18%_15%,rgba(255,228,0,0.18),transparent_35%),radial-gradient(circle_at_82%_12%,rgba(255,228,0,0.16),transparent_32%),#fdfcf7] px-6 py-6 shadow-[0_18px_48px_-34px_rgba(0,0,0,0.45)]">
+    <div class="max-w-7xl mx-auto">
+      <!-- Back Button & Title -->
+      <div class="flex items-center gap-4 mb-4">
+        <button 
+          (click)="goBack()"
+          class="p-2 hover:bg-[#fff4c8] rounded-xl transition-colors border border-[#e7dfc7]">
+          ← Back
+        </button>
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            @if (collection()?.isPublic) {
+              <span class="px-2 py-1 bg-[#e7f8d9] text-[#4c7c1f] text-xs rounded-full uppercase">
+                Public Collection
+              </span>
+            }
+            <span class="text-[#7b7465] text-sm">Updated 2h ago</span>
+          </div>
+          <h1 class="text-3xl font-semibold mb-1">{{ collection()?.name || 'Loading...' }}</h1>
+          <p class="text-[#6d665a]">{{ collection()?.owner?.username || 'Loading...' }}</p>
+        </div>
+        <div class="flex gap-2">
+          <button 
+            (click)="shareCollection()"
+            class="px-4 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded-xl transition-colors font-semibold shadow-sm">
+            Share
+          </button>
+          <button 
+            (click)="addNewItem()"
+            class="px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl flex items-center gap-2 transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)]">
+            <span class="text-xl">+</span>
+            New Item
+          </button>
+        </div>
+      </div>
+      
+      <!-- Tags -->
+      <div class="flex gap-2 mb-4 flex-wrap">
+        <span class="px-3 py-1 bg-white border border-[#e7dfc7] text-[#4f493f] text-sm rounded-full shadow-sm">#python</span>
+        <span class="px-3 py-1 bg-white border border-[#e7dfc7] text-[#4f493f] text-sm rounded-full shadow-sm">#api</span>
+        <span class="px-3 py-1 bg-white border border-[#e7dfc7] text-[#4f493f] text-sm rounded-full shadow-sm">#migration</span>
+        <button class="px-3 py-1 text-[#7b7465] text-sm">+ Add Tag</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 py-6">
+    <div class="flex flex-col lg:flex-row gap-6">
+      <!-- Left Column - Items List -->
+      <div class="flex-1">
+        <!-- Tabs & Filters -->
+        <div class="mb-4">
+          <div class="flex items-center gap-4 mb-4">
+            @for (tab of tabs; track tab) {
+              <div class="relative">
+                <button
+                  (click)="setTab(tab)"
+                  [class.text-[#0f0f0f]]="selectedTab() === tab"
+                  [class.text-[#8b8475]]="selectedTab() !== tab"
+                  class="px-4 py-2 font-semibold transition-colors">
+                  {{ tab }}
+                </button>
+                @if (selectedTab() === tab) {
+                  <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ffd600]"></div>
+                }
+              </div>
+            }
+          </div>
+          
+          <div class="flex gap-3 flex-wrap">
+            <!-- Search -->
+            <input
+              type="text"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
+              placeholder="Search collections, snippets..."
+              class="flex-1 min-w-[240px] px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] placeholder-[#9b9586] shadow-sm">
+            
+            <!-- Language Filter -->
+            <select 
+              [ngModel]="selectedLanguage()"
+              (ngModelChange)="setLanguage($event)"
+              class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+              @for (lang of languages; track lang) {
+                <option [value]="lang">{{ lang }}</option>
+              }
+            </select>
+            
+            <!-- Sort -->
+            <select 
+              [ngModel]="sortBy()"
+              (ngModelChange)="setSortBy($event)"
+              class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+              <option value="Last Modified">Last Modified</option>
+              <option value="Name">Name</option>
+              <option value="Created">Created</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        @if (error()) {
+          <div class="mb-4 p-4 bg-[#fff1f1] border border-[#ffd1d1] rounded-xl text-[#a83a3a]">
+            {{ error() }}
+          </div>
+        }
+        
+        <!-- Loading -->
+        @if (loading()) {
+          <div class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffe500]"></div>
+          </div>
+        }
+        
+        <!-- Items List -->
+        @if (!loading()) {
+          <div class="space-y-3">
+            <!-- Item Card -->
+            @for (item of items(); track item.id) {
+              <div
+                (click)="openItem(item)"
+                class="bg-white border border-[#eee8d8] rounded-xl p-4 hover:border-[#ffd600] cursor-pointer transition-all group shadow-[0_14px_46px_-32px_rgba(0,0,0,0.48)]">
+                
+                <div class="flex items-start gap-4">
+                  <!-- Icon -->
+                  <div class="text-2xl">{{ getItemIcon(item.targetType) }}</div>
+                  
+                  <!-- Content -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-start gap-2 mb-2">
+                      <h3 class="font-semibold flex-1 line-clamp-1">
+                        {{ item.content?.title || 'Untitled' }}
+                        @if (getPriorityBadge(item)) {
+                          <span class="ml-2 px-2 py-0.5 bg-[#ffe8e8] text-[#b33c3c] text-xs rounded-full uppercase">
+                            {{ getPriorityBadge(item) }}
+                          </span>
+                        }
+                      </h3>
+                      <button 
+                        (click)="toggleFavorite($event, item)"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span [class.text-[#d1a000]]="item.isFavorite" [class.text-[#bcb5a5]]="!item.isFavorite">
+                          {{ item.isFavorite ? '★' : '☆' }}
+                        </span>
+                      </button>
+                      <button 
+                        (click)="removeItem($event, item)"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity text-[#9c9483] hover:text-[#d64545]">
+                        ×
+                      </button>
+                    </div>
+                    
+                    <p class="text-sm text-[#6d665a] mb-3 line-clamp-2">
+                      {{ item.content?.description || item.content?.content?.substring(0, 150) || 'No description' }}
+                    </p>
+                    
+                    <div class="flex items-center gap-4 text-sm text-[#7b7465] flex-wrap">
+                      <span [class]="getItemBadgeColor(item.targetType)" class="px-2 py-0.5 rounded bg-[#f8f4e3] text-[#4f493f]">
+                        {{ item.targetType }}
+                      </span>
+                      @if (item.content?.language) {
+                        <span class="flex items-center gap-1">
+                          <span class="w-2 h-2 bg-[#ffd600] rounded-full"></span>
+                          {{ item.content.language }}
+                        </span>
+                      }
+                      <span>Updated {{ item.content?.updatedAt }}</span>
+                      @if (item.content?.comments) {
+                        <span class="flex items-center gap-1">
+                          💬 {{ item.content.comments }} comments
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            
+            <!-- Empty State -->
+            @if (items().length === 0) {
+              <div class="text-center py-12">
+                <div class="text-5xl mb-4">📦</div>
+                <h3 class="text-lg font-semibold mb-2">No items in this collection</h3>
+                <p class="text-[#7d7769] mb-4">Start adding snippets, posts, or issues</p>
+                <button 
+                  (click)="addNewItem()"
+                  class="px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-full transition-colors font-semibold shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]">
+                  Add Item
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="w-full lg:w-80 space-y-4">
+        <!-- Collaborators -->
+        <div class="bg-white border border-[#eee8d8] rounded-xl p-4 shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold">Collaborators</h3>
+            <button class="text-[#d1a000] text-sm font-semibold">Manage</button>
+          </div>
+          
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-[#ffe500] to-[#ffb800] rounded-full flex items-center justify-center text-sm text-[#0f0f0f]">
+                You
+              </div>
+              <div class="flex-1">
+                <div class="text-sm">{{ collection()?.owner?.username }}</div>
+                <div class="text-xs text-[#8b8475]">Owner</div>
+              </div>
+              <span class="px-2 py-0.5 bg-[#fff4c8] text-[#7d6d1b] text-xs rounded-full">Admin</span>
+            </div>
+            
+            <button class="w-full py-2 border border-[#e7dfc7] rounded-xl hover:bg-[#fff4c8] transition-colors text-sm font-semibold bg-white">
+              + Invite Collaborator
+            </button>
+          </div>
+        </div>
+        
+        <!-- Public Link -->
+        <div class="bg-white border border-[#eee8d8] rounded-xl p-4 shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold">Public Link</h3>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-[#8b8475]">On</span>
+              <button class="w-10 h-5 bg-[#ffe500] rounded-full relative shadow-inner">
+                <div class="w-4 h-4 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+              </button>
+            </div>
+          </div>
+          <p class="text-xs text-[#8b8475] mb-3">Anyone with this link can view this collection</p>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              readonly
+              value="devcoll.io/c/backend-api-24"
+              class="flex-1 px-3 py-2 bg-[#f8f6ef] border border-[#e7dfc7] rounded text-xs text-[#6d665a]">
+            <button 
+              (click)="shareCollection()"
+              class="px-3 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded transition-colors shadow-sm">
+              📋
+            </button>
+          </div>
+          <button class="w-full mt-2 py-2 text-[#d64545] hover:bg-[#ffe8e8] rounded transition-colors text-sm font-semibold">
+            Revoke access
+          </button>
+        </div>
+        
+        <!-- Collection Stats -->
+        <div class="bg-white border border-[#eee8d8] rounded-xl p-4 shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
+          <h3 class="font-semibold mb-4">Collection Stats</h3>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="text-2xl font-bold text-[#d1a000]">{{ stats().items }}</div>
+              <div class="text-xs text-[#8b8475]">ITEMS</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-[#d64545]">{{ stats().issues }}</div>
+              <div class="text-xs text-[#8b8475]">ISSUES</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-[#5fa34c]">{{ (stats().views / 1000).toFixed(1) }}k</div>
+              <div class="text-xs text-[#8b8475]">VIEWS</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-[#8a6fd6]">{{ stats().forks }}</div>
+              <div class="text-xs text-[#8b8475]">FORKS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
