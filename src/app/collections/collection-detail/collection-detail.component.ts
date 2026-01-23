@@ -19,7 +19,7 @@ export class CollectionDetailComponent implements OnInit {
   items = signal<CollectionItem[]>([]);
   loading = signal(false);
   error = signal('');
-  selectedTab = signal<'All Items' | 'Snippets' | 'Issues' | 'Solutions'>('All Items');
+  selectedTab = signal<'All Items' | 'Posts'  | 'Snippets' | 'Issues' | 'Solutions'>('All Items');
   searchQuery = signal('');
   selectedLanguage = signal('All');
   sortBy = signal('Last Modified');
@@ -31,6 +31,7 @@ export class CollectionDetailComponent implements OnInit {
   availableTags = signal<Tag[]>([]);
   collectionTags = signal<Tag[]>([]);
   showTagModal = signal(false);
+  tagModalStep = signal<'select' | 'create'>('select'); // 'select' or 'create'
   tagSearch = signal('');
   newTagName = signal('');
   newTagColor = signal('#ffe500');
@@ -56,7 +57,7 @@ export class CollectionDetailComponent implements OnInit {
     forks: 0
   });
 
-  tabs: Array<'All Items' | 'Snippets' | 'Issues' | 'Solutions'> = ['All Items', 'Snippets', 'Issues', 'Solutions'];
+  tabs: Array<'All Items' | 'Posts'  | 'Snippets' | 'Issues' | 'Solutions'> = ['All Items','Posts', 'Snippets', 'Issues', 'Solutions'];
   languages = ['All', 'JavaScript', 'Python', 'TypeScript', 'CSS', 'Java'];
 
   constructor(
@@ -151,7 +152,7 @@ export class CollectionDetailComponent implements OnInit {
     });
   }
 
-  setTab(tab: 'All Items' | 'Snippets' | 'Issues' | 'Solutions'): void {
+  setTab(tab: 'All Items' | 'Posts' | 'Snippets' | 'Issues' | 'Solutions'): void {
     this.selectedTab.set(tab);
   }
 
@@ -220,15 +221,27 @@ export class CollectionDetailComponent implements OnInit {
 
   openTagModal(): void {
     this.showTagModal.set(true);
+    this.tagModalStep.set('select');
     this.loadCollectionTags();
     this.loadAvailableTags();
   }
 
   closeTagModal(): void {
     this.showTagModal.set(false);
+    this.tagModalStep.set('select');
     this.tagSearch.set('');
     this.newTagName.set('');
     this.newTagColor.set('#ffe500');
+  }
+
+  goToCreateTagPage(): void {
+    this.tagModalStep.set('create');
+    this.newTagName.set('');
+    this.newTagColor.set('#ffe500');
+  }
+
+  goBackToSelectPage(): void {
+    this.tagModalStep.set('select');
   }
 
   assignTag(tag: Tag): void {

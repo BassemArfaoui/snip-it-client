@@ -50,6 +50,35 @@
           }
         </div>
       </div>
+      
+      <!-- Tag Filters -->
+      <div class="mt-4">
+        <div class="text-sm font-semibold text-[#6c6457] mb-2">Filter by tags:</div>
+        <div class="flex flex-wrap gap-2">
+          @if (availableTags().length === 0) {
+            <span class="text-sm text-[#8b8475]">No tags available</span>
+          } @else {
+            @for (tag of availableTags(); track tag.id) {
+              <button
+                (click)="toggleTagFilter(tag.id)"
+                [class.ring-2]="selectedTags().includes(tag.id)"
+                [class.ring-[#0f0f0f]]="selectedTags().includes(tag.id)"
+                [ngClass]="selectedTags().includes(tag.id) ? 'border-[#0f0f0f] scale-105' : 'border-[#e6dfc7]'"
+                class="px-3 py-1.5 rounded-full border-2 text-sm font-semibold text-[#4f493f] shadow-sm transition-all hover:scale-105"
+                [ngStyle]="{ 'background-color': tag.color || '#f8f6ef' }">
+                #{{ tag.name }}
+              </button>
+            }
+            @if (selectedTags().length > 0) {
+              <button
+                (click)="clearTagFilters()"
+                class="px-3 py-1.5 rounded-full border border-[#d64545] text-sm font-semibold text-[#d64545] bg-[#fff1f1] hover:bg-[#ffe8e8] transition-colors">
+                Clear filters
+              </button>
+            }
+          }
+        </div>
+      </div>
     </div>
   </div>
 
