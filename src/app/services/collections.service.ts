@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Tag } from './tags.service';
 
 export interface Collection {
   id: number;
@@ -9,6 +10,7 @@ export interface Collection {
   isPublic: boolean;
   allowEdit: boolean;
   itemCount?: number;
+  tags?: Tag[];
   owner?: {
     id: number;
     username: string;
@@ -164,6 +166,21 @@ export class CollectionsService {
   // Get collaborators
   getCollaborators(collectionId: number): Observable<CollaboratorPermission[]> {
     return this.http.get<CollaboratorPermission[]>(`${this.apiUrl}/${collectionId}/collaborators`);
+  }
+
+  // Collection Tags
+  getCollectionTags(collectionId: number): Observable<Tag[]> {
+    return this.http.get<any>(`${this.apiUrl}/${collectionId}/tags`).pipe(
+      map(response => response.data || response)
+    );
+  }
+
+  assignTagToCollection(collectionId: number, tagId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${collectionId}/tags/${tagId}`, {});
+  }
+
+  removeTagFromCollection(collectionId: number, tagId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${collectionId}/tags/${tagId}`);
   }
 
   // Add collaborator

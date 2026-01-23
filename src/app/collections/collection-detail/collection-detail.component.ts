@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CollectionsService, Collection, CollectionItem } from '../../services/collections.service';
+import { Tag, TagsService } from '../../services/tags.service';
 
 @Component({
   selector: 'app-collection-detail',
@@ -26,6 +27,21 @@ export class CollectionDetailComponent implements OnInit {
   pageSize = 20;
   totalItems = signal(0);
 
+  // Tag state
+  availableTags = signal<Tag[]>([]);
+  collectionTags = signal<Tag[]>([]);
+  showTagModal = signal(false);
+  tagSearch = signal('');
+  newTagName = signal('');
+  newTagColor = signal('#ffe500');
+  filteredTags = computed(() => {
+    const term = this.tagSearch().toLowerCase();
+    const assignedIds = new Set(this.collectionTags().map(t => t.id));
+    return this.availableTags()
+      .filter(t => !assignedIds.has(t.id))
+      .filter(t => !term || t.name.toLowerCase().includes(term));
+  });
+
   // Edit modal state
   showEditModal = signal(false);
   editCollectionName = signal('');
@@ -45,6 +61,7 @@ export class CollectionDetailComponent implements OnInit {
 
   constructor(
     private collectionsService: CollectionsService,
+    private tagsService: TagsService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -54,6 +71,8 @@ export class CollectionDetailComponent implements OnInit {
       this.collectionId.set(+params['id']);
       this.loadCollection();
       this.loadItems();
+      this.loadCollectionTags();
+      this.loadAvailableTags();
     });
   }
 
@@ -64,6 +83,9 @@ export class CollectionDetailComponent implements OnInit {
     this.collectionsService.getCollectionById(id).subscribe({
       next: (collection) => {
         this.collection.set(collection);
+        if (collection.tags) {
+          this.collectionTags.set(collection.tags);
+        }
       },
       error: (err) => {
         this.error.set('Failed to load collection');
@@ -97,6 +119,25 @@ export class CollectionDetailComponent implements OnInit {
         this.loading.set(false);
         console.error(err);
       }
+    });
+  }
+
+  loadCollectionTags(): void {
+    const id = this.collectionId();
+    if (!id) return;
+
+    this.collectionsService.getCollectionTags(id).subscribe({
+      next: (tags) => this.collectionTags.set(tags || []),
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+  loadAvailableTags(): void {
+    this.tagsService.getTags().subscribe({
+      next: (result) => this.availableTags.set(result.tags),
+      error: (err) => console.error(err)
     });
   }
 
@@ -166,13 +207,76 @@ export class CollectionDetailComponent implements OnInit {
         console.error(err);
       }
     });
-  }  openItem(item: CollectionItem): void {
+  }
+
+  openItem(item: CollectionItem): void {
     // Navigate to the appropriate detail page based on type
     if (item.targetType === 'snippet' || item.targetType === 'private-snippet') {
       this.router.navigate(['/snippets', item.targetId]);
     } else if (item.targetType === 'post') {
       this.router.navigate(['/posts', item.targetId]);
     }
+  }
+
+  openTagModal(): void {
+    this.showTagModal.set(true);
+    this.loadCollectionTags();
+    this.loadAvailableTags();
+  }
+
+  closeTagModal(): void {
+    this.showTagModal.set(false);
+    this.tagSearch.set('');
+    this.newTagName.set('');
+    this.newTagColor.set('#ffe500');
+  }
+
+  assignTag(tag: Tag): void {
+    const id = this.collectionId();
+    if (!id) return;
+
+    this.collectionsService.assignTagToCollection(id, tag.id).subscribe({
+      next: () => {
+        this.collectionTags.set([...this.collectionTags(), tag]);
+      },
+      error: (err) => {
+        this.error.set('Failed to add tag');
+        console.error(err);
+      }
+    });
+  }
+
+  removeTag(event: Event, tag: Tag): void {
+    event.stopPropagation();
+    const id = this.collectionId();
+    if (!id) return;
+
+    this.collectionsService.removeTagFromCollection(id, tag.id).subscribe({
+      next: () => {
+        this.collectionTags.set(this.collectionTags().filter(t => t.id !== tag.id));
+      },
+      error: (err) => {
+        this.error.set('Failed to remove tag');
+        console.error(err);
+      }
+    });
+  }
+
+  createAndAssignTag(): void {
+    const name = this.newTagName().trim();
+    if (!name) return;
+
+    this.tagsService.createTag({ name, color: this.newTagColor() }).subscribe({
+      next: (tag) => {
+        this.availableTags.set([tag, ...this.availableTags()]);
+        this.newTagName.set('');
+        this.assignTag(tag);
+      },
+      error: (err) => {
+        this.error.set('Failed to create tag');
+        console.error(err);
+      }
+    });
   }
 
   shareCollection(): void {
