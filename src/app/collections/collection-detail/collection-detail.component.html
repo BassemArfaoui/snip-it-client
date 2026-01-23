@@ -23,6 +23,11 @@
         </div>
         <div class="flex gap-2">
           <button 
+            (click)="openEditModal()"
+            class="px-4 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded-xl transition-colors font-semibold shadow-sm">
+            ✏️ Edit
+          </button>
+          <button 
             (click)="shareCollection()"
             class="px-4 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded-xl transition-colors font-semibold shadow-sm">
             Share
@@ -279,3 +284,59 @@
     </div>
   </div>
 </div>
+
+<!-- Edit Collection Modal -->
+@if (showEditModal()) {
+  <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+    <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+      <h2 class="text-xl font-bold mb-4">Edit Collection</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-[#6c6457] mb-2">Collection Name</label>
+          <input
+            type="text"
+            [ngModel]="editCollectionName()"
+            (ngModelChange)="editCollectionName.set($event)"
+            placeholder="e.g., React Hooks Patterns"
+            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]"
+            (keyup.enter)="updateCollection()">
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="editIsPublic"
+            [ngModel]="editCollectionPublic()"
+            (ngModelChange)="editCollectionPublic.set($event)"
+            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
+          <label for="editIsPublic" class="text-sm text-[#4f493f]">Make this collection public</label>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="editAllowEdit"
+            [ngModel]="editCollectionAllowEdit()"
+            (ngModelChange)="editCollectionAllowEdit.set($event)"
+            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
+          <label for="editAllowEdit" class="text-sm text-[#4f493f]">Allow others to edit</label>
+        </div>
+      </div>
+      
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="closeEditModal()"
+          class="flex-1 px-4 py-2 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+          Cancel
+        </button>
+        <button
+          (click)="updateCollection()"
+          [disabled]="!editCollectionName().trim()"
+          class="flex-1 px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          Update
+        </button>
+      </div>
+    </div>
+  </div>
+}

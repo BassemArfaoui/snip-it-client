@@ -1,4 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CollectionsService, Collection, CollectionItem } from '../../services/collections.service';
@@ -6,7 +7,7 @@ import { CollectionsService, Collection, CollectionItem } from '../../services/c
 @Component({
   selector: 'app-collection-detail',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './collection-detail.component.html',
   styleUrls: ['./collection-detail.component.css']
 })
@@ -24,6 +25,12 @@ export class CollectionDetailComponent implements OnInit {
   currentPage = signal(1);
   pageSize = 20;
   totalItems = signal(0);
+
+  // Edit modal state
+  showEditModal = signal(false);
+  editCollectionName = signal('');
+  editCollectionPublic = signal(false);
+  editCollectionAllowEdit = signal(false);
 
   // Stats
   stats = signal({
@@ -187,6 +194,41 @@ export class CollectionDetailComponent implements OnInit {
   addNewItem(): void {
     // This would open a modal or navigate to create snippet/post
     alert('Add item functionality - to be implemented');
+  }
+
+  openEditModal(): void {
+    const coll = this.collection();
+    if (!coll) return;
+    this.editCollectionName.set(coll.name);
+    this.editCollectionPublic.set(coll.isPublic);
+    this.editCollectionAllowEdit.set(coll.allowEdit);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+  }
+
+  updateCollection(): void {
+    const id = this.collectionId();
+    if (!id || !this.editCollectionName().trim()) return;
+    
+    const dto = {
+      name: this.editCollectionName(),
+      isPublic: this.editCollectionPublic(),
+      allowEdit: this.editCollectionAllowEdit()
+    };
+    
+    this.collectionsService.updateCollection(id, dto).subscribe({
+      next: () => {
+        this.closeEditModal();
+        this.loadCollection();
+      },
+      error: (err) => {
+        this.error.set('Failed to update collection');
+        console.error(err);
+      }
+    });
   }
 
   goBack(): void {

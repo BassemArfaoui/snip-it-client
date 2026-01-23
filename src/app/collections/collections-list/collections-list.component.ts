@@ -27,6 +27,13 @@ export class CollectionsListComponent implements OnInit {
   newCollectionName = signal('');
   newCollectionPublic = signal(false);
   newCollectionAllowEdit = signal(false);
+  
+  // Edit modal state
+  showEditModal = signal(false);
+  editingCollection = signal<Collection | null>(null);
+  editCollectionName = signal('');
+  editCollectionPublic = signal(false);
+  editCollectionAllowEdit = signal(false);
 
   // Computed signal for filtered collections
   filteredCollections = computed(() => {
@@ -130,6 +137,42 @@ export class CollectionsListComponent implements OnInit {
 
   openCollection(collection: Collection): void {
     this.router.navigate(['/collections', collection.id]);
+  }
+
+  openEditModal(event: Event, collection: Collection): void {
+    event.stopPropagation();
+    this.editingCollection.set(collection);
+    this.editCollectionName.set(collection.name);
+    this.editCollectionPublic.set(collection.isPublic);
+    this.editCollectionAllowEdit.set(collection.allowEdit);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+    this.editingCollection.set(null);
+  }
+
+  updateCollection(): void {
+    const collection = this.editingCollection();
+    if (!collection || !this.editCollectionName().trim()) return;
+    
+    const dto: Partial<CreateCollectionDto> = {
+      name: this.editCollectionName(),
+      isPublic: this.editCollectionPublic(),
+      allowEdit: this.editCollectionAllowEdit()
+    };
+    
+    this.collectionsService.updateCollection(collection.id, dto).subscribe({
+      next: () => {
+        this.closeEditModal();
+        this.loadCollections();
+      },
+      error: (err) => {
+        this.error.set('Failed to update collection');
+        console.error(err);
+      }
+    });
   }
 
   deleteCollection(event: Event, collection: Collection): void {
