@@ -83,6 +83,12 @@ export class CollectionsService {
     );
   }
 
+   getCollectionByToken(token: string): Observable<Collection> {
+    return this.http.get<any>(`${this.apiUrl}/share/token/${token}`).pipe(
+      map(response => response.data || response)
+    );
+  }
+
   // Create new collection
   createCollection(dto: CreateCollectionDto): Observable<Collection> {
     return this.http.post<any>(this.apiUrl, dto).pipe(
@@ -194,7 +200,7 @@ export class CollectionsService {
   }
 
   // Generate share link
-  generateShareLink(collectionId: number, permission: 'view' | 'edit', expiresInDays?: number): Observable<{ token: string; url: string }> {
+  generateShareLink(collectionId: number, permission: 'view' | 'edit', expiresInDays?: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/${collectionId}/share`, { permission, expiresInDays });
   }
 

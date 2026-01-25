@@ -268,6 +268,48 @@
             </button>
           </div>
 
+          <!-- Share Confirmation Modal -->
+          @if (showShareConfirmModal()) {
+            <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+              <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-xl font-bold">Make Collection Public?</h3>
+                  <button (click)="closeShareConfirmModal()" class="text-[#7b7465] hover:text-[#c1a900] text-lg">×</button>
+                </div>
+
+                <!-- Content -->
+                <div class="space-y-4 mb-6">
+                  <p class="text-[#6d665a]">
+                    Your collection is currently <strong>private</strong>. To generate a share link, it needs to be made <strong>public</strong>.
+                  </p>
+                  <p class="text-sm text-[#8b8475]">
+                    This will allow anyone with the share link to access your collection based on the permission level you set.
+                  </p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                  <button
+                    (click)="closeShareConfirmModal()"
+                    class="flex-1 px-4 py-2.5 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+                    Cancel
+                  </button>
+                  <button
+                    (click)="confirmAndMakePublic()"
+                    [disabled]="isGeneratingShareLink()"
+                    class="flex-1 px-4 py-2.5 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (isGeneratingShareLink()) {
+                      <span class="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#0f0f0f]"></span>
+                    } @else {
+                      Make Public & Share
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
           <!-- Move Item Modal -->
           @if (showMoveModal()) {
             <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">

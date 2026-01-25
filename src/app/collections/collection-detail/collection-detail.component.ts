@@ -16,6 +16,7 @@ import { TimeAgoPipe } from '../../time-ago.pipe';
 export class CollectionDetailComponent implements OnInit {
   // Signals
   collectionId = signal<number | null>(null);
+  collectionToken = signal<string | null>(null);
   collection = signal<Collection | null>(null);
   items = signal<CollectionItem[]>([]);
   loading = signal(false);
@@ -50,6 +51,10 @@ export class CollectionDetailComponent implements OnInit {
   editCollectionPublic = signal(false);
   editCollectionAllowEdit = signal(false);
 
+  // Share confirmation modal state
+  showShareConfirmModal = signal(false);
+  isGeneratingShareLink = signal(false);
+
   // Move item modal state
   showMoveModal = signal(false);
   itemToMove = signal<CollectionItem | null>(null);
@@ -77,7 +82,15 @@ export class CollectionDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.collectionId.set(+params['id']);
+      if (params['token']) {
+        // Loading via share token
+        this.collectionToken.set(params['token']);
+        this.collectionId.set(null);
+      } else if (params['id']) {
+        // Loading via collection ID
+        this.collectionId.set(+params['id']);
+        this.collectionToken.set(null);
+      }
       this.loadCollection();
       this.loadItems();
       this.loadCollectionTags();
@@ -87,16 +100,29 @@ export class CollectionDetailComponent implements OnInit {
 
   loadCollection(): void {
     const id = this.collectionId();
-    if (!id) return;
+    const token = this.collectionToken();
     
-    this.collectionsService.getCollectionById(id).subscribe({
-      next: (collection) => {
+    let request: any;
+    if (token) {
+      request = this.collectionsService.getCollectionByToken(token);
+    } else if (id) {
+      request = this.collectionsService.getCollectionById(id);
+    } else {
+      return;
+    }
+    
+    request.subscribe({
+      next: (collection: Collection) => {
         this.collection.set(collection);
+        // Set the collection ID if we loaded via token
+        if (token && collection.id) {
+          this.collectionId.set(collection.id);
+        }
         if (collection.tags) {
           this.collectionTags.set(collection.tags);
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error.set('Failed to load collection');
         console.error(err);
       }
@@ -301,16 +327,62 @@ export class CollectionDetailComponent implements OnInit {
   }
 
   shareCollection(): void {
+    const coll = this.collection();
+    if (!coll) return;
+
+    // If collection is private, ask for confirmation
+    if (!coll.isPublic) {
+      this.showShareConfirmModal.set(true);
+      return;
+    }
+
+    // If public, generate share link directly
+    this.generateAndCopyShareLink();
+  }
+
+  closeShareConfirmModal(): void {
+    this.showShareConfirmModal.set(false);
+  }
+
+  confirmAndMakePublic(): void {
     const id = this.collectionId();
     if (!id) return;
-    
+
+    this.isGeneratingShareLink.set(true);
+
+    // First, make collection public
+    this.collectionsService.updateCollection(id, { isPublic: true }).subscribe({
+      next: () => {
+        // Update local state
+        const coll = this.collection();
+        if (coll) {
+          this.collection.set({ ...coll, isPublic: true });
+        }
+        // Then generate share link
+        this.generateAndCopyShareLink();
+        this.closeShareConfirmModal();
+      },
+      error: (err) => {
+        this.error.set('Failed to update collection');
+        this.isGeneratingShareLink.set(false);
+        console.error(err);
+      }
+    });
+  }
+
+  generateAndCopyShareLink(): void {
+    const id = this.collectionId();
+    if (!id) return;
+
     this.collectionsService.generateShareLink(id, 'view', 30).subscribe({
       next: (response) => {
-        navigator.clipboard.writeText(response.url);
+        navigator.clipboard.writeText(response.data.shareLink);
         alert('Share link copied to clipboard!');
+        this.isGeneratingShareLink.set(false);
       },
       error: (err) => {
         this.error.set('Failed to generate share link');
+        this.isGeneratingShareLink.set(false);
         console.error(err);
       }
     });

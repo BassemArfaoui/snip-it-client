@@ -26,6 +26,7 @@ export const routes: Routes = [
 	
 	// Collections Routes
 	{ path: 'collections', component: CollectionsListComponent, canActivate: [AuthGuard] },
+	{ path: 'collections/share/:token', component: CollectionDetailComponent },
 	{ path: 'collections/:id', component: CollectionDetailComponent, canActivate: [AuthGuard] },
 	
 	// Private Snippets Routes
