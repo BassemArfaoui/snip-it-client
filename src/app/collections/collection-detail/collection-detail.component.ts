@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CollectionsService, Collection, CollectionItem } from '../../services/collections.service';
 import { Tag, TagsService } from '../../services/tags.service';
+import { TimeAgoPipe } from '../../time-ago.pipe';
 
 @Component({
   selector: 'app-collection-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TimeAgoPipe],
   templateUrl: './collection-detail.component.html',
   styleUrls: ['./collection-detail.component.css']
 })

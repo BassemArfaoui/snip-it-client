@@ -21,7 +21,7 @@
                 Private Collection
               </span>
             }
-            <span class="text-[#7b7465] text-sm">{{collection()?.updatedAt}}</span>
+            <span class="text-[#7b7465] text-sm">{{collection()?.updatedAt| timeAgo}}</span>
           </div>
           <h1 class="text-3xl font-semibold mb-1">{{ collection()?.name || 'Loading...' }}</h1>
           <p class="text-[#6d665a]">{{ collection()?.owner?.username || 'Loading...' }}</p>
@@ -187,7 +187,7 @@
                           {{ item.content.language }}
                         </span>
                       }
-                      <span>Updated {{ item.content?.updatedAt }}</span>
+                      <span>Updated {{ item.content?.updatedAt | timeAgo }}</span>
                       @if (item.content?.comments) {
                         <span class="flex items-center gap-1">
                           💬 {{ item.content.comments }} comments
