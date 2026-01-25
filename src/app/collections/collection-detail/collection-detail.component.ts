@@ -86,15 +86,18 @@ export class CollectionDetailComponent implements OnInit {
         // Loading via share token
         this.collectionToken.set(params['token']);
         this.collectionId.set(null);
+        // Only load collection - items will be loaded after we get the collection ID
+        this.loadCollection();
       } else if (params['id']) {
         // Loading via collection ID
         this.collectionId.set(+params['id']);
         this.collectionToken.set(null);
+        // Load everything normally
+        this.loadCollection();
+        this.loadItems();
+        this.loadCollectionTags();
+        this.loadAvailableTags();
       }
-      this.loadCollection();
-      this.loadItems();
-      this.loadCollectionTags();
-      this.loadAvailableTags();
     });
   }
 
@@ -117,6 +120,10 @@ export class CollectionDetailComponent implements OnInit {
         // Set the collection ID if we loaded via token
         if (token && collection.id) {
           this.collectionId.set(collection.id);
+          // Now load items, tags, etc. after we have the ID
+          this.loadItems();
+          this.loadCollectionTags();
+          this.loadAvailableTags();
         }
         if (collection.tags) {
           this.collectionTags.set(collection.tags);
