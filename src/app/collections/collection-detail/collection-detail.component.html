@@ -16,7 +16,12 @@
                 Public Collection
               </span>
             }
-            <span class="text-[#7b7465] text-sm">Updated 2h ago</span>
+            @if (!collection()?.isPublic) {
+              <span class="px-2 py-1 bg-[#f8d9d9] text-[#7c1f1f] text-xs rounded-full uppercase">
+                Private Collection
+              </span>
+            }
+            <span class="text-[#7b7465] text-sm">{{collection()?.updatedAt}}</span>
           </div>
           <h1 class="text-3xl font-semibold mb-1">{{ collection()?.name || 'Loading...' }}</h1>
           <p class="text-[#6d665a]">{{ collection()?.owner?.username || 'Loading...' }}</p>
@@ -145,22 +150,25 @@
                     <div class="flex items-start gap-2 mb-2">
                       <h3 class="font-semibold flex-1 line-clamp-1">
                         {{ item.content?.title || 'Untitled' }}
-                        @if (getPriorityBadge(item)) {
-                          <span class="ml-2 px-2 py-0.5 bg-[#ffe8e8] text-[#b33c3c] text-xs rounded-full uppercase">
-                            {{ getPriorityBadge(item) }}
-                          </span>
-                        }
                       </h3>
                       <button 
                         (click)="toggleFavorite($event, item)"
-                        class="opacity-0 group-hover:opacity-100 transition-opacity">
+                        class="opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Toggle favorite">
                         <span [class.text-[#d1a000]]="item.isFavorite" [class.text-[#bcb5a5]]="!item.isFavorite">
                           {{ item.isFavorite ? '★' : '☆' }}
                         </span>
                       </button>
                       <button 
+                        (click)="openMoveModal($event, item)"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity text-[#9c9483] hover:text-[#5c8fd6]"
+                        title="Move to another collection">
+                        📦
+                      </button>
+                      <button 
                         (click)="removeItem($event, item)"
-                        class="opacity-0 group-hover:opacity-100 transition-opacity text-[#9c9483] hover:text-[#d64545]">
+                        class="opacity-0 group-hover:opacity-100 transition-opacity text-[#9c9483] hover:text-[#d64545]"
+                        title="Remove from collection">
                         ×
                       </button>
                     </div>
@@ -259,6 +267,94 @@
               📋
             </button>
           </div>
+
+          <!-- Move Item Modal -->
+          @if (showMoveModal()) {
+            <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+              <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-bold">Move Item to Collection</h3>
+                  <button (click)="closeMoveModal()" class="text-[#7b7465] hover:text-[#c1a900] text-lg">×</button>
+                </div>
+
+                <!-- Item Preview -->
+                <div class="mb-4 p-3 bg-[#f8f6ef] border border-[#e6dfc7] rounded-xl">
+                  <div class="flex items-center gap-3">
+                    <div class="text-2xl">{{ getItemIcon(itemToMove()?.targetType || '') }}</div>
+                    <div class="flex-1 min-w-0">
+                      <div class="font-semibold text-sm line-clamp-1">
+                        {{ itemToMove()?.content?.title || 'Untitled' }}
+                      </div>
+                      <div class="text-xs text-[#7b7465]">
+                        {{ itemToMove()?.targetType }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Collection Selection -->
+                <div class="space-y-3">
+                  <label class="block text-sm font-semibold text-[#6c6457] mb-2">
+                    Select destination collection
+                  </label>
+
+                  @if (loadingCollections()) {
+                    <div class="text-center py-8">
+                      <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffe500]"></div>
+                    </div>
+                  } @else {
+                    <div class="max-h-64 overflow-y-auto space-y-2">
+                      @if (userCollections().length === 0) {
+                        <div class="text-center py-8 text-[#8b8475]">
+                          <div class="text-3xl mb-2">📦</div>
+                          <p class="text-sm">No other collections available</p>
+                        </div>
+                      }
+                      @for (col of userCollections(); track col.id) {
+                        <button
+                          (click)="destinationCollectionId.set(col.id)"
+                          [class.border-[#ffd600]]="destinationCollectionId() === col.id"
+                          [class.bg-[#fffef5]]="destinationCollectionId() === col.id"
+                          [class.border-[#e6dfc7]]="destinationCollectionId() !== col.id"
+                          class="w-full p-3 border-2 rounded-xl hover:border-[#ffd600] transition-all text-left">
+                          <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                              <div class="font-semibold text-sm">{{ col.name }}</div>
+                              <div class="text-xs text-[#7b7465] mt-1">
+                                {{ col.itemCount || 0 }} items
+                                @if (col.isPublic) {
+                                  <span class="ml-1 px-1.5 py-0.5 bg-[#e7f8d9] text-[#4c7c1f] text-xs rounded">Public</span>
+                                }
+                              </div>
+                            </div>
+                            @if (destinationCollectionId() === col.id) {
+                              <span class="text-[#d1a000]">✓</span>
+                            }
+                          </div>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3 mt-6">
+                  <button
+                    (click)="closeMoveModal()"
+                    class="flex-1 px-4 py-2.5 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+                    Cancel
+                  </button>
+                  <button
+                    (click)="moveItemToCollection()"
+                    [disabled]="!destinationCollectionId()"
+                    class="flex-1 px-4 py-2.5 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed">
+                    Move Item
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
 
           <!-- Tag Modal -->
           @if (showTagModal()) {

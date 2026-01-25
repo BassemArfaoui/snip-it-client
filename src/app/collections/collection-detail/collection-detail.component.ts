@@ -49,6 +49,13 @@ export class CollectionDetailComponent implements OnInit {
   editCollectionPublic = signal(false);
   editCollectionAllowEdit = signal(false);
 
+  // Move item modal state
+  showMoveModal = signal(false);
+  itemToMove = signal<CollectionItem | null>(null);
+  destinationCollectionId = signal<number | null>(null);
+  userCollections = signal<Collection[]>([]);
+  loadingCollections = signal(false);
+
   // Stats
   stats = signal({
     items: 0,
@@ -352,6 +359,62 @@ export class CollectionDetailComponent implements OnInit {
     this.router.navigate(['/collections']);
   }
 
+  openMoveModal(event: Event, item: CollectionItem): void {
+    event.stopPropagation();
+    this.itemToMove.set(item);
+    this.destinationCollectionId.set(null);
+    this.showMoveModal.set(true);
+    this.loadUserCollections();
+  }
+
+  closeMoveModal(): void {
+    this.showMoveModal.set(false);
+    this.itemToMove.set(null);
+    this.destinationCollectionId.set(null);
+  }
+
+  loadUserCollections(): void {
+    this.loadingCollections.set(true);
+    this.collectionsService.getCollections({ size: 100 }).subscribe({
+      next: (response) => {
+        // Filter out the current collection
+        const filtered = response.collections.filter(c => c.id !== this.collectionId());
+        this.userCollections.set(filtered);
+        this.loadingCollections.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load collections', err);
+        this.loadingCollections.set(false);
+      }
+    });
+  }
+
+  moveItemToCollection(): void {
+    const sourceCollectionId = this.collectionId();
+    const destCollectionId = this.destinationCollectionId();
+    const item = this.itemToMove();
+
+    if (!sourceCollectionId || !destCollectionId || !item) {
+      return;
+    }
+
+    this.collectionsService.moveItem(
+      sourceCollectionId,
+      item.targetId,
+      item.targetType,
+      destCollectionId
+    ).subscribe({
+      next: () => {
+        this.closeMoveModal();
+        this.loadItems(); // Reload items to reflect the change
+      },
+      error: (err) => {
+        this.error.set('Failed to move item');
+        console.error(err);
+      }
+    });
+  }
+
   getItemIcon(type: string): string {
     switch(type) {
       case 'snippet':
@@ -382,11 +445,5 @@ export class CollectionDetailComponent implements OnInit {
       default:
         return 'bg-gray-800 text-gray-400';
     }
-  }
-
-  getPriorityBadge(item: CollectionItem): string | null {
-    // Check if item has priority metadata
-    if (item.content?.priority === 'high') return 'HIGH PRIORITY';
-    return null;
   }
 }
