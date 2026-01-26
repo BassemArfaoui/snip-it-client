@@ -160,6 +160,15 @@ export class CollectionsService {
     });
   }
 
+  // Toggle pin
+  togglePin(collectionId: number, targetId: number, targetType: string, value: boolean): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${collectionId}/items/pin`, {
+      targetId,
+      targetType,
+      value
+    });
+  }
+
   // Move item to another collection
   moveItem(collectionId: number, targetId: number, targetType: string, destinationCollectionId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/${collectionId}/items/move`, {

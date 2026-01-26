@@ -153,6 +153,14 @@
                         {{ item.content?.title || 'Untitled' }}
                       </h3>
                       <button 
+                        (click)="togglePin($event, item)"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Toggle pin">
+                        <span [class.text-[#d1a000]]="item.isPinned" [class.text-[#bcb5a5]]="!item.isPinned">
+                          {{ item.isPinned ? '📌' : '📍' }}
+                        </span>
+                      </button>
+                      <button 
                         (click)="toggleFavorite($event, item)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Toggle favorite">

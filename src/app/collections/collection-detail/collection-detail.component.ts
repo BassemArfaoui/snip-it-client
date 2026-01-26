@@ -291,6 +291,28 @@ export class CollectionDetailComponent implements OnInit {
     });
   }
 
+  togglePin(event: Event, item: CollectionItem): void {
+    event.stopPropagation();
+    
+    const id = this.collectionId();
+    if (!id) return;
+    
+    this.collectionsService.togglePin(
+      id,
+      item.targetId,
+      item.targetType,
+      !item.isPinned
+    ).subscribe({
+      next: () => {
+        item.isPinned = !item.isPinned;
+      },
+      error: (err) => {
+        this.error.set('Failed to toggle pin');
+        console.error(err);
+      }
+    });
+  }
+
   openItem(item: CollectionItem): void {
     // Navigate to the appropriate detail page based on type
     if (item.targetType === 'snippet' || item.targetType === 'private-snippet') {
