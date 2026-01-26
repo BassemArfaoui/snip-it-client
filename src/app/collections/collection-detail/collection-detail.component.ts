@@ -24,7 +24,7 @@ export class CollectionDetailComponent implements OnInit {
   selectedTab = signal<'All Items' | 'Posts'  | 'Snippets' | 'Issues' | 'Solutions'>('All Items');
   searchQuery = signal('');
   selectedLanguage = signal('All');
-  sortBy = signal('Last Modified');
+  sortBy = signal('Latest First');
   currentPage = signal(1);
   pageSize = 20;
   totalItems = signal(0);
@@ -143,12 +143,48 @@ export class CollectionDetailComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
     
+    // Map tab to type filter
+    const tab = this.selectedTab();
+    let typeFilter: string | undefined;
+    if (tab === 'Posts') {
+      typeFilter = 'POST';
+    } else if (tab === 'Snippets') {
+      typeFilter = 'PRIVATE_SNIPPET';
+    } else if (tab === 'Issues') {
+      typeFilter = 'ISSUE';
+    } else if (tab === 'Solutions') {
+      typeFilter = 'SOLUTION';
+    }
+    
+    // Map language display names to lowercase for backend
+    const languageMap: { [key: string]: string } = {
+      'All': '',
+      'JavaScript': 'javascript',
+      'TypeScript': 'typescript',
+      'Python': 'python',
+      'CSS': 'css',
+      'Java': 'java'
+    };
+    const selectedLang = this.selectedLanguage();
+    const languageFilter = selectedLang !== 'All' ? languageMap[selectedLang] : undefined;
+    
+    // Map sort display names to backend format
+    const sortMap: { [key: string]: string } = {
+      'Latest First': 'createdAt:DESC',
+      'Oldest First': 'createdAt:ASC',
+      'Pinned First': 'isPinned:DESC',
+      'Favorites': 'isFavorite:DESC'
+    };
+    const sortValue = this.sortBy();
+    const sortFilter = sortValue ? (sortMap[sortValue] || sortValue) : 'createdAt:DESC';
+    
     this.collectionsService.getCollectionItems(id, {
       page: this.currentPage(),
       size: this.pageSize,
+      type: typeFilter,
       q: this.searchQuery() || undefined,
-      language: this.selectedLanguage() !== 'All' ? this.selectedLanguage() : undefined,
-      sort: this.sortBy()
+      language: languageFilter,
+      sort: sortFilter
     }).subscribe({
       next: (response) => {
         this.items.set(response.items);
@@ -195,15 +231,19 @@ export class CollectionDetailComponent implements OnInit {
 
   setTab(tab: 'All Items' | 'Posts' | 'Snippets' | 'Issues' | 'Solutions'): void {
     this.selectedTab.set(tab);
+    this.loadItems();
   }
 
   setLanguage(language: string): void {
     this.selectedLanguage.set(language);
+    this.currentPage.set(1);
     this.loadItems();
   }
 
   setSortBy(sort: string): void {
-    this.sortBy.set(sort);
+    if (!sort) return; // Don't do anything if placeholder is selected
+    this.sortBy.set(sort); // Keep the display value
+    this.currentPage.set(1);
     this.loadItems();
   }
 

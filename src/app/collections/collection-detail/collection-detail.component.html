@@ -100,7 +100,7 @@
             <select 
               [ngModel]="selectedLanguage()"
               (ngModelChange)="setLanguage($event)"
-              class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+              class="px-7 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
               @for (lang of languages; track lang) {
                 <option [value]="lang">{{ lang }}</option>
               }
@@ -110,10 +110,11 @@
             <select 
               [ngModel]="sortBy()"
               (ngModelChange)="setSortBy($event)"
-              class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
-              <option value="Last Modified">Last Modified</option>
-              <option value="Name">Name</option>
-              <option value="Created">Created</option>
+              class="px-7 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+              <option value="Latest First">Latest First</option>
+              <option value="Oldest First">Oldest First</option>
+              <option value="Pinned First">Pinned First</option>
+              <option value="Favorites">Favorites</option>
             </select>
           </div>
         </div>
