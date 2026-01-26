@@ -133,6 +133,31 @@ export class CollectionsService {
     );
   }
 
+  // Get collection items via share token
+  getCollectionItemsByToken(token: string, params?: {
+    page?: number;
+    size?: number;
+    type?: string;
+    language?: string;
+    q?: string;
+    sort?: string;
+  }): Observable<{ items: CollectionItem[]; total: number }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.size) httpParams = httpParams.set('size', params.size.toString());
+    if (params?.type) httpParams = httpParams.set('type', params.type);
+    if (params?.language) httpParams = httpParams.set('language', params.language);
+    if (params?.q) httpParams = httpParams.set('q', params.q);
+    if (params?.sort) httpParams = httpParams.set('sort', params.sort);
+
+    return this.http.get<any>(`${this.apiUrl}/share/token/${token}/items`, { params: httpParams }).pipe(
+      map(response => ({
+        items: response.data?.items || [],
+        total: response.data?.total || 0
+      }))
+    );
+  }
+
   // Add item to collection
   addItem(collectionId: number, dto: {
     targetId: number;
@@ -186,6 +211,13 @@ export class CollectionsService {
   // Collection Tags
   getCollectionTags(collectionId: number): Observable<Tag[]> {
     return this.http.get<any>(`${this.apiUrl}/${collectionId}/tags`).pipe(
+      map(response => response.data || response)
+    );
+  }
+
+  // Get collection tags via share token
+  getCollectionTagsByToken(token: string): Observable<Tag[]> {
+    return this.http.get<any>(`${this.apiUrl}/share/token/${token}/tags`).pipe(
       map(response => response.data || response)
     );
   }

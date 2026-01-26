@@ -130,7 +130,16 @@ export class CollectionDetailComponent implements OnInit {
         }
       },
       error: (err: any) => {
-        this.error.set('Failed to load collection');
+        // Show specific error messages
+        if (err?.error?.message?.includes('no longer shared') || err?.error?.message?.includes('now private')) {
+          this.error.set('This collection is now private and no longer shared');
+        } else if (err?.error?.message?.includes('revoked')) {
+          this.error.set('This share link has been revoked');
+        } else if (err?.error?.message?.includes('expired')) {
+          this.error.set('This share link has expired');
+        } else {
+          this.error.set('Failed to load collection');
+        }
         console.error(err);
       }
     });
@@ -138,7 +147,8 @@ export class CollectionDetailComponent implements OnInit {
 
   loadItems(): void {
     const id = this.collectionId();
-    if (!id) return;
+    const token = this.collectionToken();
+    if (!id && !token) return;
     
     this.loading.set(true);
     this.error.set('');
@@ -178,14 +188,20 @@ export class CollectionDetailComponent implements OnInit {
     const sortValue = this.sortBy();
     const sortFilter = sortValue ? (sortMap[sortValue] || sortValue) : 'createdAt:DESC';
     
-    this.collectionsService.getCollectionItems(id, {
+    const params = {
       page: this.currentPage(),
       size: this.pageSize,
       type: typeFilter,
       q: this.searchQuery() || undefined,
       language: languageFilter,
       sort: sortFilter
-    }).subscribe({
+    };
+
+    const request = token
+      ? this.collectionsService.getCollectionItemsByToken(token, params)
+      : this.collectionsService.getCollectionItems(id!, params);
+
+    request.subscribe({
       next: (response) => {
         this.items.set(response.items);
         this.totalItems.set(response.total);
@@ -193,7 +209,15 @@ export class CollectionDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Failed to load items');
+        if (err?.error?.message?.includes('no longer shared') || err?.error?.message?.includes('now private')) {
+          this.error.set('This collection is now private and no longer shared');
+        } else if (err?.error?.message?.includes('revoked')) {
+          this.error.set('This share link has been revoked');
+        } else if (err?.error?.message?.includes('expired')) {
+          this.error.set('This share link has expired');
+        } else {
+          this.error.set('Failed to load items');
+        }
         this.loading.set(false);
         console.error(err);
       }
@@ -202,9 +226,14 @@ export class CollectionDetailComponent implements OnInit {
 
   loadCollectionTags(): void {
     const id = this.collectionId();
-    if (!id) return;
+    const token = this.collectionToken();
+    if (!id && !token) return;
 
-    this.collectionsService.getCollectionTags(id).subscribe({
+    const request = token
+      ? this.collectionsService.getCollectionTagsByToken(token)
+      : this.collectionsService.getCollectionTags(id!);
+
+    request.subscribe({
       next: (tags) => this.collectionTags.set(tags || []),
       error: (err) => {
         console.error(err);
@@ -452,6 +481,31 @@ export class CollectionDetailComponent implements OnInit {
       error: (err) => {
         this.error.set('Failed to generate share link');
         this.isGeneratingShareLink.set(false);
+        console.error(err);
+      }
+    });
+  }
+
+  revokeShareLink(): void {
+    const id = this.collectionId();
+    if (!id) return;
+
+    if (!confirm('Are you sure you want to revoke the share link? Anyone with the link will no longer have access.')) {
+      return;
+    }
+
+    this.collectionsService.revokeShareLink(id).subscribe({
+      next: () => {
+        // Update collection to reflect private status
+        const coll = this.collection();
+        if (coll) {
+          this.collection.set({ ...coll, isPublic: false });
+        }
+        this.error.set('');
+        alert('Share link revoked successfully');
+      },
+      error: (err) => {
+        this.error.set('Failed to revoke share link');
         console.error(err);
       }
     });
