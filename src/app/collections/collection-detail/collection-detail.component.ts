@@ -66,6 +66,8 @@ export class CollectionDetailComponent implements OnInit {
   stats = signal({
     items: 0,
     issues: 0,
+    solutions: 0,
+    posts: 0,
     views: 0,
     forks: 0
   });
@@ -252,7 +254,9 @@ export class CollectionDetailComponent implements OnInit {
     const itemsList = this.items();
     this.stats.set({
       items: itemsList.length,
-      issues: itemsList.filter(i => i.targetType === 'issue').length,
+      issues: itemsList.filter(i => i.targetType === 'ISSUE').length,
+      posts: itemsList.filter(i => i.targetType === 'POST').length,
+      solutions: itemsList.filter(i => i.targetType === 'SOLUTION').length,
       views: Math.floor(Math.random() * 2000) + 100,
       forks: Math.floor(Math.random() * 20)
     });
@@ -344,10 +348,14 @@ export class CollectionDetailComponent implements OnInit {
 
   openItem(item: CollectionItem): void {
     // Navigate to the appropriate detail page based on type
-    if (item.targetType === 'snippet' || item.targetType === 'private-snippet') {
+    if (item.targetType === 'PRIVATE_SNIPPET') {
       this.router.navigate(['/snippets', item.targetId]);
-    } else if (item.targetType === 'post') {
+    } else if (item.targetType === 'POST') {
       this.router.navigate(['/posts', item.targetId]);
+    } else if (item.targetType === 'ISSUE') {
+      this.router.navigate(['/issues', item.targetId]);
+    } else if (item.targetType === 'SOLUTION') {
+      this.router.navigate(['/solutions', item.targetId]);
     }
   }
 
@@ -613,14 +621,13 @@ export class CollectionDetailComponent implements OnInit {
 
   getItemIcon(type: string): string {
     switch(type) {
-      case 'snippet':
-      case 'private-snippet':
+      case 'PRIVATE_SNIPPET':
         return '💾';
-      case 'post':
+      case 'POST':
         return '📝';
-      case 'issue':
+      case 'ISSUE':
         return '🔴';
-      case 'solution':
+      case 'SOLUTION':
         return '✅';
       default:
         return '📄';
@@ -629,14 +636,13 @@ export class CollectionDetailComponent implements OnInit {
 
   getItemBadgeColor(type: string): string {
     switch(type) {
-      case 'snippet':
-      case 'private-snippet':
+      case 'PRIVATE_SNIPPET':
         return 'bg-blue-900/30 text-blue-400';
-      case 'post':
+      case 'POST':
         return 'bg-green-900/30 text-green-400';
-      case 'issue':
+      case 'ISSUE':
         return 'bg-red-900/30 text-red-400';
-      case 'solution':
+      case 'SOLUTION':
         return 'bg-purple-900/30 text-purple-400';
       default:
         return 'bg-gray-800 text-gray-400';

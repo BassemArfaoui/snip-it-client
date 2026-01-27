@@ -22,11 +22,17 @@ export interface Collection {
 export interface CollectionItem {
   id: number;
   targetId: number;
-  targetType: 'post' | 'snippet' | 'private-snippet' | 'issue' | 'solution';
+  targetType: 'POST' | 'ISSUE' | 'SOLUTION' | 'PRIVATE_SNIPPET';
   isPinned: boolean;
   isFavorite: boolean;
-  addedAt: string;
-  content?: any; // The actual post/snippet data
+  createdAt: string;
+  updatedAt: string;
+  target?: {
+    title?: string;
+    content?: string;
+    description?: string;
+    language?: string;
+  };
 }
 
 export interface CreateCollectionDto {

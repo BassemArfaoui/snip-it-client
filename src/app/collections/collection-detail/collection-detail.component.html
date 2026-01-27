@@ -150,7 +150,7 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex items-start gap-2 mb-2">
                       <h3 class="font-semibold flex-1 line-clamp-1">
-                        {{ item.content?.title || 'Untitled' }}
+                        {{ item.target?.title || 'Untitled' }}
                       </h3>
                       <button 
                         (click)="togglePin($event, item)"
@@ -183,25 +183,20 @@
                     </div>
                     
                     <p class="text-sm text-[#6d665a] mb-3 line-clamp-2">
-                      {{ item.content?.description || item.content?.content?.substring(0, 150) || 'No description' }}
+                      {{ item.target?.description || item.target?.content?.substring(0, 150) || 'No description' }}
                     </p>
                     
                     <div class="flex items-center gap-4 text-sm text-[#7b7465] flex-wrap">
                       <span [class]="getItemBadgeColor(item.targetType)" class="px-2 py-0.5 rounded bg-[#f8f4e3] text-[#4f493f]">
                         {{ item.targetType }}
                       </span>
-                      @if (item.content?.language) {
+                      @if (item.target?.language) {
                         <span class="flex items-center gap-1">
                           <span class="w-2 h-2 bg-[#ffd600] rounded-full"></span>
-                          {{ item.content.language }}
+                          {{ item.target?.language }}
                         </span>
                       }
-                      <span>Updated {{ item.content?.updatedAt | timeAgo }}</span>
-                      @if (item.content?.comments) {
-                        <span class="flex items-center gap-1">
-                          💬 {{ item.content.comments }} comments
-                        </span>
-                      }
+                      <span>Updated {{ item.updatedAt | timeAgo }}</span>
                     </div>
                   </div>
                 </div>
@@ -257,11 +252,18 @@
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold">Public Link</h3>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-[#8b8475]">On</span>
-              <button class="w-10 h-5 bg-[#ffe500] rounded-full relative shadow-inner">
-                <div class="w-4 h-4 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
-              </button>
-            </div>
+  <span class="text-xs text-[#8b8475]">{{ collection()?.isPublic ? 'On' : 'Off' }}</span>
+  <button
+    class="w-10 h-5 rounded-full relative shadow-inner transition-colors"
+    [ngClass]="collection()?.isPublic ? 'bg-[#ffe500]' : 'bg-gray-400'"
+  >
+    <!-- Ball that moves left/right -->
+    <div
+      class="w-4 h-4 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform"
+      [ngClass]="collection()?.isPublic ? 'translate-x-6' : 'translate-x-0.5'"
+    ></div>
+  </button>
+</div>
           </div>
           <p class="text-xs text-[#8b8475] mb-3">Anyone with this link can view this collection</p>
           <div class="flex gap-2">
@@ -335,7 +337,7 @@
                     <div class="text-2xl">{{ getItemIcon(itemToMove()?.targetType || '') }}</div>
                     <div class="flex-1 min-w-0">
                       <div class="font-semibold text-sm line-clamp-1">
-                        {{ itemToMove()?.content?.title || 'Untitled' }}
+                        {{ itemToMove()?.target?.title || 'Untitled' }}
                       </div>
                       <div class="text-xs text-[#7b7465]">
                         {{ itemToMove()?.targetType }}
@@ -556,16 +558,16 @@
               <div class="text-xs text-[#8b8475]">ITEMS</div>
             </div>
             <div>
+              <div class="text-2xl font-bold text-[#8a6fd6]">{{ stats().posts }}</div>
+              <div class="text-xs text-[#8b8475]">POSTS</div>
+            </div>
+            <div>
               <div class="text-2xl font-bold text-[#d64545]">{{ stats().issues }}</div>
               <div class="text-xs text-[#8b8475]">ISSUES</div>
             </div>
             <div>
-              <div class="text-2xl font-bold text-[#5fa34c]">{{ (stats().views / 1000).toFixed(1) }}k</div>
-              <div class="text-xs text-[#8b8475]">VIEWS</div>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-[#8a6fd6]">{{ stats().forks }}</div>
-              <div class="text-xs text-[#8b8475]">FORKS</div>
+              <div class="text-2xl font-bold text-[#5fa34c]">{{ stats().solutions }}</div>
+              <div class="text-xs text-[#8b8475]">SOLUTIONS</div>
             </div>
           </div>
         </div>
