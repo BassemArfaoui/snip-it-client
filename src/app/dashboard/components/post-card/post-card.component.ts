@@ -192,6 +192,10 @@ export class PostCardComponent {
     return this.reactionTypes.reduce((sum, type) => sum + this.reactionCount(type), 0);
   }
 
+  visibleReactionTypes(): ReactionType[] {
+    return this.reactionTypes.filter((type) => this.reactionCount(type) > 0);
+  }
+
   reactionMeta(type: ReactionType): { icon: string; emoji: string; label: string } {
     switch (type) {
       case 'HEART':

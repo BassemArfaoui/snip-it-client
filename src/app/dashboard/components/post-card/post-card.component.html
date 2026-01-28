@@ -54,40 +54,50 @@
 
   @if (post.interactions) {
     <div class="mt-5 flex flex-wrap items-center gap-2">
-      <!-- Interact (left) + total count + hover menu -->
-      <div class="relative">
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-semibold text-text-muted hover:bg-white/5 hover:text-white transition-colors"
-          aria-label="Interact"
-          (click)="toggleReactionsMenu($event)">
-          @if (post.interactions!.myType) {
-            <span class="text-lg leading-none">{{ reactionMeta(post.interactions!.myType!).emoji }}</span>
-          } @else {
-            <span class="material-symbols-outlined text-lg">add_reaction</span>
-          }
-          <span class="tabular-nums">{{ totalReactions() }}</span>
-        </button>
-
-        <div
-          class="absolute left-0 bottom-12 z-10 rounded-full border border-white/10 bg-background-dark px-2 py-1 shadow-soft transition-all duration-150"
-          [ngClass]="reactionsMenuOpen() ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-1 pointer-events-none'">
-          <div class="flex items-center gap-1">
-            @for (type of reactionTypes; track type) {
-              <button
-                type="button"
-                class="w-10 h-10 rounded-full inline-flex items-center justify-center transition-transform duration-150 hover:-translate-y-1 hover:scale-125"
-                [ngClass]="{
-                  'bg-white/5 ring-1 ring-primary/30': post.interactions!.myType === type,
-                  'hover:bg-white/5': post.interactions!.myType !== type
-                }"
-                (click)="chooseReaction(type)"
-                [attr.aria-label]="reactionMeta(type).label">
-                <span class="text-xl leading-none">{{ reactionMeta(type).emoji }}</span>
-              </button>
+      <!-- Reactions summary + Add interaction (left) -->
+      <div class="flex items-center gap-2">
+        <!-- Add interaction button + picker (left + distinct) -->
+        <div class="relative">
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-semibold text-white hover:bg-primary/15 transition-colors"
+            aria-label="Interact"
+            (click)="toggleReactionsMenu($event)">
+            @if (post.interactions!.myType) {
+              <span class="text-lg leading-none">{{ reactionMeta(post.interactions!.myType!).emoji }}</span>
+            } @else {
+              <span class="material-symbols-outlined text-lg">add_reaction</span>
             }
+            <span class="tabular-nums">{{ totalReactions() }}</span>
+          </button>
+
+          <div
+            class="absolute left-0 bottom-12 z-10 rounded-full border border-white/10 bg-background-dark px-2 py-1 shadow-soft transition-all duration-150"
+            [ngClass]="reactionsMenuOpen() ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-1 pointer-events-none'">
+            <div class="flex items-center gap-1">
+              @for (type of reactionTypes; track type) {
+                <button
+                  type="button"
+                  class="w-10 h-10 rounded-full inline-flex items-center justify-center transition-transform duration-150 hover:-translate-y-1 hover:scale-125"
+                  [ngClass]="{
+                    'bg-white/5 ring-1 ring-primary/30': post.interactions!.myType === type,
+                    'hover:bg-white/5': post.interactions!.myType !== type
+                  }"
+                  (click)="chooseReaction(type)"
+                  [attr.aria-label]="reactionMeta(type).label">
+                  <span class="text-xl leading-none">{{ reactionMeta(type).emoji }}</span>
+                </button>
+              }
+            </div>
           </div>
         </div>
+
+        @for (type of visibleReactionTypes(); track type) {
+          <div class="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-1">
+            <span class="text-sm leading-none">{{ reactionMeta(type).emoji }}</span>
+            <span class="text-xs font-semibold tabular-nums text-text-muted">{{ reactionCount(type) }}</span>
+          </div>
+        }
       </div>
 
       <div class="ml-auto flex items-center gap-2">
