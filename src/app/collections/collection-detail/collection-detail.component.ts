@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CollectionsService, Collection, CollectionItem } from '../../services/collections.service';
 import { Tag, TagsService } from '../../services/tags.service';
 import { TimeAgoPipe } from '../../time-ago.pipe';
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-collection-detail',
@@ -72,6 +73,18 @@ export class CollectionDetailComponent implements OnInit {
     forks: 0
   });
 
+  // Computed signal to check if current user is the collection owner
+  isCollectionOwner = computed(() => {
+    // If accessing via share token, not the owner
+    if (this.collectionToken()) {
+      return false;
+    }
+    
+    // If accessing by ID and user is logged in, they are the owner
+    // (because only owners can access their collections by ID directly)
+    return !!this.collectionId();
+  });
+
   tabs: Array<'All Items' | 'Posts'  | 'Snippets' | 'Issues' | 'Solutions'> = ['All Items','Posts', 'Snippets', 'Issues', 'Solutions'];
   languages = ['All', 'JavaScript', 'Python', 'TypeScript', 'CSS', 'Java'];
 
@@ -79,7 +92,8 @@ export class CollectionDetailComponent implements OnInit {
     private collectionsService: CollectionsService,
     private tagsService: TagsService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
