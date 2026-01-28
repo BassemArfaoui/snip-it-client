@@ -26,6 +26,8 @@ export class PostCardComponent {
   readonly fullscreen = signal(false);
   readonly toast = signal<string | null>(null);
 
+  readonly reactionsMenuOpen = signal(false);
+
   constructor(
     private readonly commentsService: CommentsService,
     private readonly interactionsService: InteractionsService,
@@ -101,6 +103,44 @@ export class PostCardComponent {
     this.fullscreen.set(false);
   }
 
+  toggleReactionsMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.reactionsMenuOpen.update((open) => !open);
+  }
+
+  chooseReaction(type: ReactionType) {
+    const interactions = this.post.interactions;
+    if (!interactions) return;
+
+    // Toggle off when clicking the same reaction.
+    if (interactions.myType === type) {
+      (interactions as any)[type] = Math.max(0, ((interactions as any)[type] ?? 0) - 1);
+      interactions.total = Math.max(0, (interactions.total ?? 0) - 1);
+      interactions.myType = null;
+      interactions.didInteract = false;
+
+      this.interactionsService.unreact('POST', this.post.id).subscribe({
+        next: () => {
+          // No-op: optimistic state is fine
+        },
+        error: () => {
+          // Roll back on error
+          (interactions as any)[type] = ((interactions as any)[type] ?? 0) + 1;
+          interactions.total = (interactions.total ?? 0) + 1;
+          interactions.myType = type;
+          interactions.didInteract = true;
+          this.showToast('Reaction remove failed');
+        },
+      });
+
+      this.reactionsMenuOpen.set(false);
+      return;
+    }
+
+    this.react(type);
+    this.reactionsMenuOpen.set(false);
+  }
+
   react(type: ReactionType) {
     const interactions = this.post.interactions;
     if (!interactions) return;
@@ -146,6 +186,10 @@ export class PostCardComponent {
   reactionCount(type: ReactionType): number {
     const interactions = this.post.interactions as any;
     return Number(interactions?.[type] ?? 0);
+  }
+
+  totalReactions(): number {
+    return this.reactionTypes.reduce((sum, type) => sum + this.reactionCount(type), 0);
   }
 
   reactionMeta(type: ReactionType): { icon: string; emoji: string; label: string } {

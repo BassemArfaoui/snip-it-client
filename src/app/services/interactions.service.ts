@@ -22,4 +22,8 @@ export class InteractionsService {
   react(request: CreateInteractionRequest): Observable<any> {
     return this.http.post<any>(this.apiUrl, request);
   }
+
+  unreact(targetType: InteractionTargetType, targetId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/target/${targetType}/${targetId}`);
+  }
 }
