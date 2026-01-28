@@ -57,33 +57,82 @@ export class PrivateSnippetsService {
     if (params?.tags?.length) httpParams = httpParams.set('tags', params.tags.join(','));
 
     return this.http.get<any>(this.apiUrl, { params: httpParams }).pipe(
-      map(response => ({
-        snippets: response.data?.items || [],
-        total: response.data?.total || 0,
-        page: response.data?.page || 1,
-        size: response.data?.size || 20
-      }))
+      map(response => {
+        const items = response.data?.items || response.items || [];
+        return {
+          snippets: items.map((item: any) => ({
+            id: item.id,
+            title: item.snippet?.title || item.title,
+            content: item.snippet?.content || item.content,
+            language: item.snippet?.language || item.language,
+            userId: item.userId,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            tags: item.tags || []
+          })),
+          total: response.data?.total || response.total || 0,
+          page: response.data?.page || response.page || 1,
+          size: response.data?.size || response.size || 20
+        };
+      })
     );
   }
 
   // Get single snippet by ID
   getSnippetById(id: number): Observable<PrivateSnippet> {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      map(response => response.data || response)
+      map(response => {
+        const data = response.data || response;
+        return {
+          id: data.id,
+          title: data.snippet?.title || data.title,
+          content: data.snippet?.content || data.content,
+          language: data.snippet?.language || data.language,
+          userId: data.userId,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          tags: data.tags || []
+        };
+      })
     );
   }
 
   // Create new snippet
   createSnippet(dto: CreateSnippetDto): Observable<PrivateSnippet> {
     return this.http.post<any>(this.apiUrl, dto).pipe(
-      map(response => response.data || response)
+      map(response => {
+        const data = response.data || response;
+        // Return the snippet ID from the private snippet
+        return {
+          id: data.id,
+          title: data.snippet?.title || data.title,
+          content: data.snippet?.content || data.content,
+          language: data.snippet?.language || data.language,
+          userId: data.userId,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          tags: data.tags || []
+        };
+      })
     );
   }
 
   // Update snippet
   updateSnippet(id: number, dto: UpdateSnippetDto): Observable<PrivateSnippet> {
     return this.http.put<any>(`${this.apiUrl}/${id}`, dto).pipe(
-      map(response => response.data || response)
+      map(response => {
+        const data = response.data || response;
+        return {
+          id: data.id,
+          title: data.snippet?.title || data.title,
+          content: data.snippet?.content || data.content,
+          language: data.snippet?.language || data.language,
+          userId: data.userId,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          tags: data.tags || []
+        };
+      })
     );
   }
 

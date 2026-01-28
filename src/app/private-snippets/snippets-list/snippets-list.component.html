@@ -20,17 +20,19 @@
         <!-- Search -->
         <input
           type="text"
-          [(ngModel)]="searchQuery"
-          (ngModelChange)="onSearchChange()"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event); onSearchChange()"
           placeholder="Search snippets by title, code, or tags..."
           class="flex-1 min-w-[260px] px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] placeholder-[#9b9586] shadow-sm">
         
         <!-- Language Filter -->
         <select 
-          [(ngModel)]="selectedLanguage"
-          (ngModelChange)="setLanguage(selectedLanguage)"
+          [ngModel]="selectedLanguage()"
+          (ngModelChange)="setLanguage($event)"
           class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
-          <option *ngFor="let lang of languages" [value]="lang">Language: {{ lang }}</option>
+          @for (lang of languages; track lang) {
+            <option [value]="lang">Language: {{ lang === 'All' ? 'All' : (lang | titlecase) }}</option>
+          }
         </select>
         
         <!-- Tags Filter -->
@@ -41,8 +43,8 @@
         
         <!-- Sort -->
         <select 
-          [(ngModel)]="sortBy"
-          (ngModelChange)="setSortBy(sortBy)"
+          [ngModel]="sortBy()"
+          (ngModelChange)="setSortBy($event)"
           class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
           <option value="Newest First">Newest First</option>
           <option value="Oldest First">Oldest First</option>
@@ -55,141 +57,161 @@
   <!-- Snippets List -->
   <div class="max-w-7xl mx-auto px-6 py-8">
     <!-- Error Message -->
-    <div *ngIf="error" class="mb-4 p-4 bg-[#fff1f1] border border-[#ffd1d1] rounded-xl text-[#a83a3a]">
-      {{ error }}
-    </div>
+    @if (hasError()) {
+      <div class="mb-4 p-4 bg-[#fff1f1] border border-[#ffd1d1] rounded-xl text-[#a83a3a]">
+        {{ error() }}
+      </div>
+    }
     
     <!-- Loading -->
-    <div *ngIf="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffe500]"></div>
-      <p class="mt-4 text-[#7d7769]">Loading snippets...</p>
-    </div>
+    @if (loading()) {
+      <div class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffe500]"></div>
+        <p class="mt-4 text-[#7d7769]">Loading snippets...</p>
+      </div>
+    }
     
     <!-- Empty State -->
-    <div *ngIf="!loading && filteredSnippets.length === 0" class="text-center py-20">
-      <div class="text-6xl mb-4">📝</div>
-      <h3 class="text-xl font-semibold mb-2">No snippets yet</h3>
-      <p class="text-[#7d7769] mb-6">Create your first code snippet to get started</p>
-      <button 
-        (click)="openCreateModal()"
-        class="px-6 py-3 bg-[#ffe500] hover:bg-[#f6d600] rounded-full transition-colors font-semibold shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]">
-        Create Snippet
-      </button>
-    </div>
-    
-    <!-- Snippets Grid -->
-    <div *ngIf="!loading && filteredSnippets.length > 0" class="space-y-4">
-      <!-- Snippet Card -->
-      <div
-        *ngFor="let snippet of filteredSnippets"
-        (click)="openSnippet(snippet)"
-        class="bg-white border border-[#eee8d8] rounded-2xl overflow-hidden hover:border-[#ffd600] cursor-pointer transition-all group shadow-[0_16px_50px_-36px_rgba(0,0,0,0.5)]">
-        
-        <div class="p-4">
-          <!-- Header -->
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex items-center gap-3 flex-1">
-              <div class="text-2xl">{{ getLanguageIcon(snippet.language) }}</div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-semibold mb-1 line-clamp-1">{{ snippet.title }}</h3>
-                <div class="flex items-center gap-2 text-sm">
-                  <span [class]="getLanguageColor(snippet.language)" class="px-2 py-0.5 rounded bg-[#f8f4e3] text-[#4f493f]">
-                    {{ snippet.language }}
-                  </span>
-                  <span class="text-[#8b8475]">{{ formatDate(snippet.updatedAt) }}</span>
-                </div>
-              </div>
-            </div>
-            <button 
-              (click)="deleteSnippet($event, snippet)"
-              class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-[#fff4c8] rounded-xl">
-              <span class="text-[#9c9483] hover:text-[#d64545]">🗑️</span>
-            </button>
-          </div>
-          
-          <!-- Code Preview -->
-          <div class="bg-[#f8f6ef] border border-[#e7dfc7] rounded-xl p-4 mb-3 overflow-hidden">
-            <pre class="text-sm text-[#3a3935] font-mono overflow-x-auto"><code>{{ getPreviewLines(snippet.content) }}</code></pre>
-            <div *ngIf="snippet.content.split('\n').length > 3" class="text-xs text-[#8b8475] mt-2">
-              ... {{ snippet.content.split('\n').length - 3 }} more lines
-            </div>
-          </div>
-          
-          <!-- Tags -->
-          <div class="flex items-center gap-2 flex-wrap">
-            <span *ngFor="let tag of snippet.tags" class="px-2 py-1 bg-[#f5f1e3] text-[#6d665a] text-xs rounded-full">
-              #{{ tag.name }}
-            </span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Load More -->
-      <div *ngIf="totalSnippets > filteredSnippets.length" class="text-center py-8">
+    @if (isEmptyState()) {
+      <div class="text-center py-20">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 class="text-xl font-semibold mb-2">No snippets yet</h3>
+        <p class="text-[#7d7769] mb-6">Create your first code snippet to get started</p>
         <button 
-          (click)="loadSnippets()"
-          class="px-6 py-2 border border-[#e7dfc7] bg-white hover:bg-[#fff4c8] rounded-full transition-colors font-semibold shadow-sm">
-          Load more snippets ↓
+          (click)="openCreateModal()"
+          class="px-6 py-3 bg-[#ffe500] hover:bg-[#f6d600] rounded-full transition-colors font-semibold shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]">
+          Create Snippet
         </button>
       </div>
-    </div>
+    }
+    
+    <!-- Snippets Grid -->
+    @if (!loading() && filteredSnippets().length > 0) {
+      <div class="space-y-4">
+        <!-- Snippet Card -->
+        @for (snippet of filteredSnippets(); track snippet.id) {
+          <div
+            (click)="openSnippet(snippet)"
+            class="bg-white border border-[#eee8d8] rounded-2xl overflow-hidden hover:border-[#ffd600] cursor-pointer transition-all group shadow-[0_16px_50px_-36px_rgba(0,0,0,0.5)]">
+            
+            <div class="p-4">
+              <!-- Header -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3 flex-1">
+                  <div class="text-2xl">{{ getLanguageIcon(snippet.language) }}</div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-lg font-semibold mb-1 line-clamp-1">{{ snippet.title }}</h3>
+                    <div class="flex items-center gap-2 text-sm">
+                      <span [class]="getLanguageColor(snippet.language)" class="px-2 py-0.5 rounded bg-[#f8f4e3] text-[#4f493f]">
+                        {{ snippet.language | titlecase }}
+                      </span>
+                      <span class="text-[#8b8475]">{{ formatDate(snippet.updatedAt) }}</span>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  (click)="deleteSnippet($event, snippet)"
+                  class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-[#fff4c8] rounded-xl">
+                  <span class="text-[#9c9483] hover:text-[#d64545]">🗑️</span>
+                </button>
+              </div>
+              
+              <!-- Code Preview -->
+              <div class="bg-[#f8f6ef] border border-[#e7dfc7] rounded-xl p-4 mb-3 overflow-hidden">
+                <pre class="text-sm text-[#3a3935] font-mono overflow-x-auto"><code>{{ getPreviewLines(snippet.content) }}</code></pre>
+                @if (snippet.content.split('\n').length > 3) {
+                  <div class="text-xs text-[#8b8475] mt-2">
+                    ... {{ snippet.content.split('\n').length - 3 }} more lines
+                  </div>
+                }
+              </div>
+              
+              <!-- Tags -->
+              <div class="flex items-center gap-2 flex-wrap">
+                @for (tag of snippet.tags; track tag.id) {
+                  <span class="px-2 py-1 bg-[#f5f1e3] text-[#6d665a] text-xs rounded-full">
+                    #{{ tag.name }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+        
+        <!-- Load More -->
+        @if (hasMoreSnippets()) {
+          <div class="text-center py-8">
+            <button 
+              (click)="loadSnippets()"
+              class="px-6 py-2 border border-[#e7dfc7] bg-white hover:bg-[#fff4c8] rounded-full transition-colors font-semibold shadow-sm">
+              Load more snippets ↓
+            </button>
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>
 
 <!-- Create Snippet Modal -->
-<div *ngIf="showCreateModal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-  <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-    <h2 class="text-xl font-bold mb-4">Create New Snippet</h2>
-    
-    <div class="space-y-4">
-      <div>
-        <label class="block text-sm text-[#6c6457] mb-2">Title</label>
-        <input
-          type="text"
-          [(ngModel)]="newSnippet.title"
-          placeholder="e.g., React useDebounce Hook"
-          class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
+@if (showCreateModal()) {
+  <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+    <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <h2 class="text-xl font-bold mb-4">Create New Snippet</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-[#6c6457] mb-2">Title</label>
+          <input
+            type="text"
+            [ngModel]="newSnippet().title"
+            (ngModelChange)="newSnippet.set({...newSnippet(), title: $event})"
+            placeholder="e.g., React useDebounce Hook"
+            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
+        </div>
+        
+        <div>
+          <label class="block text-sm text-[#6c6457] mb-2">Language</label>
+          <select
+            [ngModel]="newSnippet().language"
+            (ngModelChange)="newSnippet.set({...newSnippet(), language: $event})"
+            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
+            <option value="javascript">JavaScript</option>
+            <option value="typescript">TypeScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="css">CSS</option>
+            <option value="html">HTML</option>
+            <option value="go">Go</option>
+            <option value="rust">Rust</option>
+            <option value="php">PHP</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm text-[#6c6457] mb-2">Code</label>
+          <textarea
+            [ngModel]="newSnippet().content"
+            (ngModelChange)="newSnippet.set({...newSnippet(), content: $event})"
+            placeholder="Paste your code here..."
+            rows="12"
+            class="w-full px-4 py-3 bg-[#f8f6ef] border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#111111] font-mono text-sm resize-none"></textarea>
+        </div>
       </div>
       
-      <div>
-        <label class="block text-sm text-[#6c6457] mb-2">Language</label>
-        <select
-          [(ngModel)]="newSnippet.language"
-          class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
-          <option value="javascript">JavaScript</option>
-          <option value="typescript">TypeScript</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="css">CSS</option>
-          <option value="html">HTML</option>
-          <option value="go">Go</option>
-          <option value="rust">Rust</option>
-          <option value="php">PHP</option>
-        </select>
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="closeCreateModal()"
+          class="flex-1 px-4 py-2 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+          Cancel
+        </button>
+        <button
+          (click)="createSnippet()"
+          [disabled]="!newSnippet().title.trim() || !newSnippet().content.trim()"
+          class="flex-1 px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          Create Snippet
+        </button>
       </div>
-      
-      <div>
-        <label class="block text-sm text-[#6c6457] mb-2">Code</label>
-        <textarea
-          [(ngModel)]="newSnippet.content"
-          placeholder="Paste your code here..."
-          rows="12"
-          class="w-full px-4 py-3 bg-[#f8f6ef] border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#111111] font-mono text-sm resize-none"></textarea>
-      </div>
-    </div>
-    
-    <div class="flex gap-3 mt-6">
-      <button
-        (click)="closeCreateModal()"
-        class="flex-1 px-4 py-2 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
-        Cancel
-      </button>
-      <button
-        (click)="createSnippet()"
-        [disabled]="!newSnippet.title.trim() || !newSnippet.content.trim()"
-        class="flex-1 px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-        Create Snippet
-      </button>
     </div>
   </div>
-</div>
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,74 +11,81 @@ import { PrivateSnippetsService, PrivateSnippet, SnippetVersion, UpdateSnippetDt
   templateUrl: './snippet-detail.component.html',
   styleUrls: ['./snippet-detail.component.css']
 })
-export class SnippetDetailComponent implements OnInit {
-  snippetId!: number;
-  snippet: PrivateSnippet | null = null;
-  versions: SnippetVersion[] = [];
-  loading = false;
-  error = '';
-  successMessage = '';
+export class SnippetDetailComponent {
+  private snippetsService = inject(PrivateSnippetsService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
+  snippetId = signal<number>(0);
+  snippet = signal<PrivateSnippet | null>(null);
+  versions = signal<SnippetVersion[]>([]);
+  loading = signal(false);
+  error = signal('');
+  successMessage = signal('');
   
   // Edit mode
-  isEditing = false;
-  editedSnippet: UpdateSnippetDto = {};
+  isEditing = signal(false);
+  editedSnippet = signal<UpdateSnippetDto>({});
   
   // Tabs
-  selectedTab: 'code' | 'versions' | 'settings' = 'code';
+  selectedTab = signal<'code' | 'versions' | 'settings'>('code');
   
   // Transform modal
-  showTransformModal = false;
-  transformData = {
+  showTransformModal = signal(false);
+  transformData = signal({
     title: '',
     description: '',
     publish: false
-  };
+  });
   
   // Version history
-  showVersionHistory = false;
-  selectedVersion: SnippetVersion | null = null;
+  showVersionHistory = signal(false);
+  selectedVersion = signal<SnippetVersion | null>(null);
 
   languages = ['javascript', 'typescript', 'python', 'java', 'css', 'html', 'go', 'rust', 'php', 'cpp', 'c', 'ruby', 'swift'];
 
-  constructor(
-    private snippetsService: PrivateSnippetsService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
+  // Computed signals
+  isLoading = computed(() => this.loading());
+  hasError = computed(() => this.error().length > 0);
+  hasSuccess = computed(() => this.successMessage().length > 0);
+  isShowingTransformModal = computed(() => this.showTransformModal());
+  isShowingVersionHistory = computed(() => this.showVersionHistory());
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.snippetId = +params['id'];
-      this.loadSnippet();
+  constructor() {
+    effect(() => {
+      this.route.params.subscribe(params => {
+        this.snippetId.set(+params['id']);
+        this.loadSnippet();
+      });
     });
   }
 
   loadSnippet(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     
-    this.snippetsService.getSnippetById(this.snippetId).subscribe({
+    this.snippetsService.getSnippetById(this.snippetId()).subscribe({
       next: (snippet) => {
-        this.snippet = snippet;
-        this.editedSnippet = {
+        this.snippet.set(snippet);
+        this.editedSnippet.set({
           title: snippet.title,
           content: snippet.content,
           language: snippet.language
-        };
-        this.loading = false;
+        });
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'Failed to load snippet';
-        this.loading = false;
+        this.error.set('Failed to load snippet');
+        this.loading.set(false);
         console.error(err);
       }
     });
   }
 
   loadVersions(): void {
-    this.snippetsService.getVersions(this.snippetId).subscribe({
+    this.snippetsService.getVersions(this.snippetId()).subscribe({
       next: (response) => {
-        this.versions = response.versions;
+        this.versions.set(response.versions);
       },
       error: (err) => {
         console.error('Failed to load versions', err);
@@ -87,126 +94,132 @@ export class SnippetDetailComponent implements OnInit {
   }
 
   setTab(tab: 'code' | 'versions' | 'settings'): void {
-    this.selectedTab = tab;
-    if (tab === 'versions' && this.versions.length === 0) {
+    this.selectedTab.set(tab);
+    if (tab === 'versions' && this.versions().length === 0) {
       this.loadVersions();
     }
   }
 
   toggleEdit(): void {
-    if (this.isEditing) {
+    if (this.isEditing()) {
       // Cancel editing
-      this.isEditing = false;
-      if (this.snippet) {
-        this.editedSnippet = {
-          title: this.snippet.title,
-          content: this.snippet.content,
-          language: this.snippet.language
-        };
+      this.isEditing.set(false);
+      const currentSnippet = this.snippet();
+      if (currentSnippet) {
+        this.editedSnippet.set({
+          title: currentSnippet.title,
+          content: currentSnippet.content,
+          language: currentSnippet.language
+        });
       }
     } else {
-      this.isEditing = true;
+      this.isEditing.set(true);
     }
   }
 
   saveChanges(): void {
-    if (!this.editedSnippet.title?.trim() || !this.editedSnippet.content?.trim()) {
-      this.error = 'Title and content are required';
+    const edited = this.editedSnippet();
+    if (!edited.title?.trim() || !edited.content?.trim()) {
+      this.error.set('Title and content are required');
       return;
     }
     
-    this.snippetsService.updateSnippet(this.snippetId, this.editedSnippet).subscribe({
+    this.snippetsService.updateSnippet(this.snippetId(), edited).subscribe({
       next: (snippet) => {
-        this.snippet = snippet;
-        this.isEditing = false;
-        this.successMessage = 'Snippet saved successfully!';
-        setTimeout(() => this.successMessage = '', 3000);
+        this.snippet.set(snippet);
+        this.isEditing.set(false);
+        this.successMessage.set('Snippet saved successfully!');
+        setTimeout(() => this.successMessage.set(''), 3000);
       },
       error: (err) => {
-        this.error = 'Failed to save snippet';
+        this.error.set('Failed to save snippet');
         console.error(err);
       }
     });
   }
 
   deleteSnippet(): void {
+    const currentSnippet = this.snippet();
     if (!confirm('Delete this snippet? This action cannot be undone.')) return;
     
-    this.snippetsService.deleteSnippet(this.snippetId).subscribe({
+    this.snippetsService.deleteSnippet(this.snippetId()).subscribe({
       next: () => {
         this.router.navigate(['/snippets']);
       },
       error: (err) => {
-        this.error = 'Failed to delete snippet';
+        this.error.set('Failed to delete snippet');
         console.error(err);
       }
     });
   }
 
   openTransformModal(): void {
-    this.showTransformModal = true;
-    this.transformData = {
-      title: this.snippet?.title || '',
+    const currentSnippet = this.snippet();
+    this.showTransformModal.set(true);
+    this.transformData.set({
+      title: currentSnippet?.title || '',
       description: '',
       publish: false
-    };
+    });
   }
 
   closeTransformModal(): void {
-    this.showTransformModal = false;
+    this.showTransformModal.set(false);
   }
 
   transformToPost(): void {
-    if (!this.transformData.title.trim() || !this.transformData.description.trim()) {
-      this.error = 'Title and description are required';
+    const data = this.transformData();
+    if (!data.title.trim() || !data.description.trim()) {
+      this.error.set('Title and description are required');
       return;
     }
     
-    this.snippetsService.transformToPost(this.snippetId, this.transformData).subscribe({
+    this.snippetsService.transformToPost(this.snippetId(), data).subscribe({
       next: (post) => {
         this.closeTransformModal();
-        this.successMessage = 'Transformed to post successfully!';
+        this.successMessage.set('Transformed to post successfully!');
         setTimeout(() => {
           this.router.navigate(['/posts', post.id]);
         }, 1500);
       },
       error: (err) => {
-        this.error = 'Failed to transform snippet';
+        this.error.set('Failed to transform snippet');
         console.error(err);
       }
     });
   }
 
   copyCode(): void {
-    if (this.snippet) {
-      navigator.clipboard.writeText(this.snippet.content);
-      this.successMessage = 'Code copied to clipboard!';
-      setTimeout(() => this.successMessage = '', 2000);
+    const currentSnippet = this.snippet();
+    if (currentSnippet) {
+      navigator.clipboard.writeText(currentSnippet.content);
+      this.successMessage.set('Code copied to clipboard!');
+      setTimeout(() => this.successMessage.set(''), 2000);
     }
   }
 
   viewVersion(version: SnippetVersion): void {
-    this.selectedVersion = version;
+    this.selectedVersion.set(version);
   }
 
   restoreVersion(version: SnippetVersion): void {
     if (!confirm('Restore this version? Current content will be saved as a new version.')) return;
     
-    this.editedSnippet.content = version.content;
+    this.editedSnippet.set({...this.editedSnippet(), content: version.content});
     this.saveChanges();
   }
 
   deleteVersion(version: SnippetVersion): void {
     if (!confirm('Delete this version?')) return;
     
-    this.snippetsService.deleteVersion(this.snippetId, version.id).subscribe({
+    this.snippetsService.deleteVersion(this.snippetId(), version.id).subscribe({
       next: () => {
         this.loadVersions();
-        this.successMessage = 'Version deleted';
-        setTimeout(() => this.successMessage = '', 2000);
+        this.successMessage.set('Version deleted');
+        setTimeout(() => this.successMessage.set(''), 2000);
       },
       error: (err) => {
-        this.error = 'Failed to delete version';
+        this.error.set('Failed to delete version');
         console.error(err);
       }
     });

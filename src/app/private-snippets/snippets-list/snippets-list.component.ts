@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,89 +11,97 @@ import { PrivateSnippetsService, PrivateSnippet, CreateSnippetDto } from '../../
   templateUrl: './snippets-list.component.html',
   styleUrls: ['./snippets-list.component.css']
 })
-export class SnippetsListComponent implements OnInit {
-  snippets: PrivateSnippet[] = [];
-  filteredSnippets: PrivateSnippet[] = [];
-  loading = false;
-  error = '';
+export class SnippetsListComponent {
+  private snippetsService = inject(PrivateSnippetsService);
+  private router = inject(Router);
+
+  // Signals
+  snippets = signal<PrivateSnippet[]>([]);
+  filteredSnippets = signal<PrivateSnippet[]>([]);
+  loading = signal(false);
+  error = signal('');
   
   // Filter states
-  searchQuery = '';
-  selectedLanguage = 'All';
-  selectedTags: string[] = [];
-  sortBy = 'Newest First';
+  searchQuery = signal('');
+  selectedLanguage = signal('All');
+  selectedTags = signal<string[]>([]);
+  sortBy = signal('Newest First');
   
   // Create snippet modal
-  showCreateModal = false;
-  newSnippet: CreateSnippetDto = {
+  showCreateModal = signal(false);
+  newSnippet = signal<CreateSnippetDto>({
     title: '',
     content: '',
     language: 'javascript'
-  };
+  });
   
   // Pagination
-  currentPage = 1;
-  pageSize = 20;
-  totalSnippets = 0;
+  currentPage = signal(1);
+  pageSize = signal(20);
+  totalSnippets = signal(0);
 
-  languages = ['All', 'JavaScript', 'TypeScript', 'Python', 'Java', 'CSS', 'HTML', 'Go', 'Rust', 'PHP'];
+  languages = ['All', 'javascript', 'typescript', 'python', 'java', 'css', 'html', 'go', 'rust', 'php'];
 
-  constructor(
-    private snippetsService: PrivateSnippetsService,
-    private router: Router
-  ) {}
+  // Computed signals
+  hasMoreSnippets = computed(() => this.totalSnippets() > this.filteredSnippets().length);
+  isEmptyState = computed(() => !this.loading() && this.filteredSnippets().length === 0);
+  hasError = computed(() => this.error().length > 0);
 
-  ngOnInit(): void {
-    this.loadSnippets();
+  constructor() {
+    effect(() => {
+      this.loadSnippets();
+    });
   }
 
   loadSnippets(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     
     this.snippetsService.getSnippets({
-      page: this.currentPage,
-      size: this.pageSize,
-      q: this.searchQuery || undefined,
-      language: this.selectedLanguage !== 'All' ? this.selectedLanguage : undefined,
-      tags: this.selectedTags.length > 0 ? this.selectedTags : undefined
+      page: this.currentPage(),
+      size: this.pageSize(),
+      q: this.searchQuery() || undefined,
+      language: this.selectedLanguage() !== 'All' ? this.selectedLanguage().toLowerCase() : undefined,
+      tags: this.selectedTags().length > 0 ? this.selectedTags() : undefined
     }).subscribe({
       next: (response) => {
-        this.snippets = response.snippets;
-        this.filteredSnippets = response.snippets;
-        this.totalSnippets = response.total;
-        this.loading = false;
+        this.snippets.set(response.snippets);
+        this.filteredSnippets.set(response.snippets);
+        this.totalSnippets.set(response.total);
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'Failed to load snippets';
-        this.loading = false;
+        this.error.set('Failed to load snippets');
+        this.loading.set(false);
         console.error(err);
       }
     });
   }
 
   filterSnippets(): void {
-    let filtered = [...this.snippets];
+    let filtered = [...this.snippets()];
     
     // Apply search
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
+    const query = this.searchQuery();
+    if (query) {
+      const lowerQuery = query.toLowerCase();
       filtered = filtered.filter(s => 
-        s.title.toLowerCase().includes(query) ||
-        s.content.toLowerCase().includes(query)
+        s.title.toLowerCase().includes(lowerQuery) ||
+        s.content.toLowerCase().includes(lowerQuery)
       );
     }
     
     // Apply sort
-    if (this.sortBy === 'Newest First') {
+    const sortVal = this.sortBy();
+    if (sortVal === 'Newest First') {
       filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else if (this.sortBy === 'Oldest First') {
+    } else if (sortVal === 'Oldest First') {
       filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    } else if (this.sortBy === 'Name') {
+    } else if (sortVal === 'Name') {
       filtered.sort((a, b) => a.title.localeCompare(b.title));
     }
     
-    this.filteredSnippets = filtered;
+    this.filteredSnippets.set(filtered);
   }
 
   onSearchChange(): void {
@@ -101,38 +109,38 @@ export class SnippetsListComponent implements OnInit {
   }
 
   setLanguage(language: string): void {
-    this.selectedLanguage = language;
-    this.loadSnippets();
+    this.selectedLanguage.set(language);
   }
 
   setSortBy(sort: string): void {
-    this.sortBy = sort;
+    this.sortBy.set(sort);
     this.filterSnippets();
   }
 
   openCreateModal(): void {
-    this.showCreateModal = true;
-    this.newSnippet = {
+    this.showCreateModal.set(true);
+    this.newSnippet.set({
       title: '',
       content: '',
       language: 'javascript'
-    };
+    });
   }
 
   closeCreateModal(): void {
-    this.showCreateModal = false;
+    this.showCreateModal.set(false);
   }
 
   createSnippet(): void {
-    if (!this.newSnippet.title.trim() || !this.newSnippet.content.trim()) return;
+    const snippet = this.newSnippet();
+    if (!snippet.title.trim() || !snippet.content.trim()) return;
     
-    this.snippetsService.createSnippet(this.newSnippet).subscribe({
-      next: (snippet) => {
+    this.snippetsService.createSnippet(snippet).subscribe({
+      next: (created) => {
         this.closeCreateModal();
-        this.router.navigate(['/snippets', snippet.id]);
+        this.router.navigate(['/snippets', created.id]);
       },
       error: (err) => {
-        this.error = 'Failed to create snippet';
+        this.error.set('Failed to create snippet');
         console.error(err);
       }
     });
@@ -152,7 +160,7 @@ export class SnippetsListComponent implements OnInit {
         this.loadSnippets();
       },
       error: (err) => {
-        this.error = 'Failed to delete snippet';
+        this.error.set('Failed to delete snippet');
         console.error(err);
       }
     });
