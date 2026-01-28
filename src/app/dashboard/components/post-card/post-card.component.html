@@ -6,12 +6,12 @@
         {{ authorInitials() }}
       </div>
       <div class="min-w-0">
-        <div class="flex items-center gap-2 min-w-0">
-          <div class="font-bold text-base truncate">{{ post.author.username }}</div>
-          <span class="text-text-muted text-sm">•</span>
-          <div class="text-sm text-text-muted truncate">{{ post.createdAt | date:'short' }}</div>
+        <div class="font-bold text-base truncate">{{ post.author.fullName || post.author.username }}</div>
+        <div class="flex items-center gap-2 text-sm text-text-muted truncate">
+          <span class="truncate">{{ post.snippet.language }}</span>
+          <span>•</span>
+          <span class="truncate">{{ getRelativeTime(post.createdAt) }}</span>
         </div>
-        <div class="text-sm text-text-muted truncate">{{ post.title }}</div>
       </div>
     </div>
 

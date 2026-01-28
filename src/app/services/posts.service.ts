@@ -8,6 +8,7 @@ export type ReactionType = 'HEART' | 'HELPFUL' | 'FIRE' | 'FUNNY' | 'INCORRECT';
 export interface PostAuthor {
   id: number;
   username: string;
+  fullName?: string;
 }
 
 export interface Snippet {
