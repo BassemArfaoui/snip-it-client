@@ -3,7 +3,7 @@ import { LoginPageComponent } from './login-page/login-page.component';
 import { SignupPageComponent } from './signup-page/signup-page.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { HomeComponent } from './home/home.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './profile/profile.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 import { AuthGuard } from './auth.guard';
@@ -21,7 +21,7 @@ export const routes: Routes = [
 	{ path: 'forgot-password', component: ForgotPasswordComponent },
 	{ path: 'reset-password', component: ResetPasswordComponent },
 	{ path: 'auth-success', component: GitHubCallbackComponent },
-	{ path: 'dashboard', component: HomeComponent, canActivate: [AuthGuard] },
+	{ path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
 	{ path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/new', component: CreateIssueComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/:id/edit', component: EditIssueComponent, canActivate: [AuthGuard] },

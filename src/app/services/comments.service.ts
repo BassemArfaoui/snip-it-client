@@ -40,12 +40,23 @@ export interface CommentResponse {
   message?: string;
 }
 
-export interface CommentsListResponse {
-  data: Comment[];
-  total: number;
+interface ApiResponse<T> {
+  data: T;
+  message: string;
+}
+
+interface PaginationMeta {
   page: number;
   limit: number;
+  total: number;
   totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+interface PaginatedResult<T> {
+  data: T[];
+  meta: PaginationMeta;
 }
 
 @Injectable({
@@ -62,7 +73,17 @@ export class CommentsService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.http.get<CommentsListResponse>(`${this.apiUrl}/posts/${postId}`, { params });
+    return this.http
+      .get<ApiResponse<PaginatedResult<Comment>>>(`${this.apiUrl}/posts/${postId}`, { params })
+      .pipe(
+        map((res) => ({
+          data: res.data.data,
+          page: res.data.meta.page,
+          limit: res.data.meta.limit,
+          total: res.data.meta.total,
+          totalPages: res.data.meta.totalPages,
+        })),
+      );
   }
 
   // Create a comment on a post
@@ -78,7 +99,17 @@ export class CommentsService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.http.get<CommentsListResponse>(`${this.apiUrl}/solutions/${solutionId}`, { params });
+    return this.http
+      .get<ApiResponse<PaginatedResult<Comment>>>(`${this.apiUrl}/solutions/${solutionId}`, { params })
+      .pipe(
+        map((res) => ({
+          data: res.data.data,
+          page: res.data.meta.page,
+          limit: res.data.meta.limit,
+          total: res.data.meta.total,
+          totalPages: res.data.meta.totalPages,
+        })),
+      );
   }
 
   // Create a comment on a solution
