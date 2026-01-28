@@ -66,11 +66,6 @@ export interface UpdateProfilePayload {
   email?: string;
 }
 
-export interface UpdatePasswordPayload {
-  currentPassword: string;
-  newPassword: string;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -129,12 +124,6 @@ export class ProfileService {
 
   updateProfile(payload: UpdateProfilePayload): Observable<any> {
     return this.http.patch<any>(`${this.apiUrl}`, payload).pipe(
-      map((response: any) => response.data || response)
-    );
-  }
-
-  updatePassword(payload: UpdatePasswordPayload): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/password`, payload).pipe(
       map((response: any) => response.data || response)
     );
   }

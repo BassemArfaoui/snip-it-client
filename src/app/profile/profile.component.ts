@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload, UpdatePasswordPayload } from '../services/profile.service';
+import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload } from '../services/profile.service';
 import { SubscriptionService } from '../services/subscription.service';
 import { getUserId, updateUsername } from '../auth.store';
 
@@ -49,15 +49,9 @@ export class ProfileComponent implements OnInit {
   streakLoading = false;
   leaderboardLoading = false;
   editForm: FormGroup;
-  passwordForm: FormGroup;
   editLoading = false;
   editError = '';
   editSuccess = '';
-  showPasswordModal = false;
-  passwordLoading = false;
-  passwordError = '';
-  passwordSuccess = '';
-  showEmailVerificationPrompt = false;
   followLoading = false;
 
   loading: boolean = false;
@@ -81,11 +75,7 @@ export class ProfileComponent implements OnInit {
       email: ['', [Validators.email]],
       imageProfile: ['']
     });
-    this.passwordForm = this.fb.group({
-      currentPassword: ['', [Validators.required, Validators.minLength(8)]],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]]
-    }, { validators: this.passwordMatchValidator });
+    
   }
 
   ngOnInit(): void {
@@ -507,75 +497,8 @@ export class ProfileComponent implements OnInit {
     return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
-  passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
-    const newPassword = group.get('newPassword')?.value;
-    const confirmPassword = group.get('confirmPassword')?.value;
-    return newPassword === confirmPassword ? null : { passwordMismatch: true };
-  }
-
-  openPasswordModal(): void {
-    this.passwordError = '';
-    this.passwordSuccess = '';
-    this.passwordForm.reset();
-    this.showPasswordModal = true;
-  }
-
-  closePasswordModal(): void {
-    this.showPasswordModal = false;
-  }
-
-  submitPasswordUpdate(): void {
-    if (this.passwordForm.invalid) {
-      this.passwordForm.markAllAsTouched();
-      return;
-    }
-
-    const { currentPassword, newPassword } = this.passwordForm.value;
-    const payload: UpdatePasswordPayload = { currentPassword, newPassword };
-
-    this.passwordLoading = true;
-    this.passwordError = '';
-    this.passwordSuccess = '';
-
-    this.profileService.updatePassword(payload).subscribe({
-      next: (res) => {
-        this.passwordSuccess = res.message || 'Password updated successfully';
-        this.passwordError = '';
-        this.passwordLoading = false;
-        if (res.requiresEmailVerification) {
-          setTimeout(() => {
-            this.showPasswordModal = false;
-            this.showEmailVerificationPrompt = true;
-          }, 2000);
-        } else {
-          setTimeout(() => this.closePasswordModal(), 2000);
-        }
-      },
-      error: (err) => {
-        const status = err?.status;
-        if (status === 401) {
-          this.passwordError = 'Current password is incorrect';
-        } else if (status === 400) {
-          this.passwordError = err?.error?.message || 'Invalid password data';
-        } else if (status === 403) {
-          this.passwordError = 'Access denied';
-        } else {
-          this.passwordError = err?.error?.message || 'Failed to update password. Please try again.';
-        }
-        this.passwordSuccess = '';
-        this.passwordLoading = false;
-        console.error('Update password error:', err);
-      }
-    });
-  }
-
-  goToEmailVerification(): void {
-    // Save email to localStorage for pre-fill on verify page
-    if (this.profile?.email) {
-      localStorage.setItem('pendingVerificationEmail', this.profile.email);
-    }
-    window.location.href = '/verify-email';
-  }
+  
+  
 
   toggleFollow(): void {
     if (!this.profile || this.followLoading) return;
