@@ -28,12 +28,13 @@
             class="px-4 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded-xl transition-colors font-semibold">
             🚀 Publish
           </button>
-          <button 
-            @if (!isEditing())
-            (click)="toggleEdit()"
-            class="px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.45)]">
-            ✏️ Edit
-          </button>
+          @if (!isEditing()) {
+            <button 
+              (click)="toggleEdit()"
+              class="px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.45)]">
+              ✏️ Edit
+            </button>
+          }
           @if (isEditing()) {
             <button 
               (click)="saveChanges()"
@@ -94,14 +95,14 @@
                   <input
                     type="text"
                     [ngModel]="editedSnippet().title"
-                    (ngModelChange)="editedSnippet.set({...editedSnippet(), title: $event})"
+                    (ngModelChange)="updateEditedTitle($event)"
                     class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
                 </div>
                 <div>
                   <label class="block text-sm text-[#6c6457] mb-2">Language</label>
                   <select
                     [ngModel]="editedSnippet().language"
-                    (ngModelChange)="editedSnippet.set({...editedSnippet(), language: $event})"
+                    (ngModelChange)="updateEditedLanguage($event)"
                     class="px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
                     @for (lang of languages; track lang) {
                       <option [value]="lang">{{ lang }}</option>
@@ -128,7 +129,7 @@
             @if (isEditing()) {
               <textarea
                 [ngModel]="editedSnippet().content"
-                (ngModelChange)="editedSnippet.set({...editedSnippet(), content: $event})"
+                (ngModelChange)="updateEditedContent($event)"
                 rows="25"
                 class="w-full p-4 bg-[#f8f6ef] border-0 focus:outline-none text-[#111111] font-mono text-sm resize-none"></textarea>
             }
@@ -162,7 +163,7 @@
                 <label class="block text-sm text-[#6c6457] mb-2">LANGUAGE</label>
                 <select
                   [ngModel]="editedSnippet().language"
-                  (ngModelChange)="editedSnippet.set({...editedSnippet(), language: $event})"
+                  (ngModelChange)="updateEditedLanguage($event)"
                   [disabled]="!isEditing()"
                   class="w-full px-3 py-2 bg-white border border-[#e6dfc7] rounded text-sm focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60">
                   @for (lang of languages; track lang) {
@@ -255,7 +256,7 @@
           <input
             type="text"
             [ngModel]="transformData().title"
-            (ngModelChange)="transformData.set({...transformData(), title: $event})"
+            (ngModelChange)="updateTransformTitle($event)"
             placeholder="Post title"
             class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
         </div>
@@ -264,7 +265,7 @@
           <label class="block text-sm text-[#6c6457] mb-2">Description</label>
           <textarea
             [ngModel]="transformData().description"
-            (ngModelChange)="transformData.set({...transformData(), description: $event})"
+            (ngModelChange)="updateTransformDescription($event)"
             placeholder="Describe what this code does..."
             rows="4"
             class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] resize-none"></textarea>
@@ -275,7 +276,7 @@
             type="checkbox"
             id="publish"
             [ngModel]="transformData().publish"
-            (ngModelChange)="transformData.set({...transformData(), publish: $event})"
+            (ngModelChange)="updateTransformPublish($event)"
             class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
           <label for="publish" class="text-sm text-[#4f493f]">Publish immediately</label>
         </div>

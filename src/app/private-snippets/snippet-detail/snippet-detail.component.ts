@@ -1,7 +1,9 @@
-import { Component, signal, computed, effect, inject } from '@angular/core';
+import { Component, signal, computed, effect, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { PrivateSnippetsService, PrivateSnippet, SnippetVersion, UpdateSnippetDto } from '../../services/private-snippets.service';
 
 @Component({
@@ -11,10 +13,11 @@ import { PrivateSnippetsService, PrivateSnippet, SnippetVersion, UpdateSnippetDt
   templateUrl: './snippet-detail.component.html',
   styleUrls: ['./snippet-detail.component.css']
 })
-export class SnippetDetailComponent {
+export class SnippetDetailComponent implements OnInit, OnDestroy {
   private snippetsService = inject(PrivateSnippetsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroy$ = new Subject<void>();
 
   snippetId = signal<number>(0);
   snippet = signal<PrivateSnippet | null>(null);
@@ -51,13 +54,19 @@ export class SnippetDetailComponent {
   isShowingTransformModal = computed(() => this.showTransformModal());
   isShowingVersionHistory = computed(() => this.showVersionHistory());
 
-  constructor() {
-    effect(() => {
-      this.route.params.subscribe(params => {
-        this.snippetId.set(+params['id']);
+  ngOnInit(): void {
+    this.route.params
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const id = +params['id'];
+        this.snippetId.set(id);
         this.loadSnippet();
       });
-    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadSnippet(): void {
@@ -250,5 +259,30 @@ export class SnippetDetailComponent {
       'php': '🐘'
     };
     return icons[language.toLowerCase()] || '📝';
+  }
+
+  // Helper methods for updating nested signal properties
+  updateEditedTitle(title: string): void {
+    this.editedSnippet.set({...this.editedSnippet(), title});
+  }
+
+  updateEditedContent(content: string): void {
+    this.editedSnippet.set({...this.editedSnippet(), content});
+  }
+
+  updateEditedLanguage(language: string): void {
+    this.editedSnippet.set({...this.editedSnippet(), language});
+  }
+
+  updateTransformTitle(title: string): void {
+    this.transformData.set({...this.transformData(), title});
+  }
+
+  updateTransformDescription(description: string): void {
+    this.transformData.set({...this.transformData(), description});
+  }
+
+  updateTransformPublish(publish: boolean): void {
+    this.transformData.set({...this.transformData(), publish});
   }
 }
