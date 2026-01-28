@@ -16,9 +16,12 @@ export interface PrivateSnippet {
 
 export interface SnippetVersion {
   id: number;
+  title?: string;
   content: string;
+  language: string;
+  version: number;
   createdAt: string;
-  note?: string;
+  updatedAt: string;
 }
 
 export interface CreateSnippetDto {
@@ -160,16 +163,35 @@ export class PrivateSnippetsService {
     if (params?.size) httpParams = httpParams.set('size', params.size.toString());
 
     return this.http.get<any>(`${this.apiUrl}/${id}/versions`, { params: httpParams }).pipe(
-      map(response => ({
-        versions: response.data?.versions || [],
-        total: response.data?.total || 0
-      }))
+      map(response => {
+        const data = response.data || response;
+        return {
+          versions: data.items || data.versions || [],
+          total: data.total || 0
+        };
+      })
     );
   }
 
   // Delete version
   deleteVersion(snippetId: number, versionId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${snippetId}/versions/${versionId}`);
+  }
+
+  // Restore version
+  restoreVersion(snippetId: number, versionId: number): Observable<PrivateSnippet> {
+    return this.http.post<any>(`${this.apiUrl}/${snippetId}/versions/${versionId}/restore`, {}).pipe(
+      map(response => {
+        const snippet = response.data?.snippet || response.snippet || response.data || response;
+        return {
+          ...snippet,
+          title: snippet.snippet?.title || snippet.title,
+          content: snippet.snippet?.content || snippet.content,
+          language: snippet.snippet?.language || snippet.language,
+          tags: snippet.tags || []
+        };
+      })
+    );
   }
 
   // Assign tag

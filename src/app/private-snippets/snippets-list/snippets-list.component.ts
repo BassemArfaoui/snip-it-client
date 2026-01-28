@@ -213,4 +213,17 @@ export class SnippetsListComponent {
     const lines = content.split('\n').slice(0, 3);
     return lines.join('\n');
   }
+
+  // Helper methods for updating newSnippet signal
+  updateNewSnippetTitle(title: string): void {
+    this.newSnippet.set({...this.newSnippet(), title});
+  }
+
+  updateNewSnippetLanguage(language: string): void {
+    this.newSnippet.set({...this.newSnippet(), language});
+  }
+
+  updateNewSnippetContent(content: string): void {
+    this.newSnippet.set({...this.newSnippet(), content});
+  }
 }

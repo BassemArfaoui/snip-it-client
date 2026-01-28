@@ -165,7 +165,7 @@
           <input
             type="text"
             [ngModel]="newSnippet().title"
-            (ngModelChange)="newSnippet.set({...newSnippet(), title: $event})"
+            (ngModelChange)="updateNewSnippetTitle($event)"
             placeholder="e.g., React useDebounce Hook"
             class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
         </div>
@@ -174,7 +174,7 @@
           <label class="block text-sm text-[#6c6457] mb-2">Language</label>
           <select
             [ngModel]="newSnippet().language"
-            (ngModelChange)="newSnippet.set({...newSnippet(), language: $event})"
+            (ngModelChange)="updateNewSnippetLanguage($event)"
             class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
             <option value="javascript">JavaScript</option>
             <option value="typescript">TypeScript</option>
@@ -192,7 +192,7 @@
           <label class="block text-sm text-[#6c6457] mb-2">Code</label>
           <textarea
             [ngModel]="newSnippet().content"
-            (ngModelChange)="newSnippet.set({...newSnippet(), content: $event})"
+            (ngModelChange)="updateNewSnippetContent($event)"
             placeholder="Paste your code here..."
             rows="12"
             class="w-full px-4 py-3 bg-[#f8f6ef] border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#111111] font-mono text-sm resize-none"></textarea>

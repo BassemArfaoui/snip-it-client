@@ -44,6 +44,8 @@ export class SnippetDetailComponent implements OnInit, OnDestroy {
   // Version history
   showVersionHistory = signal(false);
   selectedVersion = signal<SnippetVersion | null>(null);
+  showVersionsPanel = signal(false);
+  expandedVersionId = signal<number | null>(null);
 
   languages = ['javascript', 'typescript', 'python', 'java', 'css', 'html', 'go', 'rust', 'php', 'cpp', 'c', 'ruby', 'swift'];
 
@@ -91,15 +93,35 @@ export class SnippetDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadVersions(): void {
+  loadVersions(force: boolean = false): void {
+    // Only load if not already loaded or if forced
+    if (!force && this.versions().length > 0) return;
+    
     this.snippetsService.getVersions(this.snippetId()).subscribe({
       next: (response) => {
-        this.versions.set(response.versions);
+        console.log('Versions loaded:', response); // Debug log
+        this.versions.set(response.versions || []);
       },
       error: (err) => {
         console.error('Failed to load versions', err);
+        this.error.set('Failed to load version history');
       }
     });
+  }
+
+  toggleVersionsPanel(): void {
+    this.showVersionsPanel.set(!this.showVersionsPanel());
+    if (this.showVersionsPanel() && this.versions().length === 0) {
+      this.loadVersions();
+    }
+  }
+
+  toggleVersionExpansion(versionId: number): void {
+    if (this.expandedVersionId() === versionId) {
+      this.expandedVersionId.set(null);
+    } else {
+      this.expandedVersionId.set(versionId);
+    }
   }
 
   setTab(tab: 'code' | 'versions' | 'settings'): void {
@@ -139,6 +161,8 @@ export class SnippetDetailComponent implements OnInit, OnDestroy {
         this.isEditing.set(false);
         this.successMessage.set('Snippet saved successfully!');
         setTimeout(() => this.successMessage.set(''), 3000);
+        // Reload versions to show the new version
+        this.loadVersions(true);
       },
       error: (err) => {
         this.error.set('Failed to save snippet');
@@ -209,13 +233,30 @@ export class SnippetDetailComponent implements OnInit, OnDestroy {
 
   viewVersion(version: SnippetVersion): void {
     this.selectedVersion.set(version);
+    this.showVersionHistory.set(true);
   }
 
   restoreVersion(version: SnippetVersion): void {
-    if (!confirm('Restore this version? Current content will be saved as a new version.')) return;
+    if (!confirm('Restore this version? This will replace your current content.')) return;
     
-    this.editedSnippet.set({...this.editedSnippet(), content: version.content});
-    this.saveChanges();
+    this.snippetsService.restoreVersion(this.snippetId(), version.id).subscribe({
+      next: (snippet) => {
+        this.snippet.set(snippet);
+        this.editedSnippet.set({
+          title: snippet.title,
+          content: snippet.content,
+          language: snippet.language
+        });
+        this.successMessage.set('Version restored successfully!');
+        setTimeout(() => this.successMessage.set(''), 3000);
+        // Collapse the expanded version
+        this.expandedVersionId.set(null);
+      },
+      error: (err) => {
+        this.error.set('Failed to restore version');
+        console.error(err);
+      }
+    });
   }
 
   deleteVersion(version: SnippetVersion): void {

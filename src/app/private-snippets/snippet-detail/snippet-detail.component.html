@@ -208,37 +208,164 @@
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold">Version History</h3>
               <button 
-                (click)="setTab('versions'); loadVersions()"
-                class="text-[#d1a000] text-sm font-semibold">
-                VIEW ALL
+                (click)="toggleVersionsPanel()"
+                class="text-[#d1a000] text-sm font-semibold hover:text-[#b38c00]">
+                {{ showVersionsPanel() ? 'VIEW LESS' : 'VIEW ALL' }}
               </button>
             </div>
             
-            <div class="space-y-2">
-              <div class="flex items-center gap-2 p-2 bg-[#e9f8e4] border border-[#c9e7c0] rounded">
+            @if (!showVersionsPanel()) {
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 p-2 bg-[#e9f8e4] border border-[#c9e7c0] rounded">
+                  <div class="w-2 h-2 bg-[#5fa34c] rounded-full"></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium">Current Version</div>
+                    <div class="text-xs text-[#6d665a]">{{ formatDate(snippet()!.updatedAt) }}</div>
+                  </div>
+                </div>
+                
+                @for (version of versions().slice(0, 2); track version.id) {
+                  <div class="flex items-center gap-2 p-2 hover:bg-[#f8f4e3] rounded cursor-pointer">
+                    <div class="w-2 h-2 bg-[#c4bba5] rounded-full"></div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm">Version {{ version.version }}</div>
+                      <div class="text-xs text-[#8b8475]">{{ formatDate(version.createdAt) }}</div>
+                    </div>
+                    <button 
+                      (click)="restoreVersion(version)"
+                      class="text-xs text-[#d1a000] hover:text-[#b38c00] font-semibold">
+                      Restore
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+            
+            @if (showVersionsPanel()) {
+              <div class="space-y-2 max-h-96 overflow-y-auto">
+                @for (version of versions(); track version.id) {
+                  <div class="border border-[#eee8d8] rounded-lg overflow-hidden">
+                    <div 
+                      (click)="toggleVersionExpansion(version.id)"
+                      class="flex items-center gap-2 p-3 hover:bg-[#f8f4e3] cursor-pointer">
+                      <div class="w-2 h-2 bg-[#c4bba5] rounded-full"></div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                          <div class="text-sm font-semibold">Version {{ version.version }}</div>
+                          <span class="text-xs px-2 py-0.5 bg-[#f5f1e3] rounded">{{ version.language }}</span>
+                        </div>
+                        <div class="text-xs text-[#8b8475]">{{ formatDate(version.createdAt) }}</div>
+                      </div>
+                      <div class="text-[#8b8475]">
+                        {{ expandedVersionId() === version.id ? '▼' : '▶' }}
+                      </div>
+                    </div>
+                    
+                    @if (expandedVersionId() === version.id) {
+                      <div class="border-t border-[#eee8d8] p-4 bg-[#f8f6ef]">
+                        <div class="mb-4">
+                          <div class="text-sm font-semibold text-[#6d665a] mb-3 flex items-center gap-2">
+                            <span>📄 CONTENT</span>
+                            @if (version.title) {
+                              <span class="text-xs px-2 py-1 bg-white rounded border border-[#e6dfc7]">{{ version.title }}</span>
+                            }
+                          </div>
+                          <div class="bg-white border border-[#e6dfc7] rounded-lg p-4 overflow-y-auto max-h-64 shadow-sm">
+                            <pre class="text-sm font-mono text-[#1a1a1a] whitespace-pre-wrap break-words leading-relaxed">{{ version.content }}</pre>
+                          </div>
+                        </div>
+                        <div class="flex gap-2 pt-3 border-t border-[#eee8d8]">
+                          <button 
+                            (click)="restoreVersion(version); $event.stopPropagation()"
+                            class="px-4 py-2 bg-[#fff4c8] hover:bg-[#ffe500] rounded-lg text-sm font-semibold text-[#d1a000] transition-colors shadow-sm\">
+                            🔄 Restore
+                          </button>                          <button 
+                            (click)="deleteVersion(version); $event.stopPropagation()"
+                            class="px-4 py-2 bg-[#fff1f1] hover:bg-[#ffd1d1] rounded-lg text-sm font-semibold text-[#a83a3a] transition-colors shadow-sm\">
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Version History Tab View -->
+    @if (selectedTab() === 'versions' && !isLoading()) {
+      <div class="bg-white border border-[#eee8d8] rounded-xl shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
+        <!-- Header -->
+        <div class="border-b border-[#eee8d8] p-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold">Version History</h2>
+            <button 
+              (click)="setTab('code')"
+              class="text-[#8b8475] hover:text-[#0f0f0f]">
+              ×
+            </button>
+          </div>
+        </div>
+        
+        <!-- Versions List -->
+        <div class="divide-y divide-[#eee8d8]">
+          @if (versions().length === 0) {
+            <div class="p-8 text-center">
+              <div class="text-[#8b8475] mb-2">No version history yet</div>
+              <div class="text-sm text-[#9c9483]">Versions will appear after you save changes to this snippet</div>
+            </div>
+          }
+          
+          @if (versions().length > 0) {
+            <div class="p-4 bg-[#e9f8e4] border-b border-[#c9e7c0]">
+              <div class="flex items-center gap-2 mb-2">
                 <div class="w-2 h-2 bg-[#5fa34c] rounded-full"></div>
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium">Current Version</div>
-                  <div class="text-xs text-[#6d665a]">AM 10:42 AM today</div>
+                <div class="flex-1">
+                  <div class="text-sm font-semibold">Current Version</div>
+                  <div class="text-xs text-[#6d665a]">{{ formatDate(snippet()!.updatedAt) }}</div>
+                </div>
+              </div>
+              <div class="ml-4 text-xs text-[#5fa34c] font-mono">Latest</div>
+            </div>
+          }
+          
+          @for (version of versions(); track version.id) {
+            <div class="p-4 hover:bg-[#f8f4e3] transition-colors">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2 flex-1">
+                  <div class="w-2 h-2 bg-[#c4bba5] rounded-full"></div>
+                  <div class="flex-1">
+                    <div class="text-sm font-semibold">Version {{ version.version }}</div>
+                    <div class="text-xs text-[#8b8475]">{{ formatDate(version.createdAt) }}</div>
+                  </div>
                 </div>
               </div>
               
-              @for (version of versions().slice(0, 2); track version.id) {
-                <div class="flex items-center gap-2 p-2 hover:bg-[#f8f4e3] rounded cursor-pointer">
-                  <div class="w-2 h-2 bg-[#c4bba5] rounded-full"></div>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm">{{ formatDate(version.createdAt) }}</div>
-                    <div class="text-xs text-[#8b8475]">{{ version.note || 'Manually saved' }}</div>
-                  </div>
-                  <button 
-                    (click)="restoreVersion(version)"
-                    class="text-xs text-[#d1a000] hover:text-[#b38c00] font-semibold">
-                    Revert
-                  </button>
-                </div>
-              }
+              <div class="ml-4 mb-3 space-y-1 text-xs">
+                @if (version.title) {
+                  <div><strong>Title:</strong> {{ version.title }}</div>
+                }
+                <div><strong>Language:</strong> {{ version.language }}</div>
+              </div>
+              
+              <div class="ml-4 flex gap-2">
+                <button 
+                  (click)="restoreVersion(version)"
+                  class="px-3 py-1 bg-[#fff4c8] hover:bg-[#ffe500] rounded text-xs font-semibold text-[#d1a000] transition-colors">
+                  🔄 Restore
+                </button>
+                <button 
+                  (click)="deleteVersion(version)"
+                  class="px-3 py-1 bg-[#fff1f1] hover:bg-[#ffd1d1] rounded text-xs font-semibold text-[#a83a3a] transition-colors">
+                  🗑️ Delete
+                </button>
+              </div>
             </div>
-          </div>
+          }
         </div>
       </div>
     }
