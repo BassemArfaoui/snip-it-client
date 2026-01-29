@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommentsService, type Comment } from '../../../services/comments.service';
 import { InteractionsService } from '../../../services/interactions.service';
 import { type Post, type ReactionType } from '../../../services/posts.service';
+import { Collection, CollectionsService } from '../../../services/collections.service';
 
 @Component({
   selector: 'app-post-card',
@@ -36,10 +37,107 @@ export class PostCardComponent {
 
   readonly reactionsMenuOpen = signal(false);
 
+  readonly saveMenuOpen = signal(false);
+  readonly collectionsLoading = signal(false);
+  readonly collections = signal<Collection[]>([]);
+  readonly savingToCollection = signal(false);
+
+  private readonly defaultSavedPostsCollectionName = 'Saved Posts';
+
   constructor(
     private readonly commentsService: CommentsService,
     private readonly interactionsService: InteractionsService,
+    private readonly collectionsService: CollectionsService,
   ) {}
+
+  toggleSaveMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.saveMenuOpen.update((open) => !open);
+    if (this.saveMenuOpen() && this.collections().length === 0) {
+      this.loadCollections();
+    }
+  }
+
+  loadCollections() {
+    if (this.collectionsLoading()) return;
+    this.collectionsLoading.set(true);
+
+    this.collectionsService.getCollections({ page: 1, size: 100 }).subscribe({
+      next: (res) => {
+        this.collections.set(res.collections ?? []);
+        this.collectionsLoading.set(false);
+      },
+      error: () => {
+        this.collectionsLoading.set(false);
+      },
+    });
+  }
+
+  saveToDefaultCollection() {
+    this.ensureDefaultSavedPostsCollectionId().then((collectionId) => {
+      if (!collectionId) {
+        this.showToast('Save failed');
+        return;
+      }
+      this.savePostToCollection(collectionId);
+    });
+  }
+
+  savePostToCollection(collectionId: number) {
+    if (this.savingToCollection()) return;
+    this.savingToCollection.set(true);
+
+    this.collectionsService.addItem(collectionId, {
+      targetId: this.post.id,
+      targetType: 'POST',
+    }).subscribe({
+      next: () => {
+        this.savingToCollection.set(false);
+        this.saveMenuOpen.set(false);
+        this.showToast('Saved');
+      },
+      error: () => {
+        this.savingToCollection.set(false);
+        this.saveMenuOpen.set(false);
+        this.showToast('Already saved');
+      },
+    });
+  }
+
+  private async ensureDefaultSavedPostsCollectionId(): Promise<number | null> {
+    const existing = this.collections()
+      .find((c) => c.name?.trim().toLowerCase() === this.defaultSavedPostsCollectionName.toLowerCase());
+
+    if (existing) return existing.id;
+
+    // If collections were never loaded, load them first.
+    if (this.collections().length === 0) {
+      await new Promise<void>((resolve) => {
+        this.collectionsService.getCollections({ page: 1, size: 100, q: this.defaultSavedPostsCollectionName }).subscribe({
+          next: (res) => {
+            this.collections.set(res.collections ?? []);
+            resolve();
+          },
+          error: () => resolve(),
+        });
+      });
+
+      const afterLoad = this.collections()
+        .find((c) => c.name?.trim().toLowerCase() === this.defaultSavedPostsCollectionName.toLowerCase());
+      if (afterLoad) return afterLoad.id;
+    }
+
+    // Create the default collection when it doesn't exist.
+    return await new Promise<number | null>((resolve) => {
+      this.collectionsService.createCollection({ name: this.defaultSavedPostsCollectionName }).subscribe({
+        next: (created) => {
+          this.collections.update((current) => [created, ...current]);
+          resolve(created.id);
+        },
+        error: () => resolve(null),
+      });
+    });
+  }
 
   openCommentsModal() {
     this.commentsModalOpen.set(true);
