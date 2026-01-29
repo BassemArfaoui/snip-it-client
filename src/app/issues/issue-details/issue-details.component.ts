@@ -134,7 +134,7 @@ export class IssueDetailsComponent implements OnInit {
   }
 
   isIssueOwner(): boolean {
-    return !!this.issue?.author && this.issue.author.id === this.currentUserId;
+    return this.issue?.author?.id === this.currentUserId;
   }
 
   isSolutionOwner(solution: Solution): boolean {

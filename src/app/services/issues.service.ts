@@ -18,7 +18,7 @@ export interface Issue {
   likesCount: number;
   dislikesCount: number;
   created_at: string;
-  author: IssueAuthor;
+  author: IssueAuthor | null;
 }
 
 export interface IssueDetails extends Issue {

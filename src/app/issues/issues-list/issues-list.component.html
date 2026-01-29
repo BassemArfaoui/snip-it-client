@@ -89,7 +89,7 @@
                     <span class="material-symbols-outlined text-primary text-lg">person</span>
                   </div>
                   <div>
-                    <span class="font-semibold text-text-main dark:text-white block">{{ issue.author.username || 'Deleted User' }}</span>
+                    <span class="font-semibold text-text-main dark:text-white block">{{ issue.author?.username || 'Deleted User' }}</span>
                     <div class="flex items-center gap-2 text-xs text-text-muted dark:text-gray-400">
                       <span>{{ formatDate(issue.created_at) }}</span>
                       <span>·</span>
