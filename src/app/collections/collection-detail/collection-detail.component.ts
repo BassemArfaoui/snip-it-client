@@ -636,15 +636,15 @@ export class CollectionDetailComponent implements OnInit {
   getItemIcon(type: string): string {
     switch(type) {
       case 'PRIVATE_SNIPPET':
-        return '💾';
+        return 'code';
       case 'POST':
-        return '📝';
+        return 'article';
       case 'ISSUE':
-        return '🔴';
+        return 'report';
       case 'SOLUTION':
-        return '✅';
+        return 'check_circle';
       default:
-        return '📄';
+        return 'description';
     }
   }
 

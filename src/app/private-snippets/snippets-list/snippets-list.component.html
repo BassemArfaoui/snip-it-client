@@ -75,7 +75,7 @@
     <!-- Empty State -->
     @if (isEmptyState()) {
       <div class="text-center py-20">
-        <div class="text-6xl mb-4">📝</div>
+        <span class="material-symbols-outlined text-6xl mb-4 text-primary">code</span>
         <h3 class="text-2xl font-bold text-text-main dark:text-white mb-2">No snippets yet</h3>
         <p class="text-text-muted dark:text-gray-400 mb-6">Create your first code snippet to get started</p>
         <button 
@@ -99,7 +99,7 @@
               <!-- Header -->
               <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center gap-3 flex-1">
-                  <div class="text-2xl">{{ getLanguageIcon(snippet.language) }}</div>
+                  <span class="material-symbols-outlined text-[24px] text-primary">{{ getLanguageIcon(snippet.language) }}</span>
                   <div class="flex-1 min-w-0">
                     <h3 class="text-lg font-semibold text-text-main dark:text-white mb-1 line-clamp-1">{{ snippet.title }}</h3>
                     <div class="flex items-center gap-2 text-sm">
@@ -113,7 +113,7 @@
                 <button 
                   (click)="deleteSnippet($event, snippet)"
                   class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl">
-                  <span class="text-text-muted dark:text-gray-400 hover:text-danger">🗑️</span>
+                  <span class="material-symbols-outlined text-[20px] text-text-muted dark:text-gray-400 hover:text-danger">delete</span>
                 </button>
               </div>
               

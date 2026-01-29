@@ -237,14 +237,13 @@ export class CollectionsListComponent implements OnInit {
   }
 
   getCollectionIcon(collection: Collection): string {
-    // Return emoji based on collection name or type
     const name = collection.name.toLowerCase();
-    if (name.includes('react')) return '⚛️';
-    if (name.includes('python')) return '🐍';
-    if (name.includes('css')) return '🎨';
-    if (name.includes('design')) return '🎨';
-    if (name.includes('api')) return '🔌';
-    if (name.includes('legacy')) return '📦';
-    return '📁';
+    if (name.includes('react')) return 'code';
+    if (name.includes('python')) return 'terminal';
+    if (name.includes('css')) return 'palette';
+    if (name.includes('design')) return 'palette';
+    if (name.includes('api')) return 'api';
+    if (name.includes('legacy')) return 'inventory_2';
+    return 'folder';
   }
 }

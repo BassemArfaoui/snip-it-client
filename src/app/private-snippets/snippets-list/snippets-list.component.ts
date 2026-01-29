@@ -168,17 +168,17 @@ export class SnippetsListComponent {
 
   getLanguageIcon(language: string): string {
     const icons: Record<string, string> = {
-      'javascript': '💛',
-      'typescript': '💙',
-      'python': '🐍',
-      'java': '☕',
-      'css': '🎨',
-      'html': '📄',
-      'go': '🔷',
-      'rust': '🦀',
-      'php': '🐘'
+      'javascript': 'code',
+      'typescript': 'data_object',
+      'python': 'terminal',
+      'java': 'code',
+      'css': 'palette',
+      'html': 'language',
+      'go': 'tune',
+      'rust': 'settings',
+      'php': 'dns'
     };
-    return icons[language.toLowerCase()] || '📝';
+    return icons[language.toLowerCase()] || 'code';
   }
 
   getLanguageColor(language: string): string {

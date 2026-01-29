@@ -103,7 +103,7 @@
     <!-- Empty State -->
     @if (!loading() && filteredCollections().length === 0) {
       <div class="text-center py-20">
-        <div class="text-6xl mb-4">📁</div>
+        <span class="material-symbols-outlined text-6xl mb-4 text-primary">folder</span>
         <h3 class="text-2xl font-bold text-text-main dark:text-white mb-2">No collections yet</h3>
         <p class="text-text-muted dark:text-gray-400 mb-6">Create your first collection to organize your code snippets</p>
         <button 
@@ -129,18 +129,18 @@
                 (click)="openEditModal($event, collection)"
                 class="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl"
                 title="Edit collection">
-                <span class="text-text-muted dark:text-gray-400 hover:text-primary">✏️</span>
+                <span class="material-symbols-outlined text-[20px] text-text-muted dark:text-gray-400 hover:text-primary">edit</span>
               </button>
               <button 
                 (click)="deleteCollection($event, collection)"
                 class="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl"
                 title="Delete collection">
-                <span class="text-text-muted dark:text-gray-400 hover:text-danger">🗑️</span>
+                <span class="material-symbols-outlined text-[20px] text-text-muted dark:text-gray-400 hover:text-danger">delete</span>
               </button>
             </div>
             
             <!-- Icon -->
-            <div class="text-4xl mb-4">{{ getCollectionIcon(collection) }}</div>
+            <span class="material-symbols-outlined text-4xl mb-4 text-primary">{{ getCollectionIcon(collection) }}</span>
             <!-- Title & Badge -->
             <div class="flex items-start gap-2 mb-2">
               <h3 class="text-lg font-semibold text-text-main dark:text-white flex-1 line-clamp-1">{{ collection.name }}</h3>
@@ -150,7 +150,7 @@
                 </span>
               } @else {
                 <span class="px-2 py-0.5 bg-white/60 dark:bg-white/5 text-text-muted dark:text-gray-400 text-xs rounded-full border border-gray-100 dark:border-white/10">
-                  🔒
+                  <span class="material-symbols-outlined text-[16px] align-middle">lock</span>
                 </span>
               }
             </div>
@@ -163,7 +163,7 @@
             <!-- Stats -->
             <div class="flex items-center justify-between text-sm">
               <div class="flex items-center gap-2 text-text-muted dark:text-gray-400">
-                <span>📦</span>
+                <span class="material-symbols-outlined text-[18px]">inventory_2</span>
                 <span>{{ collection.itemCount || 0 }} Items</span>
               </div>
               <button class="text-text-main dark:text-white font-semibold hover:text-primary transition-colors">

@@ -29,7 +29,8 @@
             <button 
               (click)="openEditModal()"
               class="px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors font-semibold shadow-soft text-text-main dark:text-white">
-              ✏️ Edit
+              <span class="material-symbols-outlined text-[18px] align-middle mr-1">edit</span>
+              Edit
             </button>
             <button 
               (click)="shareCollection()"
@@ -146,7 +147,7 @@
                 
                 <div class="flex items-start gap-4">
                   <!-- Icon -->
-                  <div class="text-2xl">{{ getItemIcon(item.targetType) }}</div>
+                  <span class="material-symbols-outlined text-[28px] text-primary">{{ getItemIcon(item.targetType) }}</span>
                   
                   <!-- Content -->
                   <div class="flex-1 min-w-0">
@@ -158,29 +159,31 @@
                         (click)="togglePin($event, item)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Toggle pin">
-                        <span [ngClass]="item.isPinned ? 'text-warning' : 'text-text-muted dark:text-gray-500'">
-                          {{ item.isPinned ? '📌' : '📍' }}
-                        </span>
+                        <span
+                          class="material-symbols-outlined text-[20px]"
+                          [class.filled-icon]="item.isPinned"
+                          [ngClass]="item.isPinned ? 'text-warning' : 'text-text-muted dark:text-gray-500'">push_pin</span>
                       </button>
                       <button 
                         (click)="toggleFavorite($event, item)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Toggle favorite">
-                        <span [ngClass]="item.isFavorite ? 'text-warning' : 'text-text-muted dark:text-gray-500'">
-                          {{ item.isFavorite ? '★' : '☆' }}
-                        </span>
+                        <span
+                          class="material-symbols-outlined text-[20px]"
+                          [class.filled-icon]="item.isFavorite"
+                          [ngClass]="item.isFavorite ? 'text-warning' : 'text-text-muted dark:text-gray-500'">star</span>
                       </button>
                       <button 
                         (click)="openMoveModal($event, item)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity text-text-muted dark:text-gray-500 hover:text-primary"
                         title="Move to another collection">
-                        📦
+                        <span class="material-symbols-outlined text-[20px]">drive_file_move</span>
                       </button>
                       <button 
                         (click)="removeItem($event, item)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity text-text-muted dark:text-gray-500 hover:text-danger"
                         title="Remove from collection">
-                        ×
+                        <span class="material-symbols-outlined text-[20px]">remove_circle</span>
                       </button>
                     </div>
                     
@@ -208,7 +211,7 @@
             <!-- Empty State -->
             @if (items().length === 0) {
               <div class="text-center py-12">
-                <div class="text-5xl mb-4">📦</div>
+                <span class="material-symbols-outlined text-5xl mb-4 text-primary">inventory_2</span>
                 <h3 class="text-lg font-semibold mb-2">No items in this collection</h3>
                 <p class="text-text-muted dark:text-gray-400 mb-4">Start adding snippets, posts, or issues</p>
                 <button 
@@ -280,7 +283,7 @@
               <button 
                 (click)="shareCollection()"
                 class="px-3 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 rounded transition-colors shadow-soft hover:border-primary">
-                📋
+                <span class="material-symbols-outlined text-[18px]">content_copy</span>
               </button>
             </div>
 
@@ -339,7 +342,7 @@
                 <!-- Item Preview -->
                 <div class="mb-4 p-3 bg-background-light dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl">
                   <div class="flex items-center gap-3">
-                    <div class="text-2xl">{{ getItemIcon(itemToMove()?.targetType || '') }}</div>
+                    <span class="material-symbols-outlined text-[24px] text-primary">{{ getItemIcon(itemToMove()?.targetType || '') }}</span>
                     <div class="flex-1 min-w-0">
                       <div class="font-semibold text-sm line-clamp-1">
                         {{ itemToMove()?.target?.title || 'Untitled' }}
@@ -365,7 +368,7 @@
                     <div class="max-h-64 overflow-y-auto space-y-2">
                       @if (userCollections().length === 0) {
                         <div class="text-center py-8 text-text-muted dark:text-gray-400">
-                          <div class="text-3xl mb-2">📦</div>
+                          <span class="material-symbols-outlined text-3xl mb-2 text-primary">inventory_2</span>
                           <p class="text-sm">No other collections available</p>
                         </div>
                       }
@@ -387,7 +390,7 @@
                               </div>
                             </div>
                             @if (destinationCollectionId() === col.id) {
-                              <span class="text-primary">✓</span>
+                              <span class="material-symbols-outlined text-[18px] text-primary">check</span>
                             }
                           </div>
                         </button>
