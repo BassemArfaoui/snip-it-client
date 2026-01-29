@@ -1,12 +1,13 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { PostsService, type Post } from '../services/posts.service';
 import { PostCardComponent } from './components/post-card/post-card.component';
 
 @Component({
   selector: 'snip-it-dashboard',
   standalone: true,
-  imports: [CommonModule, PostCardComponent],
+  imports: [CommonModule, RouterModule, PostCardComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {

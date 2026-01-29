@@ -54,6 +54,15 @@ export interface PaginatedPosts {
   totalPages: number;
 }
 
+export interface CreatePostRequest {
+  title: string;
+  description: string;
+  snippetContent: string;
+  snippetLanguage: string;
+  snippetTitle?: string;
+  githubLink?: string;
+}
+
 interface ApiResponse<T> {
   data: T;
   message: string;
@@ -98,5 +107,9 @@ export class PostsService {
 
   getPostById(id: number): Observable<Post> {
     return this.http.get<ApiResponse<Post>>(`${this.apiUrl}/${id}`).pipe(map((res) => res.data));
+  }
+
+  createPost(post: CreatePostRequest): Observable<Post> {
+    return this.http.post<ApiResponse<Post>>(this.apiUrl, post).pipe(map((res) => res.data));
   }
 }

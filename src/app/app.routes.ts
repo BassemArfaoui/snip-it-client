@@ -12,6 +12,7 @@ import { IssuesListComponent } from './issues/issues-list/issues-list.component'
 import { IssueDetailsComponent } from './issues/issue-details/issue-details.component';
 import { CreateIssueComponent } from './issues/create-issue/create-issue.component';
 import { EditIssueComponent } from './issues/edit-issue/edit-issue.component';
+import { CreatePostComponent } from './posts/create-post/create-post.component';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -22,6 +23,7 @@ export const routes: Routes = [
 	{ path: 'reset-password', component: ResetPasswordComponent },
 	{ path: 'auth-success', component: GitHubCallbackComponent },
 	{ path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+	{ path: 'posts/new', component: CreatePostComponent, canActivate: [AuthGuard] },
 	{ path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/new', component: CreateIssueComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/:id/edit', component: EditIssueComponent, canActivate: [AuthGuard] },
