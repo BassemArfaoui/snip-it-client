@@ -15,19 +15,19 @@ import { EditIssueComponent } from './issues/edit-issue/edit-issue.component';
 import { CreatePostComponent } from './posts/create-post/create-post.component';
 
 export const routes: Routes = [
-	{ path: '', pathMatch: 'full', redirectTo: 'login' },
+	{ path: '', component: DashboardComponent, canActivate: [AuthGuard] },
 	{ path: 'login', component: LoginPageComponent },
 	{ path: 'signup', component: SignupPageComponent },
 	{ path: 'verify-email', component: VerifyEmailComponent },
 	{ path: 'forgot-password', component: ForgotPasswordComponent },
 	{ path: 'reset-password', component: ResetPasswordComponent },
 	{ path: 'auth-success', component: GitHubCallbackComponent },
-	{ path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+	{ path: 'dashboard', pathMatch: 'full', redirectTo: '' },
 	{ path: 'posts/new', component: CreatePostComponent, canActivate: [AuthGuard] },
 	{ path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/new', component: CreateIssueComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/:id/edit', component: EditIssueComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/:id', component: IssueDetailsComponent },
 	{ path: 'issues', component: IssuesListComponent },
-	{ path: '**', redirectTo: 'login' }
+	{ path: '**', redirectTo: '' }
 ];

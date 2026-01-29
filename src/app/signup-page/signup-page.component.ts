@@ -116,7 +116,7 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit, On
       next: () => {
         this.loading = false;
         login();
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/']);
       },
       error: (err) => {
         this.handleError(err, 'OTP verification failed. Please try again.');

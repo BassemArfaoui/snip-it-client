@@ -32,9 +32,9 @@ export class LoginPageComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(8)]]
     });
 
-    // Redirect to dashboard if already logged in
+    // Redirect to feed if already logged in
     if (isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/']);
       return;
     }
 
@@ -69,7 +69,7 @@ export class LoginPageComponent implements OnInit {
       next: () => {
         this.loading = false;
         login();
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/']);
       },
       error: (err) => {
         this.loading = false;

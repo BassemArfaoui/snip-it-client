@@ -58,7 +58,7 @@ export class VerifyEmailComponent extends BaseAuthComponent implements OnInit, O
         localStorage.removeItem('pendingVerificationEmail');
         
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/']);
         }, 2000);
       },
       error: (err) => {

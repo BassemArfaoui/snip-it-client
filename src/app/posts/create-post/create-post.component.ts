@@ -84,7 +84,7 @@ export class CreatePostComponent implements OnInit {
 
     this.postsService.createPost(request).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/']);
       },
       error: () => {
         this.submitting = false;

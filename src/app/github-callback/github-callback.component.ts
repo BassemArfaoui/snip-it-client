@@ -55,9 +55,9 @@ export class GitHubCallbackComponent extends BaseAuthComponent implements OnInit
     const user = this.authService.getUsername();
     username.set(user);
 
-    // Redirect to dashboard
+    // Redirect to feed
     this.loading = false;
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/']);
   }
 
   private getCookie(name: string): string | null {
