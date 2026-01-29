@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload } from '../services/profile.service';
 import { SubscriptionService } from '../services/subscription.service';
@@ -16,7 +16,7 @@ interface Badge {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -29,7 +29,6 @@ export class ProfileComponent implements OnInit {
   // Tab data
   posts: Post[] = [];
   issues: Issue[] = [];
-  savedPosts: Post[] = [];
   badges: Badge[] = [];
   leaderboard: LeaderBoardUser[] = [];
   contributionGraph: ContributionDay[] = [];
@@ -58,7 +57,6 @@ export class ProfileComponent implements OnInit {
   error: string = '';
   postsError: string = '';
   issuesError: string = '';
-  savedPostsError: string = '';
   badgesError: string = '';
   leaderboardError: string = '';
   graphError: string = '';
@@ -132,9 +130,6 @@ export class ProfileComponent implements OnInit {
       case 'issues':
         this.loadIssues();
         break;
-      case 'saved':
-        this.loadSavedPosts();
-        break;
       case 'badges':
         this.loadBadges();
         break;
@@ -192,28 +187,6 @@ export class ProfileComponent implements OnInit {
           this.issuesError = 'Access denied';
         } else {
           this.issuesError = err?.error?.message || 'Failed to load issues';
-        }
-      }
-    });
-  }
-
-  loadSavedPosts(): void {
-    this.savedPostsError = '';
-    this.profileService.getSavedPosts(this.userId).subscribe({
-      next: (data) => {
-        this.savedPosts = data || [];
-        this.savedPostsError = '';
-      },
-      error: (err) => {
-        console.error('Saved posts error:', err);
-        this.savedPosts = [];
-        const status = err?.status;
-        if (status === 403) {
-          this.savedPostsError = 'You can only view your own saved posts';
-        } else if (status === 401) {
-          this.savedPostsError = 'Please log in to view saved posts';
-        } else {
-          this.savedPostsError = err?.error?.message || 'Failed to load saved posts';
         }
       }
     });

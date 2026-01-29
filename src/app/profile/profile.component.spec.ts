@@ -14,7 +14,6 @@ const profileServiceMock: jasmine.SpyObj<ProfileService> = jasmine.createSpyObj(
   'getProfile',
   'getUserPosts',
   'getUserIssues',
-  'getSavedPosts',
   'getBadges',
   'getLeaderBoard',
   'getContributionGraph',
@@ -24,7 +23,6 @@ const profileServiceMock: jasmine.SpyObj<ProfileService> = jasmine.createSpyObj(
 profileServiceMock.getProfile.and.returnValue(of({ username: 'test', email: 'test@example.com' } as any));
 profileServiceMock.getUserPosts.and.returnValue(of([]));
 profileServiceMock.getUserIssues.and.returnValue(of([]));
-profileServiceMock.getSavedPosts.and.returnValue(of([]));
 profileServiceMock.getBadges.and.returnValue(of([]));
 profileServiceMock.getLeaderBoard.and.returnValue(of([]));
 profileServiceMock.getContributionGraph.and.returnValue(of([]));
