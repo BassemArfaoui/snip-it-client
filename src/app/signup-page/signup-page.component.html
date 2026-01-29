@@ -1,270 +1,282 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-background-light to-gray-100 dark:from-background-dark dark:to-gray-900 px-4 py-8">
-  <!-- Decorative elements -->
-  <div class="absolute top-20 left-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
-  <div class="absolute bottom-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-  
-  <div class="relative w-full max-w-md">
-    <!-- Logo/Brand -->
-    <div class="flex items-center justify-center gap-3 mb-8">
-      <div class="bg-primary p-3 rounded-xl text-black shadow-lg">
-        <span class="material-symbols-outlined text-3xl">code</span>
-      </div>
-      <h2 class="text-3xl font-bold text-text-main dark:text-white">Snip-it</h2>
-    </div>
-
-    <!-- Signup Card -->
-    <div class="bg-white dark:bg-card-dark rounded-2xl shadow-soft p-8 backdrop-blur-sm border border-gray-100 dark:border-white/10">
-      @if (!showOtpVerification) {
-        <!-- Signup Form -->
-        <div class="text-center mb-6">
-          <h1 class="text-2xl font-bold text-text-main dark:text-white mb-2">Create Your Account</h1>
-          <p class="text-text-muted dark:text-gray-400">Set up a secure profile and start saving snippets</p>
-        </div>
-
-        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-5">
-          <!-- Error Message -->
-          @if (error) {
-            <div class="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-              <span class="material-symbols-outlined text-lg">error</span>
-              <span>{{ error }}</span>
+<div class="min-h-screen bg-background-light dark:bg-background-dark flex items-center">
+  <div class="mx-auto w-full max-w-6xl px-4 py-12">
+    <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+      <!-- Brand panel (right on desktop) -->
+      <section class="lg:order-2">
+        <div class="mx-auto max-w-lg">
+          <div class="flex items-center gap-3 text-text-main dark:text-white">
+            <div class="bg-primary p-3 rounded-xl text-black">
+              <span class="material-symbols-outlined text-3xl">code</span>
             </div>
-          }
-
-          <!-- Full Name Input -->
-          <div>
-            <label for="fullName" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              id="fullName"
-              formControlName="fullName"
-              placeholder="Jordan Smith"
-              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              [class.border-red-500]="fullName?.invalid && fullName?.touched"
-            />
-            @if (fullName?.hasError('required') && fullName?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Full name is required</span>
-            }
-            @if (fullName?.hasError('minlength') && fullName?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Full name must be at least 3 characters</span>
-            }
+            <h2 class="text-3xl font-bold tracking-tight">Snip-it</h2>
           </div>
 
-          <!-- Username Input -->
-          <div>
-            <label for="username" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              formControlName="username"
-              autocomplete="username"
-              placeholder="jordansmith"
-              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              [class.border-red-500]="username?.invalid && username?.touched"
-            />
-            @if (username?.hasError('required') && username?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Username is required</span>
-            }
-            @if (username?.hasError('minlength') && username?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Username must be at least 3 characters</span>
-            }
-          </div>
+          <h1 class="mt-6 text-4xl font-bold tracking-tight text-text-main dark:text-white">
+            Build your snippet library.
+          </h1>
+          <p class="mt-4 text-lg leading-relaxed text-text-muted">
+            Keep private code, notes, and solutions organized — and find them instantly when you need them.
+          </p>
+          <p class="mt-3 text-sm text-text-muted">
+            Create an account in minutes.
+          </p>
+        </div>
+      </section>
 
-          <!-- Email Input -->
-          <div>
-            <label for="email" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              formControlName="email"
-              autocomplete="email"
-              placeholder="you@email.com"
-              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              [class.border-red-500]="email?.invalid && email?.touched"
-            />
-            @if (email?.hasError('required') && email?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Email is required</span>
-            }
-            @if (email?.hasError('email') && email?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Please enter a valid email</span>
-            }
-          </div>
+      <!-- Form panel (left on desktop) -->
+      <section class="lg:order-1">
+        <div class="mx-auto w-full max-w-md bg-white dark:bg-card-dark rounded-2xl shadow-soft p-8 border border-gray-100 dark:border-white/10">
+          @if (!showOtpVerification) {
+            <div class="mb-6">
+              <h1 class="text-2xl font-bold text-text-main dark:text-white">Create Your Account</h1>
+              <p class="mt-2 text-text-muted dark:text-gray-400">Set up a profile and start saving snippets.</p>
+              <p class="mt-2 text-sm text-text-muted">Step {{ signupStep }} of 2</p>
+            </div>
 
-          <!-- Password Input -->
-          <div>
-            <label for="password" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              formControlName="password"
-              autocomplete="new-password"
-              placeholder="Create a password"
-              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              [class.border-red-500]="password?.invalid && password?.touched"
-            />
-            @if (password?.hasError('required') && password?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Password is required</span>
-            }
-            @if (password?.hasError('minlength') && password?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Password must be at least 8 characters</span>
-            }
-          </div>
-
-          <!-- Confirm Password Input -->
-          <div>
-            <label for="confirm" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirm"
-              formControlName="confirm"
-              autocomplete="new-password"
-              placeholder="Re-enter password"
-              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              [class.border-red-500]="confirm?.invalid && confirm?.touched"
-            />
-            @if (confirm?.hasError('required') && confirm?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Confirm password is required</span>
-            }
-            @if (confirm?.hasError('minlength') && confirm?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Password must be at least 8 characters</span>
-            }
-            @if (signupForm.hasError('passwordMismatch') && confirm?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Passwords do not match</span>
-            }
-          </div>
-
-          <!-- Terms Checkbox -->
-          <div class="flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="terms"
-              formControlName="terms"
-              class="mt-1 w-4 h-4 rounded border-2 border-gray-200 dark:border-white/10 text-primary focus:ring-2 focus:ring-primary/20"
-              [class.border-red-500]="terms?.invalid && terms?.touched"
-            />
-            <label for="terms" class="text-sm text-text-main dark:text-white">
-              I agree to the <a href="#" class="text-primary hover:underline font-semibold">terms of service</a> and <a href="#" class="text-primary hover:underline font-semibold">privacy policy</a>
-              @if (terms?.hasError('required') && terms?.touched) {
-                <span class="text-red-500 text-xs mt-1 block">You must accept the terms</span>
+            <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-5">
+              @if (error) {
+                <div class="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                  <span class="material-symbols-outlined text-lg">error</span>
+                  <span>{{ error }}</span>
+                </div>
               }
-            </label>
-          </div>
 
-          <!-- Create Account Button -->
-          <button 
-            type="submit" 
-            [disabled]="!signupForm.valid || loading"
-            class="w-full py-3 px-6 bg-primary hover:bg-[#e6e205] text-black font-bold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-            @if (!loading) {
-              <span class="material-symbols-outlined">person_add</span>
-              <span>Create Account</span>
-            }
-            @if (loading) {
-              <span class="material-symbols-outlined animate-spin">progress_activity</span>
-              <span>Creating account...</span>
-            }
-          </button>
+              @if (signupStep === 1) {
+                <div>
+                  <label for="fullName" class="block text-sm font-semibold text-text-main dark:text-white mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    formControlName="fullName"
+                    placeholder="Jordan Smith"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    [class.border-red-500]="fullName?.invalid && fullName?.touched"
+                  />
+                  @if (fullName?.hasError('required') && fullName?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Full name is required</span>
+                  }
+                  @if (fullName?.hasError('minlength') && fullName?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Full name must be at least 3 characters</span>
+                  }
+                </div>
 
-          <!-- Divider -->
-          <div class="relative flex items-center gap-4 my-6">
-            <div class="flex-1 border-t border-gray-200 dark:border-white/10"></div>
-            <span class="text-sm text-text-muted dark:text-gray-400">or</span>
-            <div class="flex-1 border-t border-gray-200 dark:border-white/10"></div>
-          </div>
+                <div>
+                  <label for="username" class="block text-sm font-semibold text-text-main dark:text-white mb-2">Username</label>
+                  <input
+                    type="text"
+                    id="username"
+                    formControlName="username"
+                    autocomplete="username"
+                    placeholder="jordansmith"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    [class.border-red-500]="username?.invalid && username?.touched"
+                  />
+                  @if (username?.hasError('required') && username?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Username is required</span>
+                  }
+                  @if (username?.hasError('minlength') && username?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Username must be at least 3 characters</span>
+                  }
+                </div>
 
-          <!-- GitHub Signup -->
-          <a
-            href="http://localhost:3000/auth/github"
-            class="w-full py-3 px-6 bg-background-light dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-lg border-2 border-gray-200 dark:border-white/10 transition-all flex items-center justify-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-            </svg>
-            Sign up with GitHub
-          </a>
-        </form>
+                <button
+                  type="button"
+                  (click)="goToStep2()"
+                  [disabled]="loading"
+                  class="w-full py-3 px-6 bg-primary hover:bg-[#e6e205] text-black font-bold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                  <span>Next</span>
+                </button>
+              } @else {
+                <div>
+                  <label for="email" class="block text-sm font-semibold text-text-main dark:text-white mb-2">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    formControlName="email"
+                    autocomplete="email"
+                    placeholder="you@email.com"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    [class.border-red-500]="email?.invalid && email?.touched"
+                  />
+                  @if (email?.hasError('required') && email?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Email is required</span>
+                  }
+                  @if (email?.hasError('email') && email?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Please enter a valid email</span>
+                  }
+                </div>
 
-        <!-- Login Link -->
-        <p class="text-center mt-6 text-sm text-text-muted dark:text-gray-400">
-          Already have an account? <a routerLink="/login" class="text-primary hover:underline font-semibold">Log in</a>
-        </p>
-      } @else {
-        <!-- OTP Verification -->
-        <div class="text-center mb-6">
-          <div class="flex justify-center mb-4">
-            <div class="bg-primary/10 p-4 rounded-full">
-              <span class="material-symbols-outlined text-4xl text-primary">mail</span>
+                <div>
+                  <label for="password" class="block text-sm font-semibold text-text-main dark:text-white mb-2">Password</label>
+                  <input
+                    type="password"
+                    id="password"
+                    formControlName="password"
+                    autocomplete="new-password"
+                    placeholder="Create a password"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    [class.border-red-500]="password?.invalid && password?.touched"
+                  />
+                  @if (password?.hasError('required') && password?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Password is required</span>
+                  }
+                  @if (password?.hasError('minlength') && password?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Password must be at least 8 characters</span>
+                  }
+                </div>
+
+                <div>
+                  <label for="confirm" class="block text-sm font-semibold text-text-main dark:text-white mb-2">Confirm Password</label>
+                  <input
+                    type="password"
+                    id="confirm"
+                    formControlName="confirm"
+                    autocomplete="new-password"
+                    placeholder="Re-enter password"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    [class.border-red-500]="confirm?.invalid && confirm?.touched"
+                  />
+                  @if (confirm?.hasError('required') && confirm?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Confirm password is required</span>
+                  }
+                  @if (confirm?.hasError('minlength') && confirm?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Password must be at least 8 characters</span>
+                  }
+                  @if (signupForm.hasError('passwordMismatch') && confirm?.touched) {
+                    <span class="text-red-500 text-xs mt-1 block">Passwords do not match</span>
+                  }
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    formControlName="terms"
+                    class="mt-1 w-4 h-4 rounded border-2 border-gray-200 dark:border-white/10 text-primary focus:ring-2 focus:ring-primary/20"
+                    [class.border-red-500]="terms?.invalid && terms?.touched"
+                  />
+                  <label for="terms" class="text-sm text-text-main dark:text-white">
+                    I agree to the <a href="#" class="text-primary hover:underline font-semibold">terms of service</a> and
+                    <a href="#" class="text-primary hover:underline font-semibold">privacy policy</a>
+                    @if (terms?.hasError('required') && terms?.touched) {
+                      <span class="text-red-500 text-xs mt-1 block">You must accept the terms</span>
+                    }
+                  </label>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <button
+                    type="button"
+                    (click)="goToStep1()"
+                    [disabled]="loading"
+                    class="flex-1 py-3 px-6 bg-background-light dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-lg border-2 border-gray-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
+                  >
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    <span>Back</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    [disabled]="!signupForm.valid || loading"
+                    class="flex-1 py-3 px-6 bg-primary hover:bg-[#e6e205] text-black font-bold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    @if (!loading) {
+                      <span class="material-symbols-outlined">person_add</span>
+                      <span>Create Account</span>
+                    }
+                    @if (loading) {
+                      <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                      <span>Creating account...</span>
+                    }
+                  </button>
+                </div>
+
+                <div class="relative flex items-center gap-4 my-6">
+                  <div class="flex-1 border-t border-gray-200 dark:border-white/10"></div>
+                  <span class="text-sm text-text-muted dark:text-gray-400">or</span>
+                  <div class="flex-1 border-t border-gray-200 dark:border-white/10"></div>
+                </div>
+
+                <a
+                  href="http://localhost:3000/auth/github"
+                  class="w-full py-3 px-6 bg-background-light dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-lg border-2 border-gray-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                  </svg>
+                  Sign up with GitHub
+                </a>
+              }
+            </form>
+
+            <p class="text-center mt-6 text-sm text-text-muted dark:text-gray-400">
+              Already have an account? <a routerLink="/login" class="text-primary hover:underline font-semibold">Log in</a>
+            </p>
+          } @else {
+            <div class="mb-6">
+              <h1 class="text-2xl font-bold text-text-main dark:text-white">Check Your Email</h1>
+              <p class="mt-2 text-text-muted dark:text-gray-400">
+                We've sent a 6-digit code to <span class="font-semibold text-text-main dark:text-white">{{ userEmail }}</span>
+              </p>
             </div>
-          </div>
-          <h1 class="text-2xl font-bold text-text-main dark:text-white mb-2">Check Your Email</h1>
-          <p class="text-text-muted dark:text-gray-400">We've sent a 6-digit code to <span class="font-semibold text-text-main dark:text-white">{{ userEmail }}</span></p>
-        </div>
 
-        <form [formGroup]="otpForm" (ngSubmit)="onVerifyOtp()" class="space-y-5">
-          <!-- OTP Input -->
-          <div>
-            <label for="otp" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-              Verification Code
-            </label>
-            <input
-              type="text"
-              id="otp"
-              formControlName="otp"
-              maxlength="6"
-              placeholder="000000"
-              class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-center text-2xl tracking-widest font-mono"
-              [class.border-red-500]="otp?.invalid && otp?.touched"
-            />
-            @if (otp?.hasError('required') && otp?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Verification code is required</span>
-            }
-            @if (otp?.hasError('pattern') && otp?.touched) {
-              <span class="text-red-500 text-xs mt-1 block">Please enter a valid 6-digit code</span>
-            }
-          </div>
+            <form [formGroup]="otpForm" (ngSubmit)="onVerifyOtp()" class="space-y-5">
+              <div>
+                <label for="otp" class="block text-sm font-semibold text-text-main dark:text-white mb-2">Verification Code</label>
+                <input
+                  type="text"
+                  id="otp"
+                  formControlName="otp"
+                  maxlength="6"
+                  placeholder="000000"
+                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-main dark:text-white placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-center text-2xl tracking-widest font-mono"
+                  [class.border-red-500]="otp?.invalid && otp?.touched"
+                />
+                @if (otp?.hasError('required') && otp?.touched) {
+                  <span class="text-red-500 text-xs mt-1 block">Verification code is required</span>
+                }
+                @if (otp?.hasError('pattern') && otp?.touched) {
+                  <span class="text-red-500 text-xs mt-1 block">Please enter a valid 6-digit code</span>
+                }
+              </div>
 
-          <!-- Error Message -->
-          @if (error) {
-            <div class="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-              <span class="material-symbols-outlined text-lg">error</span>
-              <span>{{ error }}</span>
-            </div>
+              @if (error) {
+                <div class="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                  <span class="material-symbols-outlined text-lg">error</span>
+                  <span>{{ error }}</span>
+                </div>
+              }
+
+              <button
+                type="submit"
+                [disabled]="!otpForm.valid || loading"
+                class="w-full py-3 px-6 bg-primary hover:bg-[#e6e205] text-black font-bold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                @if (!loading) {
+                  <span class="material-symbols-outlined">verified</span>
+                  <span>Verify Email</span>
+                }
+                @if (loading) {
+                  <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                  <span>Verifying...</span>
+                }
+              </button>
+
+              <button
+                type="button"
+                (click)="onResendOtp()"
+                [disabled]="loading"
+                class="w-full py-3 px-6 bg-background-light dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-lg border-2 border-gray-200 dark:border-white/10 transition-all flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined">refresh</span>
+                <span>Resend Code</span>
+              </button>
+            </form>
           }
-
-          <!-- Verify Button -->
-          <button 
-            type="submit" 
-            [disabled]="!otpForm.valid || loading"
-            class="w-full py-3 px-6 bg-primary hover:bg-[#e6e205] text-black font-bold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-            @if (!loading) {
-              <span class="material-symbols-outlined">verified</span>
-              <span>Verify Email</span>
-            }
-            @if (loading) {
-              <span class="material-symbols-outlined animate-spin">progress_activity</span>
-              <span>Verifying...</span>
-            }
-          </button>
-
-          <!-- Resend Button -->
-          <button 
-            type="button"
-            (click)="onResendOtp()"
-            [disabled]="loading"
-            class="w-full py-3 px-6 bg-background-light dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-lg border-2 border-gray-200 dark:border-white/10 transition-all flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined">refresh</span>
-            <span>Resend Code</span>
-          </button>
-        </form>
-      }
+        </div>
+      </section>
     </div>
   </div>
 </div>

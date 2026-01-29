@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { isLoggedIn, logout, username, userId, setAuthService, getUsername, getUserId } from './auth.store';
 import { AuthService } from './auth.service';
 
@@ -15,10 +16,25 @@ export class AppComponent implements OnInit {
   isLoggedIn = isLoggedIn;
   username = username;
   userId = userId;
+
+  isAuthRoute = false;
   
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
+    this.isAuthRoute =
+      this.router.url.startsWith('/login') ||
+      this.router.url.startsWith('/signup') ||
+      this.router.url.startsWith('/forgot-password');
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.isAuthRoute =
+          event.urlAfterRedirects.startsWith('/login') ||
+          event.urlAfterRedirects.startsWith('/signup') ||
+          event.urlAfterRedirects.startsWith('/forgot-password');
+      });
+
     // Provide AuthService to auth store
     setAuthService(this.authService);
     

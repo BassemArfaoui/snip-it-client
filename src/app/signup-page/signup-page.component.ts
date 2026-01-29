@@ -19,6 +19,7 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit, On
   signupForm!: FormGroup;
   otpForm!: FormGroup;
   showOtpVerification = false;
+  signupStep: 1 | 2 = 1;
   userEmail = '';
 
   constructor(
@@ -32,6 +33,8 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit, On
 
   ngOnInit(): void {
     this.redirectIfLoggedIn();
+
+    this.signupStep = 1;
 
     this.signupForm = this.fb.group(
       {
@@ -79,7 +82,15 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit, On
   }
 
   onSubmit(): void {
-    if (!this.signupForm.valid || this.loading) return;
+    if (this.loading) return;
+
+    // Step 1 submit (e.g., pressing Enter) should advance to step 2
+    if (!this.showOtpVerification && this.signupStep === 1) {
+      this.goToStep2();
+      return;
+    }
+
+    if (!this.signupForm.valid) return;
 
     this.loading = true;
     this.error = null;
@@ -101,6 +112,21 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit, On
         this.handleError(err, 'Registration failed. Please try again.');
       }
     });
+  }
+
+  goToStep2(): void {
+    if (this.loading) return;
+
+    this.fullName?.markAsTouched();
+    this.username?.markAsTouched();
+
+    if (this.fullName?.invalid || this.username?.invalid) return;
+    this.signupStep = 2;
+  }
+
+  goToStep1(): void {
+    if (this.loading) return;
+    this.signupStep = 1;
   }
 
   onVerifyOtp(): void {
