@@ -42,7 +42,8 @@ export class PostCardComponent {
   readonly collections = signal<Collection[]>([]);
   readonly savingToCollection = signal(false);
 
-  private readonly defaultSavedPostsCollectionName = 'Saved Posts';
+  private readonly defaultSavedItemsCollectionName = 'Saved Items';
+  private readonly legacyDefaultCollectionNames = ['Saved Posts', 'Saved Issues', 'Saved Solutions'];
 
   constructor(
     private readonly commentsService: CommentsService,
@@ -105,15 +106,12 @@ export class PostCardComponent {
   }
 
   private async ensureDefaultSavedPostsCollectionId(): Promise<number | null> {
-    const existing = this.collections()
-      .find((c) => c.name?.trim().toLowerCase() === this.defaultSavedPostsCollectionName.toLowerCase());
-
-    if (existing) return existing.id;
+    const normalize = (name?: string | null) => (name ?? '').trim().toLowerCase();
 
     // If collections were never loaded, load them first.
     if (this.collections().length === 0) {
       await new Promise<void>((resolve) => {
-        this.collectionsService.getCollections({ page: 1, size: 100, q: this.defaultSavedPostsCollectionName }).subscribe({
+        this.collectionsService.getCollections({ page: 1, size: 100 }).subscribe({
           next: (res) => {
             this.collections.set(res.collections ?? []);
             resolve();
@@ -121,15 +119,35 @@ export class PostCardComponent {
           error: () => resolve(),
         });
       });
-
-      const afterLoad = this.collections()
-        .find((c) => c.name?.trim().toLowerCase() === this.defaultSavedPostsCollectionName.toLowerCase());
-      if (afterLoad) return afterLoad.id;
     }
 
-    // Create the default collection when it doesn't exist.
+    const desiredName = this.defaultSavedItemsCollectionName;
+    const desired = this.collections().find((c) => normalize(c.name) === normalize(desiredName));
+    if (desired) return desired.id;
+
+    const legacy = this.collections().find((c) =>
+      this.legacyDefaultCollectionNames.some((legacyName) => normalize(c.name) === normalize(legacyName))
+    );
+
+    if (legacy) {
+      // Rename legacy default collection to the new shared name.
+      await new Promise<void>((resolve) => {
+        this.collectionsService.updateCollection(legacy.id, { name: desiredName }).subscribe({
+          next: () => {
+            this.collections.update((current) =>
+              current.map((c) => (c.id === legacy.id ? { ...c, name: desiredName } : c))
+            );
+            resolve();
+          },
+          error: () => resolve(),
+        });
+      });
+      return legacy.id;
+    }
+
+    // Create the shared default collection when it doesn't exist.
     return await new Promise<number | null>((resolve) => {
-      this.collectionsService.createCollection({ name: this.defaultSavedPostsCollectionName }).subscribe({
+      this.collectionsService.createCollection({ name: desiredName }).subscribe({
         next: (created) => {
           this.collections.update((current) => [created, ...current]);
           resolve(created.id);

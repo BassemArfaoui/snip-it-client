@@ -271,7 +271,7 @@
         <div class="space-y-5">
           @for (solution of solutions; track solution.id) {
             <article
-              class="bg-white dark:bg-card-dark rounded-2xl shadow-soft overflow-hidden transition-shadow duration-200 hover:shadow-lg"
+              class="bg-white dark:bg-card-dark rounded-2xl shadow-soft transition-shadow duration-200 hover:shadow-lg"
               [ngClass]="{
                 'ring-2 ring-primary': solution.isAccepted
               }">
@@ -303,6 +303,60 @@
                   </div>
 
                   <div class="flex items-center gap-1">
+                    @if (isAuthenticated) {
+                      <div class="relative" (click)="$event.stopPropagation()">
+                        <button
+                          type="button"
+                          class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                          (click)="toggleSaveSolutionMenu(solution.id, $event)"
+                          aria-label="Save solution">
+                          <span class="material-symbols-outlined">bookmark_add</span>
+                        </button>
+
+                        @if (saveMenuOpenSolutionId === solution.id) {
+                          <div class="absolute right-0 mt-2 w-64 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-card-dark shadow-soft overflow-hidden z-10">
+                            <button
+                              type="button"
+                              class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-text-main dark:text-white hover:bg-background-light dark:hover:bg-white/5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                              [disabled]="savingToCollection"
+                              (click)="saveSolutionToDefaultCollection(solution.id)">
+                              <span class="material-symbols-outlined text-xl">bookmark</span>
+                              <span>Save</span>
+                            </button>
+
+                            <div class="px-4 py-2 text-xs font-bold text-text-muted dark:text-gray-400 bg-background-light/40 dark:bg-white/5">
+                              Save to collection
+                            </div>
+
+                            @if (collectionsLoading) {
+                              <div class="px-4 py-3 text-sm text-text-muted dark:text-gray-400 flex items-center gap-2">
+                                <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                                <span>Loading…</span>
+                              </div>
+                            } @else {
+                              <div class="max-h-60 overflow-auto">
+                                @for (col of collections; track col.id) {
+                                  <button
+                                    type="button"
+                                    class="w-full text-left flex items-center gap-3 px-4 py-3 text-sm font-semibold text-text-main dark:text-white hover:bg-background-light dark:hover:bg-white/5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                    [disabled]="savingToCollection"
+                                    (click)="saveSolutionToCollection(solution.id, col.id)">
+                                    <span class="material-symbols-outlined text-xl">folder</span>
+                                    <span class="truncate">{{ col.name }}</span>
+                                  </button>
+                                }
+
+                                @if (collections.length === 0) {
+                                  <div class="px-4 py-3 text-sm text-text-muted dark:text-gray-400">
+                                    No collections yet.
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
                     @if (isAuthenticated && !solution.isAccepted) {
                       @if (canAcceptSolution()) {
                         <button

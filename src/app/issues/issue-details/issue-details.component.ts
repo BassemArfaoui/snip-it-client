@@ -7,6 +7,7 @@ import { SolutionsService, Solution } from '../../services/solutions.service';
 import { VotesService, VoteType } from '../../services/votes.service';
 import { CommentsService, Comment } from '../../services/comments.service';
 import { AuthService } from '../../auth.service';
+import { Collection, CollectionsService } from '../../services/collections.service';
 import { LanguageBadgeComponent } from '../../shared/language-badge/language-badge.component';
 import { ResolvedBadgeComponent } from '../../shared/resolved-badge/resolved-badge.component';
 import { AcceptedBadgeComponent } from '../../shared/accepted-badge/accepted-badge.component';
@@ -73,6 +74,14 @@ export class IssueDetailsComponent implements OnInit {
   // Accept solution loading
   acceptingSolutionId: number | null = null;
 
+  // Save solutions
+  saveMenuOpenSolutionId: number | null = null;
+  collectionsLoading = false;
+  collections: Collection[] = [];
+  savingToCollection = false;
+  private readonly defaultSavedItemsCollectionName = 'Saved Items';
+  private readonly legacyDefaultCollectionNames = ['Saved Posts', 'Saved Issues', 'Saved Solutions'];
+
   // Image upload settings
   readonly maxUploadSize = 2 * 1024 * 1024; // 2MB
   readonly maxImageDimension = 1024; // pixels
@@ -84,7 +93,8 @@ export class IssueDetailsComponent implements OnInit {
     private solutionsService: SolutionsService,
     private votesService: VotesService,
     private commentsService: CommentsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private collectionsService: CollectionsService,
   ) {}
 
   ngOnInit() {
@@ -407,6 +417,104 @@ export class IssueDetailsComponent implements OnInit {
     this.toastTimeout = setTimeout(() => {
       this.toastMessage = null;
     }, 4000);
+  }
+
+  toggleSaveSolutionMenu(solutionId: number, event: MouseEvent) {
+    event.stopPropagation();
+    this.saveMenuOpenSolutionId = this.saveMenuOpenSolutionId === solutionId ? null : solutionId;
+    if (this.saveMenuOpenSolutionId !== null && this.collections.length === 0) {
+      this.loadCollections();
+    }
+  }
+
+  loadCollections() {
+    if (this.collectionsLoading) return;
+    this.collectionsLoading = true;
+
+    this.collectionsService.getCollections({ page: 1, size: 100 }).subscribe({
+      next: (res) => {
+        this.collections = res.collections ?? [];
+        this.collectionsLoading = false;
+      },
+      error: () => {
+        this.collectionsLoading = false;
+      },
+    });
+  }
+
+  saveSolutionToDefaultCollection(solutionId: number) {
+    this.ensureDefaultSavedItemsCollectionId().then((collectionId) => {
+      if (!collectionId) {
+        this.showToast('Save failed', 'error');
+        return;
+      }
+      this.saveSolutionToCollection(solutionId, collectionId);
+    });
+  }
+
+  saveSolutionToCollection(solutionId: number, collectionId: number) {
+    if (this.savingToCollection) return;
+    this.savingToCollection = true;
+
+    this.collectionsService.addItem(collectionId, { targetId: solutionId, targetType: 'SOLUTION' }).subscribe({
+      next: () => {
+        this.savingToCollection = false;
+        this.saveMenuOpenSolutionId = null;
+        this.showToast('Saved', 'success');
+      },
+      error: () => {
+        this.savingToCollection = false;
+        this.saveMenuOpenSolutionId = null;
+        this.showToast('Already saved', 'info');
+      },
+    });
+  }
+
+  private async ensureDefaultSavedItemsCollectionId(): Promise<number | null> {
+    const normalize = (name?: string | null) => (name ?? '').trim().toLowerCase();
+
+    if (this.collections.length === 0) {
+      await new Promise<void>((resolve) => {
+        this.collectionsService.getCollections({ page: 1, size: 100 }).subscribe({
+          next: (res) => {
+            this.collections = res.collections ?? [];
+            resolve();
+          },
+          error: () => resolve(),
+        });
+      });
+    }
+
+    const desired = this.collections.find((c) => normalize(c.name) === normalize(this.defaultSavedItemsCollectionName));
+    if (desired) return desired.id;
+
+    const legacy = this.collections.find((c) =>
+      this.legacyDefaultCollectionNames.some((legacyName) => normalize(c.name) === normalize(legacyName))
+    );
+    if (legacy) {
+      await new Promise<void>((resolve) => {
+        this.collectionsService.updateCollection(legacy.id, { name: this.defaultSavedItemsCollectionName }).subscribe({
+          next: () => {
+            this.collections = this.collections.map((c) =>
+              c.id === legacy.id ? { ...c, name: this.defaultSavedItemsCollectionName } : c
+            );
+            resolve();
+          },
+          error: () => resolve(),
+        });
+      });
+      return legacy.id;
+    }
+
+    return await new Promise<number | null>((resolve) => {
+      this.collectionsService.createCollection({ name: this.defaultSavedItemsCollectionName }).subscribe({
+        next: (created) => {
+          this.collections = [created, ...this.collections];
+          resolve(created.id);
+        },
+        error: () => resolve(null),
+      });
+    });
   }
 
   // Comments methods
