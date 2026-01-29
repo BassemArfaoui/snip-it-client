@@ -119,8 +119,9 @@ export class SignupPageComponent extends BaseAuthComponent implements OnInit, On
 
     this.fullName?.markAsTouched();
     this.username?.markAsTouched();
+    this.email?.markAsTouched();
 
-    if (this.fullName?.invalid || this.username?.invalid) return;
+    if (this.fullName?.invalid || this.username?.invalid || this.email?.invalid) return;
     this.signupStep = 2;
   }
 

@@ -18,6 +18,7 @@ export class AppComponent implements OnInit {
   userId = userId;
 
   isAuthRoute = false;
+  profileMenuOpen = false;
   
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -52,5 +53,9 @@ export class AppComponent implements OnInit {
     logout();
     // ensure we return to the login page after clearing tokens/state
     this.router.navigate(['/login']);
+  }
+
+  toggleProfileMenu() {
+    this.profileMenuOpen = !this.profileMenuOpen;
   }
 }
