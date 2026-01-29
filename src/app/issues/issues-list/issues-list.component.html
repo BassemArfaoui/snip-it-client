@@ -90,11 +90,30 @@
             <div class="p-5 pb-0">
               <div class="flex items-start justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm">
-                    <span class="material-symbols-outlined text-primary text-lg">person</span>
-                  </div>
+                  @if (issue.author) {
+                    <a
+                      [routerLink]="['/profile', issue.author.id]"
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm hover:ring-primary/30"
+                      aria-label="Open author profile"
+                    >
+                      <span class="material-symbols-outlined text-primary text-lg">person</span>
+                    </a>
+                  } @else {
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm">
+                      <span class="material-symbols-outlined text-primary text-lg">person</span>
+                    </div>
+                  }
                   <div>
-                    <span class="font-semibold text-text-main dark:text-white block">{{ issue.author?.username || 'Deleted User' }}</span>
+                    @if (issue.author) {
+                      <a
+                        [routerLink]="['/profile', issue.author.id]"
+                        class="font-semibold text-text-main dark:text-white block hover:text-primary"
+                      >
+                        {{ issue.author.username }}
+                      </a>
+                    } @else {
+                      <span class="font-semibold text-text-main dark:text-white block">Deleted User</span>
+                    }
                     <div class="flex items-center gap-2 text-xs text-text-muted dark:text-gray-400">
                       <span>{{ formatDate(issue.created_at) }}</span>
                       <span>·</span>

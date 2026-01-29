@@ -2,11 +2,20 @@
   <!-- Header (avatar / name / meta / tag / menu) -->
   <div class="flex items-start justify-between gap-4">
     <div class="flex items-center gap-3 min-w-0">
-      <div class="w-11 h-11 rounded-full bg-gray-100 dark:bg-background-dark border border-gray-200 dark:border-white/10 text-text-main dark:text-white flex items-center justify-center font-bold tracking-wide">
+      <a
+        [routerLink]="['/profile', post.author.id]"
+        class="w-11 h-11 rounded-full bg-gray-100 dark:bg-background-dark border border-gray-200 dark:border-white/10 text-text-main dark:text-white flex items-center justify-center font-bold tracking-wide hover:border-primary/40"
+        aria-label="Open author profile"
+      >
         {{ authorInitials() }}
-      </div>
+      </a>
       <div class="min-w-0">
-        <div class="font-bold text-base truncate">{{ post.author.fullName || post.author.username }}</div>
+        <a
+          [routerLink]="['/profile', post.author.id]"
+          class="font-bold text-base truncate hover:text-primary"
+        >
+          {{ post.author.fullName || post.author.username }}
+        </a>
         <div class="flex items-center gap-2 text-sm text-text-muted dark:text-gray-400 truncate">
           <span class="truncate">{{ post.snippet.language }}</span>
           <span>•</span>
@@ -283,7 +292,12 @@
               @for (c of comments(); track c.id) {
                 <div class="rounded-2xl bg-white/70 dark:bg-white/5 p-4 border border-[#f5f5f0] dark:border-white/10">
                   <div class="flex items-center justify-between gap-3 mb-1">
-                    <div class="text-sm font-semibold text-text-main dark:text-white">{{ c.user.username }}</div>
+                    <a
+                      [routerLink]="['/profile', c.user.id]"
+                      class="text-sm font-semibold text-text-main dark:text-white hover:text-primary"
+                    >
+                      {{ c.user.username }}
+                    </a>
                     <div class="text-xs text-text-muted dark:text-gray-400">{{ c.createdAt | date:'short' }}</div>
                   </div>
                   <p class="text-sm text-text-main dark:text-white/90 whitespace-pre-line">{{ c.content }}</p>

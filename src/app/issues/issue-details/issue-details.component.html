@@ -65,11 +65,30 @@
         <!-- Author Header -->
         <div class="p-6 pb-4">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm">
-              <span class="material-symbols-outlined text-primary text-xl">person</span>
-            </div>
+            @if (issue.author) {
+              <a
+                [routerLink]="['/profile', issue.author.id]"
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm hover:ring-primary/30"
+                aria-label="Open author profile"
+              >
+                <span class="material-symbols-outlined text-primary text-xl">person</span>
+              </a>
+            } @else {
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm">
+                <span class="material-symbols-outlined text-primary text-xl">person</span>
+              </div>
+            }
             <div>
-              <span class="font-semibold text-text-main dark:text-white block text-lg">{{ issue.author?.username || 'Deleted User' }}</span>
+              @if (issue.author) {
+                <a
+                  [routerLink]="['/profile', issue.author.id]"
+                  class="font-semibold text-text-main dark:text-white block text-lg hover:text-primary"
+                >
+                  {{ issue.author.username }}
+                </a>
+              } @else {
+                <span class="font-semibold text-text-main dark:text-white block text-lg">Deleted User</span>
+              }
               <div class="flex items-center gap-2 text-sm text-text-muted dark:text-gray-400">
                 <span>{{ getRelativeTime(issue.created_at) }}</span>
               </div>
@@ -320,11 +339,30 @@
               <div class="p-6 pb-0">
                 <div class="flex items-start justify-between">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm">
-                      <span class="material-symbols-outlined text-primary text-lg">person</span>
-                    </div>
+                    @if (solution.contributor) {
+                      <a
+                        [routerLink]="['/profile', solution.contributor.id]"
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm hover:ring-primary/30"
+                        aria-label="Open contributor profile"
+                      >
+                        <span class="material-symbols-outlined text-primary text-lg">person</span>
+                      </a>
+                    } @else {
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-white dark:ring-card-dark shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-lg">person</span>
+                      </div>
+                    }
                     <div>
-                      <span class="font-semibold text-text-main dark:text-white block">{{ solution.contributor?.username || 'Unknown' }}</span>
+                      @if (solution.contributor) {
+                        <a
+                          [routerLink]="['/profile', solution.contributor.id]"
+                          class="font-semibold text-text-main dark:text-white block hover:text-primary"
+                        >
+                          {{ solution.contributor.username }}
+                        </a>
+                      } @else {
+                        <span class="font-semibold text-text-main dark:text-white block">Unknown</span>
+                      }
                       <span class="text-xs text-text-muted dark:text-gray-400">
                         {{ getRelativeTime(solution.createdAt) }}
                         @if (solution.updatedAt !== solution.createdAt) {
@@ -609,12 +647,19 @@
                         <div class="bg-gray-50 dark:bg-background-dark rounded-xl p-4 transition-all hover:bg-gray-100 dark:hover:bg-background-dark/80">
                           <div class="flex items-start justify-between mb-2">
                             <div class="flex items-center gap-2 text-sm">
-                              <div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <a
+                                [routerLink]="['/profile', comment.user.id]"
+                                class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center hover:ring-2 hover:ring-primary/20"
+                                aria-label="Open commenter profile"
+                              >
                                 <span class="material-symbols-outlined text-primary text-xs">person</span>
-                              </div>
-                              <span class="font-semibold text-text-main dark:text-white">
+                              </a>
+                              <a
+                                [routerLink]="['/profile', comment.user.id]"
+                                class="font-semibold text-text-main dark:text-white hover:text-primary"
+                              >
                                 {{ comment.user.username }}
-                              </span>
+                              </a>
                               <span class="text-text-muted/40 dark:text-gray-600">·</span>
                               <span class="text-text-muted dark:text-gray-400 text-xs">
                                 {{ getRelativeTime(comment.createdAt) }}
