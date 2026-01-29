@@ -1,0 +1,165 @@
+<div class="min-h-screen bg-gradient-to-b from-background-light to-white dark:from-background-dark dark:to-card-dark py-8">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <nav class="flex items-center gap-2 mb-6 text-sm">
+        <a
+          routerLink="/"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-text-muted dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all group"
+        >
+          <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <span class="font-medium">Feed</span>
+        </a>
+        <span class="text-text-muted/40 dark:text-gray-600">/</span>
+        <span class="text-text-main dark:text-white font-medium">New Post</span>
+      </nav>
+      <h1 class="text-3xl sm:text-4xl font-bold text-text-main dark:text-white tracking-tight mb-2">Create New Post</h1>
+      <p class="text-text-muted dark:text-gray-400 text-lg">Share a snippet with the community</p>
+    </div>
+
+    <div class="bg-white dark:bg-card-dark rounded-2xl shadow-soft p-8">
+      @if (error) {
+        <div class="mb-6 flex items-center gap-3 p-4 bg-danger-light dark:bg-danger-dark/20 rounded-xl text-danger-dark dark:text-danger-light">
+          <span class="material-symbols-outlined text-xl">error</span>
+          <span class="font-medium">{{ error }}</span>
+        </div>
+      }
+
+      <form [formGroup]="postForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div>
+          <label for="title" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+            Title <span class="text-danger">*</span>
+          </label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            class="w-full px-4 py-3 rounded-xl border-2 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark"
+            [ngClass]="{
+              'border-gray-200 dark:border-white/10': !title?.invalid || !title?.touched,
+              'border-danger': title?.invalid && title?.touched
+            }"
+            placeholder="Give your post a clear title" />
+
+          @if (title?.invalid && title?.touched) {
+            <p class="mt-2 text-sm text-danger flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">info</span>
+              @if (title?.errors?.['required']) { Title is required } @else { Title is too long }
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="description" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+            Description <span class="text-danger">*</span>
+          </label>
+          <textarea
+            id="description"
+            rows="5"
+            formControlName="description"
+            class="w-full px-4 py-3 rounded-xl border-2 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark resize-none"
+            [ngClass]="{
+              'border-gray-200 dark:border-white/10': !description?.invalid || !description?.touched,
+              'border-danger': description?.invalid && description?.touched
+            }"
+            placeholder="Add a bit of context about what this snippet does" ></textarea>
+
+          @if (description?.invalid && description?.touched) {
+            <p class="mt-2 text-sm text-danger flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">info</span>
+              @if (description?.errors?.['required']) {
+                Description is required
+              } @else {
+                Description must be at least 10 characters
+              }
+            </p>
+          }
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="snippetLanguage" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+              Language <span class="text-danger">*</span>
+            </label>
+            <div class="relative">
+              <select
+                id="snippetLanguage"
+                formControlName="snippetLanguage"
+                class="w-full px-4 py-3 rounded-xl border-2 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark appearance-none cursor-pointer"
+                [ngClass]="{
+                  'border-gray-200 dark:border-white/10': !snippetLanguage?.invalid || !snippetLanguage?.touched,
+                  'border-danger': snippetLanguage?.invalid && snippetLanguage?.touched
+                }">
+                <option value="" disabled>Select a language</option>
+                @for (lang of languages; track lang) {
+                  <option [value]="lang">{{ lang }}</option>
+                }
+              </select>
+              <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="snippetTitle" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+              Snippet Title <span class="text-text-muted font-normal">(Optional)</span>
+            </label>
+            <input
+              id="snippetTitle"
+              type="text"
+              formControlName="snippetTitle"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark"
+              placeholder="e.g. Fetch with AbortController" />
+          </div>
+        </div>
+
+        <div>
+          <label for="snippetContent" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+            Code <span class="text-danger">*</span>
+          </label>
+          <textarea
+            id="snippetContent"
+            rows="10"
+            formControlName="snippetContent"
+            class="w-full px-4 py-3 rounded-xl border-2 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark font-mono text-sm resize-none"
+            [ngClass]="{
+              'border-gray-200 dark:border-white/10': !snippetContent?.invalid || !snippetContent?.touched,
+              'border-danger': snippetContent?.invalid && snippetContent?.touched
+            }"
+            placeholder="Paste your code here..."></textarea>
+        </div>
+
+        <div>
+          <label for="githubLink" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+            GitHub Link <span class="text-text-muted font-normal">(Optional)</span>
+          </label>
+          <input
+            id="githubLink"
+            type="url"
+            formControlName="githubLink"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark"
+            placeholder="https://github.com/user/repo" />
+        </div>
+
+        <div class="flex gap-4 pt-2">
+          <button
+            type="submit"
+            [disabled]="submitting"
+            class="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-xl shadow-soft hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-soft">
+            @if (submitting) {
+              <span class="animate-spin material-symbols-outlined">progress_activity</span>
+              <span>Creating...</span>
+            } @else {
+              <span class="material-symbols-outlined">add_circle</span>
+              <span>Create Post</span>
+            }
+          </button>
+
+          <a
+            routerLink="/"
+            class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-text-main dark:text-white font-semibold rounded-xl transition-colors text-center">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

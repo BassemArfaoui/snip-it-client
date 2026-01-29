@@ -9,11 +9,13 @@ module.exports = {
       colors: {
         primary: '#f9f506',
         'background-light': '#f8f8f5',
-        'background-dark': '#23220f',
+        // Dark theme (cool blue/gray)
+        'background-dark': '#0b1220',
         'card-light': '#ffffff',
-        'card-dark': '#2c2b18',
-        'text-main': '#181811',
-        'text-muted': '#8c8b5f',
+        'card-dark': '#111c2e',
+        // Text tokens (app is dark-first)
+        'text-main': '#e6edf6',
+        'text-muted': '#9aa4b2',
         // Semantic colors for consistent UI
         success: {
           light: '#dcfce7',

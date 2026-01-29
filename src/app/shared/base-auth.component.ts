@@ -18,11 +18,11 @@ export abstract class BaseAuthComponent implements OnDestroy {
   }
 
   /**
-   * Redirect to dashboard if user is already authenticated
+  * Redirect to feed if user is already authenticated
    */
   protected redirectIfLoggedIn(): void {
     if (isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/']);
     }
   }
 
