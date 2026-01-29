@@ -48,7 +48,7 @@
               <span class="font-medium hidden sm:inline">Issues</span>
             </a>
             <span class="text-text-muted/40 dark:text-gray-600 hidden sm:inline">/</span>
-            <span class="text-text-main dark:text-white font-medium truncate max-w-[200px] hidden sm:inline">{{ issue.content | slice:0:25 }}...</span>
+            <span class="text-text-main dark:text-white font-medium truncate max-w-[200px] hidden sm:inline">{{ issue.title }}</span>
           </nav>
 
           <div class="flex items-center gap-2">
@@ -77,6 +77,10 @@
           </div>
 
           <!-- Issue Content -->
+          <h1 class="text-2xl sm:text-3xl font-bold text-text-main dark:text-white mb-4 leading-tight">
+            {{ issue.title }}
+          </h1>
+
           <div class="text-text-main dark:text-white text-lg leading-relaxed whitespace-pre-wrap">
             {{ issue.content }}
           </div>

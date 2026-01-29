@@ -10,6 +10,7 @@ export interface IssueAuthor {
 
 export interface Issue {
   id: number;
+  title: string;
   content: string;
   language: string;
   imageUrl?: string;
@@ -26,12 +27,14 @@ export interface IssueDetails extends Issue {
 }
 
 export interface CreateIssueRequest {
+  title: string;
   content: string;
   language: string;
   imageUrl?: string;
 }
 
 export interface UpdateIssueRequest {
+  title?: string;
   content?: string;
   language?: string;
   imageUrl?: string;

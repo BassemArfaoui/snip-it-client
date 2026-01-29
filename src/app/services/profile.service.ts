@@ -29,6 +29,7 @@ export interface Post {
 
 export interface Issue {
   id: number;
+  title: string;
   content: string;
   language: string;
   solutionsCount: number;

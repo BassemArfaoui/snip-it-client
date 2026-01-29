@@ -29,6 +29,39 @@
       }
 
       <form [formGroup]="issueForm" class="space-y-8">
+        <!-- Title Field -->
+        <div>
+          <label for="title" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+            Title <span class="text-danger">*</span>
+          </label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            class="w-full px-4 py-3 rounded-xl border-2 text-text-main dark:text-white bg-gray-50 dark:bg-background-dark transition-all focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark"
+            [ngClass]="{
+              'border-gray-200 dark:border-white/10': !title?.invalid || !title?.touched,
+              'border-danger': title?.invalid && title?.touched
+            }"
+            placeholder="Short summary of your issue" />
+
+          @if (title?.invalid && title?.touched) {
+            <p class="mt-2 text-sm text-danger flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">info</span>
+              @if (title?.errors?.['required']) {
+                Title is required
+              } @else if (title?.errors?.['minlength']) {
+                Title must be at least 4 characters long
+              } @else if (title?.errors?.['maxlength']) {
+                Title must be at most 120 characters long
+              }
+            </p>
+          }
+          <p class="mt-2 text-sm text-text-muted dark:text-gray-400">
+            {{ title?.value?.length || 0 }} / 120 characters
+          </p>
+        </div>
+
         <!-- Content Field -->
         <div>
           <label for="content" class="block text-sm font-semibold text-text-main dark:text-white mb-2">

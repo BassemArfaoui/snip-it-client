@@ -40,9 +40,14 @@ export class CreateIssueComponent implements OnInit {
 
   ngOnInit() {
     this.issueForm = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(120)]],
       content: ['', [Validators.required, Validators.minLength(10)]],
       language: ['', Validators.required]
     });
+  }
+
+  get title() {
+    return this.issueForm.get('title');
   }
 
   get content() {
