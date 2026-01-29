@@ -13,6 +13,10 @@ import { IssueDetailsComponent } from './issues/issue-details/issue-details.comp
 import { CreateIssueComponent } from './issues/create-issue/create-issue.component';
 import { EditIssueComponent } from './issues/edit-issue/edit-issue.component';
 import { CreatePostComponent } from './posts/create-post/create-post.component';
+import { CollectionsListComponent } from './collections/collections-list/collections-list.component';
+import { CollectionDetailComponent } from './collections/collection-detail/collection-detail.component';
+import { SnippetsListComponent } from './private-snippets/snippets-list/snippets-list.component';
+import { SnippetDetailComponent } from './private-snippets/snippet-detail/snippet-detail.component';
 
 export const routes: Routes = [
 	{ path: '', component: DashboardComponent, canActivate: [AuthGuard] },
@@ -29,5 +33,15 @@ export const routes: Routes = [
 	{ path: 'issues/:id/edit', component: EditIssueComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/:id', component: IssueDetailsComponent },
 	{ path: 'issues', component: IssuesListComponent },
+
+	
+	// Collections Routes
+	{ path: 'collections', component: CollectionsListComponent, canActivate: [AuthGuard] },
+	{ path: 'collections/share/:token', component: CollectionDetailComponent },
+	{ path: 'collections/:id', component: CollectionDetailComponent, canActivate: [AuthGuard] },
+	
+	// Private Snippets Routes
+	{ path: 'snippets', component: SnippetsListComponent, canActivate: [AuthGuard] },
+	{ path: 'snippets/:id', component: SnippetDetailComponent, canActivate: [AuthGuard] },
 	{ path: '**', redirectTo: '' }
 ];
