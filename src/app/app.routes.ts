@@ -13,6 +13,7 @@ import { IssueDetailsComponent } from './issues/issue-details/issue-details.comp
 import { CreateIssueComponent } from './issues/create-issue/create-issue.component';
 import { EditIssueComponent } from './issues/edit-issue/edit-issue.component';
 import { CreatePostComponent } from './posts/create-post/create-post.component';
+import { PostDetailsComponent } from './posts/post-details/post-details.component';
 import { CollectionsListComponent } from './collections/collections-list/collections-list.component';
 import { CollectionDetailComponent } from './collections/collection-detail/collection-detail.component';
 import { SnippetsListComponent } from './private-snippets/snippets-list/snippets-list.component';
@@ -28,6 +29,7 @@ export const routes: Routes = [
 	{ path: 'auth-success', component: GitHubCallbackComponent },
 	{ path: 'dashboard', pathMatch: 'full', redirectTo: '' },
 	{ path: 'posts/new', component: CreatePostComponent, canActivate: [AuthGuard] },
+	{ path: 'posts/:id', component: PostDetailsComponent, canActivate: [AuthGuard] },
 	{ path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/new', component: CreateIssueComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/:id/edit', component: EditIssueComponent, canActivate: [AuthGuard] },

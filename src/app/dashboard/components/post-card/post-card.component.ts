@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { CommentsService, type Comment } from '../../../services/comments.service';
 import { InteractionsService } from '../../../services/interactions.service';
 import { type Post, type ReactionType } from '../../../services/posts.service';
@@ -9,7 +10,7 @@ import { Collection, CollectionsService } from '../../../services/collections.se
 @Component({
   selector: 'app-post-card',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './post-card.component.html',
 })
 export class PostCardComponent {

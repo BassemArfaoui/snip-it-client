@@ -105,6 +105,14 @@
           <span class="material-symbols-outlined text-lg">comment</span>
           <span>{{ post.commentsCount || 0 }}</span>
         </button>
+
+        <a
+          [routerLink]="['/posts', post.id]"
+          class="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-white/10 px-3 py-2 text-sm font-semibold text-text-muted dark:text-gray-300 hover:text-primary transition-colors"
+          aria-label="View post">
+          <span class="material-symbols-outlined text-lg">open_in_new</span>
+          <span class="hidden sm:inline">View</span>
+        </a>
         <div class="relative" (click)="$event.stopPropagation()">
           
           <button
