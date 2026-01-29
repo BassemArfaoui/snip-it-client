@@ -1,46 +1,45 @@
-<div class="sunny-theme min-h-screen bg-[#f8f8f5] text-[#0f0f0f]">
+<div class="min-h-screen bg-gradient-to-b from-background-light to-white dark:from-background-dark dark:to-card-dark">
   <!-- Header -->
-  <div class="border-b border-[#ebe6d3] bg-[radial-gradient(circle_at_18%_15%,rgba(255,228,0,0.18),transparent_35%),radial-gradient(circle_at_82%_12%,rgba(255,228,0,0.16),transparent_32%),#fdfcf7] px-6 py-6 shadow-[0_18px_48px_-34px_rgba(0,0,0,0.45)]">
-    <div class="max-w-7xl mx-auto">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <!-- Back Button & Title -->
       <div class="flex items-center gap-4 mb-4">
         <button 
           (click)="goBack()"
-          class="p-2 hover:bg-[#fff4c8] rounded-xl transition-colors border border-[#e7dfc7]">
+          class="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 text-text-main dark:text-white">
           ← Back
         </button>
         <div class="flex-1">
           <div class="flex items-center gap-3 mb-2">
             @if (collection()?.isPublic) {
-              <span class="px-2 py-1 bg-[#e7f8d9] text-[#4c7c1f] text-xs rounded-full uppercase">
+              <span class="px-2 py-1 bg-success-light dark:bg-success/15 text-success text-xs rounded-full uppercase">
                 Public Collection
               </span>
             }
             @if (!collection()?.isPublic) {
-              <span class="px-2 py-1 bg-[#f8d9d9] text-[#7c1f1f] text-xs rounded-full uppercase">
+              <span class="px-2 py-1 bg-danger-light dark:bg-danger-dark/20 text-danger text-xs rounded-full uppercase">
                 Private Collection
               </span>
             }
-            <span class="text-[#7b7465] text-sm">{{collection()?.updatedAt| timeAgo}}</span>
+            <span class="text-text-muted dark:text-gray-400 text-sm">{{collection()?.updatedAt| timeAgo}}</span>
           </div>
-          <h1 class="text-3xl font-semibold mb-1">{{ collection()?.name || 'Loading...' }}</h1>
+          <h1 class="text-3xl font-bold text-text-main dark:text-white mb-1">{{ collection()?.name || 'Loading...' }}</h1>
         </div>
         <div class="flex gap-2">
           @if (isCollectionOwner()) {
             <button 
               (click)="openEditModal()"
-              class="px-4 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded-xl transition-colors font-semibold shadow-sm">
+              class="px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors font-semibold shadow-soft text-text-main dark:text-white">
               ✏️ Edit
             </button>
             <button 
               (click)="shareCollection()"
-              class="px-4 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded-xl transition-colors font-semibold shadow-sm">
+              class="px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors font-semibold shadow-soft text-text-main dark:text-white">
               Share
             </button>
           }
           <button 
             (click)="addNewItem()"
-            class="px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl flex items-center gap-2 transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)]">
+            class="px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-xl flex items-center gap-2 transition-colors font-semibold shadow-soft">
             <span class="text-xl">+</span>
             New Item
           </button>
@@ -51,25 +50,24 @@
       <div class="flex gap-2 mb-4 flex-wrap">
         @for (tag of collectionTags(); track tag.id) {
           <span
-            class="px-3 py-1 bg-white border border-[#e7dfc7] text-[#4f493f] text-sm rounded-full shadow-sm flex items-center gap-2"
-            [ngStyle]="{ 'background-color': tag.color || '#f8f6ef' }">
+            class="px-3 py-1 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 text-text-main dark:text-white text-sm rounded-full shadow-soft flex items-center gap-2"
+            [ngStyle]="tag.color ? { 'background-color': tag.color } : null">
             #{{ tag.name }}
             @if (isCollectionOwner()) {
               <button
                 (click)="removeTag($event, tag)"
-                class="text-[#a03c3c] hover:text-[#d64545]">×</button>
+                class="text-danger hover:text-danger/80">×</button>
             }
           </span>
         }
         @if (isCollectionOwner()) {
-          <button (click)="openTagModal()" class="px-3 py-1 text-[#7b7465] text-sm font-semibold hover:text-[#c1a900]">+ Add Tag</button>
+          <button (click)="openTagModal()" class="px-3 py-1 text-text-muted dark:text-gray-400 text-sm font-semibold hover:text-primary">+ Add Tag</button>
         }
       </div>
-    </div>
   </div>
 
   <!-- Main Content -->
-  <div class="max-w-7xl mx-auto px-6 py-6">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="flex flex-col lg:flex-row gap-6">
       <!-- Left Column - Items List -->
       <div class="flex-1">
@@ -80,13 +78,12 @@
               <div class="relative">
                 <button
                   (click)="setTab(tab)"
-                  [class.text-[#0f0f0f]]="selectedTab() === tab"
-                  [class.text-[#8b8475]]="selectedTab() !== tab"
+                  [ngClass]="selectedTab() === tab ? 'text-text-main dark:text-white' : 'text-text-muted dark:text-gray-400'"
                   class="px-4 py-2 font-semibold transition-colors">
                   {{ tab }}
                 </button>
                 @if (selectedTab() === tab) {
-                  <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ffd600]"></div>
+                  <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                 }
               </div>
             }
@@ -99,13 +96,13 @@
               [ngModel]="searchQuery()"
               (ngModelChange)="searchQuery.set($event)"
               placeholder="Search collections, snippets..."
-              class="flex-1 min-w-[240px] px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] placeholder-[#9b9586] shadow-sm">
+              class="flex-1 min-w-[240px] px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white placeholder:text-text-muted dark:placeholder:text-gray-500 shadow-soft">
             
             <!-- Language Filter -->
             <select 
               [ngModel]="selectedLanguage()"
               (ngModelChange)="setLanguage($event)"
-              class="px-7 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+              class="px-7 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white shadow-soft">
               @for (lang of languages; track lang) {
                 <option [value]="lang">{{ lang }}</option>
               }
@@ -115,7 +112,7 @@
             <select 
               [ngModel]="sortBy()"
               (ngModelChange)="setSortBy($event)"
-              class="px-7 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+              class="px-7 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white shadow-soft">
               <option value="Latest First">Latest First</option>
               <option value="Oldest First">Oldest First</option>
               <option value="Pinned First">Pinned</option>
@@ -126,7 +123,7 @@
 
         <!-- Error Message -->
         @if (error()) {
-          <div class="mb-4 p-4 bg-[#fff1f1] border border-[#ffd1d1] rounded-xl text-[#a83a3a]">
+          <div class="mb-4 p-4 bg-danger-light dark:bg-danger-dark/20 border border-danger/30 dark:border-danger/40 rounded-xl text-danger">
             {{ error() }}
           </div>
         }
@@ -134,7 +131,7 @@
         <!-- Loading -->
         @if (loading()) {
           <div class="text-center py-12">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffe500]"></div>
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         }
         
@@ -145,7 +142,7 @@
             @for (item of items(); track item.id) {
               <div
                 (click)="openItem(item)"
-                class="bg-white border border-[#eee8d8] rounded-xl p-4 hover:border-[#ffd600] cursor-pointer transition-all group shadow-[0_14px_46px_-32px_rgba(0,0,0,0.48)]">
+                class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl p-4 hover:border-primary cursor-pointer transition-all group shadow-soft">
                 
                 <div class="flex items-start gap-4">
                   <!-- Icon -->
@@ -161,7 +158,7 @@
                         (click)="togglePin($event, item)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Toggle pin">
-                        <span [class.text-[#d1a000]]="item.isPinned" [class.text-[#bcb5a5]]="!item.isPinned">
+                        <span [ngClass]="item.isPinned ? 'text-warning' : 'text-text-muted dark:text-gray-500'">
                           {{ item.isPinned ? '📌' : '📍' }}
                         </span>
                       </button>
@@ -169,35 +166,35 @@
                         (click)="toggleFavorite($event, item)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Toggle favorite">
-                        <span [class.text-[#d1a000]]="item.isFavorite" [class.text-[#bcb5a5]]="!item.isFavorite">
+                        <span [ngClass]="item.isFavorite ? 'text-warning' : 'text-text-muted dark:text-gray-500'">
                           {{ item.isFavorite ? '★' : '☆' }}
                         </span>
                       </button>
                       <button 
                         (click)="openMoveModal($event, item)"
-                        class="opacity-0 group-hover:opacity-100 transition-opacity text-[#9c9483] hover:text-[#5c8fd6]"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity text-text-muted dark:text-gray-500 hover:text-primary"
                         title="Move to another collection">
                         📦
                       </button>
                       <button 
                         (click)="removeItem($event, item)"
-                        class="opacity-0 group-hover:opacity-100 transition-opacity text-[#9c9483] hover:text-[#d64545]"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity text-text-muted dark:text-gray-500 hover:text-danger"
                         title="Remove from collection">
                         ×
                       </button>
                     </div>
                     
-                    <p class="text-sm text-[#6d665a] mb-3 line-clamp-2">
+                    <p class="text-sm text-text-muted dark:text-gray-400 mb-3 line-clamp-2">
                       {{ item.target?.description || item.target?.content?.substring(0, 150) || 'No description' }}
                     </p>
                     
-                    <div class="flex items-center gap-4 text-sm text-[#7b7465] flex-wrap">
-                      <span [class]="getItemBadgeColor(item.targetType)" class="px-2 py-0.5 rounded bg-[#f8f4e3] text-[#4f493f]">
+                    <div class="flex items-center gap-4 text-sm text-text-muted dark:text-gray-400 flex-wrap">
+                      <span [class]="getItemBadgeColor(item.targetType)" class="px-2 py-0.5 rounded text-xs font-semibold">
                         {{ item.targetType }}
                       </span>
                       @if (item.target?.language) {
                         <span class="flex items-center gap-1">
-                          <span class="w-2 h-2 bg-[#ffd600] rounded-full"></span>
+                          <span class="w-2 h-2 bg-primary rounded-full"></span>
                           {{ item.target?.language }}
                         </span>
                       }
@@ -213,10 +210,10 @@
               <div class="text-center py-12">
                 <div class="text-5xl mb-4">📦</div>
                 <h3 class="text-lg font-semibold mb-2">No items in this collection</h3>
-                <p class="text-[#7d7769] mb-4">Start adding snippets, posts, or issues</p>
+                <p class="text-text-muted dark:text-gray-400 mb-4">Start adding snippets, posts, or issues</p>
                 <button 
                   (click)="addNewItem()"
-                  class="px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-full transition-colors font-semibold shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]">
+                  class="px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold shadow-soft">
                   Add Item
                 </button>
               </div>
@@ -229,25 +226,25 @@
       <div class="w-full lg:w-80 space-y-4">
         <!-- Collaborators -->
         @if (isCollectionOwner()) {
-          <div class="bg-white border border-[#eee8d8] rounded-xl p-4 shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
+          <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl p-4 shadow-soft">
             <div class="flex items-center justify-between mb-4">
               <h3 class="font-semibold">Collaborators</h3>
-              <button class="text-[#d1a000] text-sm font-semibold">Manage</button>
+              <button class="text-primary text-sm font-semibold hover:text-primary/80">Manage</button>
             </div>
             
             <div class="space-y-3">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-gradient-to-br from-[#ffe500] to-[#ffb800] rounded-full flex items-center justify-center text-sm text-[#0f0f0f]">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm text-black">
                   You
                 </div>
                 <div class="flex-1">
                   <div class="text-sm">{{ collection()?.owner?.username }}</div>
-                  <div class="text-xs text-[#8b8475]">Owner</div>
+                  <div class="text-xs text-text-muted dark:text-gray-400">Owner</div>
                 </div>
-                <span class="px-2 py-0.5 bg-[#fff4c8] text-[#7d6d1b] text-xs rounded-full">Admin</span>
+                <span class="px-2 py-0.5 bg-primary/20 text-black text-xs rounded-full">Admin</span>
               </div>
               
-              <button class="w-full py-2 border border-[#e7dfc7] rounded-xl hover:bg-[#fff4c8] transition-colors text-sm font-semibold bg-white">
+              <button class="w-full py-2 border border-gray-100 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-sm font-semibold bg-white dark:bg-card-dark text-text-main dark:text-white shadow-soft hover:border-primary">
                 + Invite Collaborator
               </button>
             </div>
@@ -256,14 +253,14 @@
         
         <!-- Public Link -->
         @if (isCollectionOwner()) {
-          <div class="bg-white border border-[#eee8d8] rounded-xl p-4 shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
+          <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl p-4 shadow-soft">
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold">Public Link</h3>
               <div class="flex items-center gap-2">
-    <span class="text-xs text-[#8b8475]">{{ collection()?.isPublic ? 'On' : 'Off' }}</span>
+    <span class="text-xs text-text-muted dark:text-gray-400">{{ collection()?.isPublic ? 'On' : 'Off' }}</span>
     <button
       class="w-10 h-5 rounded-full relative shadow-inner transition-colors"
-      [ngClass]="collection()?.isPublic ? 'bg-[#ffe500]' : 'bg-gray-400'"
+      [ngClass]="collection()?.isPublic ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'"
     >
       <!-- Ball that moves left/right -->
       <div
@@ -273,16 +270,16 @@
     </button>
   </div>
             </div>
-            <p class="text-xs text-[#8b8475] mb-3">Anyone with this link can view this collection</p>
+            <p class="text-xs text-text-muted dark:text-gray-400 mb-3">Anyone with this link can view this collection</p>
             <div class="flex gap-2">
               <input
                 type="text"
                 readonly
                 value="devcoll.io/c/backend-api-24"
-                class="flex-1 px-3 py-2 bg-[#f8f6ef] border border-[#e7dfc7] rounded text-xs text-[#6d665a]">
+                class="flex-1 px-3 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded text-xs text-text-muted dark:text-gray-400">
               <button 
                 (click)="shareCollection()"
-                class="px-3 py-2 bg-white border border-[#e7dfc7] hover:bg-[#fff4c8] rounded transition-colors shadow-sm">
+                class="px-3 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 rounded transition-colors shadow-soft hover:border-primary">
                 📋
               </button>
             </div>
@@ -290,19 +287,19 @@
           <!-- Share Confirmation Modal -->
           @if (showShareConfirmModal()) {
             <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-              <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+              <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-xl font-bold">Make Collection Public?</h3>
-                  <button (click)="closeShareConfirmModal()" class="text-[#7b7465] hover:text-[#c1a900] text-lg">×</button>
+                  <button (click)="closeShareConfirmModal()" class="text-text-muted dark:text-gray-400 hover:text-primary text-lg">×</button>
                 </div>
 
                 <!-- Content -->
                 <div class="space-y-4 mb-6">
-                  <p class="text-[#6d665a]">
+                  <p class="text-text-main dark:text-white">
                     Your collection is currently <strong>private</strong>. To generate a share link, it needs to be made <strong>public</strong>.
                   </p>
-                  <p class="text-sm text-[#8b8475]">
+                  <p class="text-sm text-text-muted dark:text-gray-400">
                     This will allow anyone with the share link to access your collection based on the permission level you set.
                   </p>
                 </div>
@@ -311,15 +308,15 @@
                 <div class="flex gap-3">
                   <button
                     (click)="closeShareConfirmModal()"
-                    class="flex-1 px-4 py-2.5 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+                    class="flex-1 px-4 py-2.5 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
                     Cancel
                   </button>
                   <button
                     (click)="confirmAndMakePublic()"
                     [disabled]="isGeneratingShareLink()"
-                    class="flex-1 px-4 py-2.5 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="flex-1 px-4 py-2.5 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold shadow-soft disabled:opacity-50 disabled:cursor-not-allowed">
                     @if (isGeneratingShareLink()) {
-                      <span class="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#0f0f0f]"></span>
+                      <span class="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black/80"></span>
                     } @else {
                       Make Public & Share
                     }
@@ -332,22 +329,22 @@
           <!-- Move Item Modal -->
           @if (showMoveModal()) {
             <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-              <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+              <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6">
                   <h3 class="text-xl font-bold">Move Item to Collection</h3>
-                  <button (click)="closeMoveModal()" class="text-[#7b7465] hover:text-[#c1a900] text-lg">×</button>
+                  <button (click)="closeMoveModal()" class="text-text-muted dark:text-gray-400 hover:text-primary text-lg">×</button>
                 </div>
 
                 <!-- Item Preview -->
-                <div class="mb-4 p-3 bg-[#f8f6ef] border border-[#e6dfc7] rounded-xl">
+                <div class="mb-4 p-3 bg-background-light dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl">
                   <div class="flex items-center gap-3">
                     <div class="text-2xl">{{ getItemIcon(itemToMove()?.targetType || '') }}</div>
                     <div class="flex-1 min-w-0">
                       <div class="font-semibold text-sm line-clamp-1">
                         {{ itemToMove()?.target?.title || 'Untitled' }}
                       </div>
-                      <div class="text-xs text-[#7b7465]">
+                      <div class="text-xs text-text-muted dark:text-gray-400">
                         {{ itemToMove()?.targetType }}
                       </div>
                     </div>
@@ -356,18 +353,18 @@
 
                 <!-- Collection Selection -->
                 <div class="space-y-3">
-                  <label class="block text-sm font-semibold text-[#6c6457] mb-2">
+                  <label class="block text-sm font-semibold text-text-main dark:text-white mb-2">
                     Select destination collection
                   </label>
 
                   @if (loadingCollections()) {
                     <div class="text-center py-8">
-                      <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffe500]"></div>
+                      <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
                     </div>
                   } @else {
                     <div class="max-h-64 overflow-y-auto space-y-2">
                       @if (userCollections().length === 0) {
-                        <div class="text-center py-8 text-[#8b8475]">
+                        <div class="text-center py-8 text-text-muted dark:text-gray-400">
                           <div class="text-3xl mb-2">📦</div>
                           <p class="text-sm">No other collections available</p>
                         </div>
@@ -375,22 +372,22 @@
                       @for (col of userCollections(); track col.id) {
                         <button
                           (click)="destinationCollectionId.set(col.id)"
-                          [class.border-[#ffd600]]="destinationCollectionId() === col.id"
-                          [class.bg-[#fffef5]]="destinationCollectionId() === col.id"
-                          [class.border-[#e6dfc7]]="destinationCollectionId() !== col.id"
-                          class="w-full p-3 border-2 rounded-xl hover:border-[#ffd600] transition-all text-left">
+                          [ngClass]="destinationCollectionId() === col.id
+                            ? 'border-primary bg-white dark:bg-white/5'
+                            : 'border-gray-100 dark:border-white/10 bg-white dark:bg-card-dark'"
+                          class="w-full p-3 border-2 rounded-xl hover:border-primary transition-all text-left">
                           <div class="flex items-center justify-between">
                             <div class="flex-1">
                               <div class="font-semibold text-sm">{{ col.name }}</div>
-                              <div class="text-xs text-[#7b7465] mt-1">
+                              <div class="text-xs text-text-muted dark:text-gray-400 mt-1">
                                 {{ col.itemCount || 0 }} items
                                 @if (col.isPublic) {
-                                  <span class="ml-1 px-1.5 py-0.5 bg-[#e7f8d9] text-[#4c7c1f] text-xs rounded">Public</span>
+                                  <span class="ml-1 px-1.5 py-0.5 bg-success-light dark:bg-success/15 text-success text-xs rounded">Public</span>
                                 }
                               </div>
                             </div>
                             @if (destinationCollectionId() === col.id) {
-                              <span class="text-[#d1a000]">✓</span>
+                              <span class="text-primary">✓</span>
                             }
                           </div>
                         </button>
@@ -403,13 +400,13 @@
                 <div class="flex gap-3 mt-6">
                   <button
                     (click)="closeMoveModal()"
-                    class="flex-1 px-4 py-2.5 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+                    class="flex-1 px-4 py-2.5 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
                     Cancel
                   </button>
                   <button
                     (click)="moveItemToCollection()"
                     [disabled]="!destinationCollectionId()"
-                    class="flex-1 px-4 py-2.5 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="flex-1 px-4 py-2.5 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold shadow-soft disabled:opacity-50 disabled:cursor-not-allowed">
                     Move Item
                   </button>
                 </div>
@@ -420,7 +417,7 @@
           <!-- Tag Modal -->
           @if (showTagModal()) {
             <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-              <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-2xl w-full shadow-2xl">
+              <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-2xl p-6 max-w-2xl w-full shadow-2xl">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6">
                   <h3 class="text-xl font-bold">
@@ -430,26 +427,26 @@
                       Create New Tag
                     }
                   </h3>
-                  <button (click)="closeTagModal()" class="text-[#7b7465] hover:text-[#c1a900] text-lg">×</button>
+                  <button (click)="closeTagModal()" class="text-text-muted dark:text-gray-400 hover:text-primary text-lg">×</button>
                 </div>
 
                 <!-- Page 1: Select Existing Tags -->
                 @if (tagModalStep() === 'select') {
                   <div class="space-y-4">
                     <div>
-                      <label class="block text-sm font-semibold text-[#6c6457] mb-3">Search and select from your existing tags</label>
+                      <label class="block text-sm font-semibold text-text-main dark:text-white mb-3">Search and select from your existing tags</label>
                       <input
                         type="text"
                         [ngModel]="tagSearch()"
                         (ngModelChange)="tagSearch.set($event)"
                         placeholder="Search your tags..."
-                        class="w-full px-4 py-2.5 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
+                        class="w-full px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white placeholder:text-text-muted dark:placeholder:text-gray-500 shadow-soft">
                     </div>
 
                     <!-- Tags List -->
-                    <div class="flex flex-wrap gap-2 max-h-64 overflow-y-auto p-3 bg-[#fafaf8] rounded-xl border border-[#e6dfc7]">
+                    <div class="flex flex-wrap gap-2 max-h-64 overflow-y-auto p-3 bg-background-light dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10">
                       @if (filteredTags().length === 0) {
-                        <div class="w-full text-center py-6 text-[#8b8475]">
+                        <div class="w-full text-center py-6 text-text-muted dark:text-gray-400">
                           @if (availableTags().length === 0) {
                             <span>No tags yet. Create your first tag</span>
                           } @else {
@@ -460,15 +457,15 @@
                       @for (tag of filteredTags(); track tag.id) {
                         <button
                           (click)="assignTag(tag)"
-                          class="px-4 py-2 rounded-full border-2 border-[#e7dfc7] hover:border-[#ffd600] text-sm font-semibold text-[#4f493f] shadow-sm transition-all hover:scale-105"
-                          [ngStyle]="{ 'background-color': tag.color || '#f8f6ef', 'border-color': tag.color ? 'transparent' : '#e7dfc7' }">
+                          class="px-4 py-2 rounded-full border-2 border-gray-100 dark:border-white/10 hover:border-primary text-sm font-semibold text-text-main dark:text-white shadow-soft transition-all hover:scale-105 bg-white dark:bg-card-dark"
+                          [ngStyle]="{ 'background-color': tag.color || null, 'border-color': tag.color ? 'transparent' : null }">
                           #{{ tag.name }}
                         </button>
                       }
                     </div>
 
                     <!-- Stats -->
-                    <div class="flex items-center justify-between text-sm text-[#7b7465]">
+                    <div class="flex items-center justify-between text-sm text-text-muted dark:text-gray-400">
                       <span>{{ collectionTags().length }} tags assigned</span>
                       <span>{{ filteredTags().length }} available</span>
                     </div>
@@ -478,12 +475,12 @@
                   <div class="flex gap-3 mt-6">
                     <button
                       (click)="closeTagModal()"
-                      class="flex-1 px-4 py-2.5 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+                      class="flex-1 px-4 py-2.5 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
                       Close
                     </button>
                     <button
                       (click)="goToCreateTagPage()"
-                      class="flex-1 px-4 py-2.5 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)]">
+                      class="flex-1 px-4 py-2.5 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold shadow-soft">
                       Create New Tag →
                     </button>
                   </div>
@@ -493,37 +490,37 @@
                 @if (tagModalStep() === 'create') {
                   <div class="space-y-5">
                     <div>
-                      <label class="block text-sm font-semibold text-[#6c6457] mb-2">Tag Name</label>
+                      <label class="block text-sm font-semibold text-text-main dark:text-white mb-2">Tag Name</label>
                       <input
                         type="text"
                         [ngModel]="newTagName()"
                         (ngModelChange)="newTagName.set($event)"
                         placeholder="e.g., backend, design, important"
-                        class="w-full px-4 py-2.5 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white placeholder:text-text-muted dark:placeholder:text-gray-500 shadow-soft"
                         (keyup.enter)="createAndAssignTag()">
                     </div>
 
                     <div>
-                      <label class="block text-sm font-semibold text-[#6c6457] mb-3">Choose Color</label>
+                      <label class="block text-sm font-semibold text-text-main dark:text-white mb-3">Choose Color</label>
                       <div class="flex items-center gap-4">
                         <input
                           type="color"
                           [ngModel]="newTagColor()"
                           (ngModelChange)="newTagColor.set($event)"
-                          class="w-16 h-12 border-2 border-[#e6dfc7] rounded-lg bg-white cursor-pointer">
+                          class="w-16 h-12 border-2 border-gray-100 dark:border-white/10 rounded-lg bg-white dark:bg-card-dark cursor-pointer">
                         <div
-                          class="flex-1 h-12 rounded-lg border-2 border-[#e6dfc7] flex items-center px-4 font-semibold text-[#4f493f]"
+                          class="flex-1 h-12 rounded-lg border-2 border-gray-100 dark:border-white/10 flex items-center px-4 font-semibold text-text-main dark:text-white bg-white dark:bg-card-dark"
                           [ngStyle]="{ 'background-color': newTagColor() }">
                           Preview
                         </div>
                       </div>
                     </div>
 
-                    <div class="bg-[#f8f6ef] border border-[#e6dfc7] rounded-lg p-4">
-                      <p class="text-sm text-[#6c6457]">
+                    <div class="bg-background-light dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg p-4">
+                      <p class="text-sm text-text-main dark:text-white">
                         <strong>Tag will appear as:</strong><br>
                         <span
-                          class="inline-block px-3 py-1 rounded-full mt-2 font-semibold text-[#4f493f]"
+                          class="inline-block px-3 py-1 rounded-full mt-2 font-semibold text-text-main dark:text-white"
                           [ngStyle]="{ 'background-color': newTagColor() }">
                           #{{ newTagName() || 'tagname' }}
                         </span>
@@ -535,13 +532,13 @@
                   <div class="flex gap-3 mt-6">
                     <button
                       (click)="goBackToSelectPage()"
-                      class="flex-1 px-4 py-2.5 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+                      class="flex-1 px-4 py-2.5 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
                       ← Back
                     </button>
                     <button
                       (click)="createAndAssignTag()"
                       [disabled]="!newTagName().trim()"
-                      class="flex-1 px-4 py-2.5 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold shadow-[0_10px_30px_-18px_rgba(0,0,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed">
+                      class="flex-1 px-4 py-2.5 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold shadow-soft disabled:opacity-50 disabled:cursor-not-allowed">
                       Create & Add Tag
                     </button>
                   </div>
@@ -551,32 +548,32 @@
           }
           <button 
           (click)="revokeShareLink()" 
-          class="w-full mt-2 py-2 text-[#d64545] hover:bg-[#ffe8e8] rounded transition-colors text-sm font-semibold">
+          class="w-full mt-2 py-2 text-danger hover:bg-danger-light dark:hover:bg-danger-dark/20 rounded transition-colors text-sm font-semibold">
             Revoke access
           </button>
           </div>
         }
         
         <!-- Collection Stats -->
-        <div class="bg-white border border-[#eee8d8] rounded-xl p-4 shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
+        <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl p-4 shadow-soft">
           <h3 class="font-semibold mb-4">Collection Stats</h3>
           
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <div class="text-2xl font-bold text-[#d1a000]">{{ stats().items }}</div>
-              <div class="text-xs text-[#8b8475]">ITEMS</div>
+              <div class="text-2xl font-bold text-text-main dark:text-white">{{ stats().items }}</div>
+              <div class="text-xs text-text-muted dark:text-gray-400">ITEMS</div>
             </div>
             <div>
-              <div class="text-2xl font-bold text-[#8a6fd6]">{{ stats().posts }}</div>
-              <div class="text-xs text-[#8b8475]">POSTS</div>
+              <div class="text-2xl font-bold text-text-main dark:text-white">{{ stats().posts }}</div>
+              <div class="text-xs text-text-muted dark:text-gray-400">POSTS</div>
             </div>
             <div>
-              <div class="text-2xl font-bold text-[#d64545]">{{ stats().issues }}</div>
-              <div class="text-xs text-[#8b8475]">ISSUES</div>
+              <div class="text-2xl font-bold text-text-main dark:text-white">{{ stats().issues }}</div>
+              <div class="text-xs text-text-muted dark:text-gray-400">ISSUES</div>
             </div>
             <div>
-              <div class="text-2xl font-bold text-[#5fa34c]">{{ stats().solutions }}</div>
-              <div class="text-xs text-[#8b8475]">SOLUTIONS</div>
+              <div class="text-2xl font-bold text-text-main dark:text-white">{{ stats().solutions }}</div>
+              <div class="text-xs text-text-muted dark:text-gray-400">SOLUTIONS</div>
             </div>
           </div>
         </div>
@@ -588,18 +585,18 @@
 <!-- Edit Collection Modal -->
 @if (showEditModal()) {
   <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-    <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+    <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
       <h2 class="text-xl font-bold mb-4">Edit Collection</h2>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-sm text-[#6c6457] mb-2">Collection Name</label>
+          <label class="block text-sm text-text-main dark:text-white mb-2">Collection Name</label>
           <input
             type="text"
             [ngModel]="editCollectionName()"
             (ngModelChange)="editCollectionName.set($event)"
             placeholder="e.g., React Hooks Patterns"
-            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]"
+            class="w-full px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white placeholder:text-text-muted dark:placeholder:text-gray-500 shadow-soft"
             (keyup.enter)="updateCollection()">
         </div>
         
@@ -609,8 +606,8 @@
             id="editIsPublic"
             [ngModel]="editCollectionPublic()"
             (ngModelChange)="editCollectionPublic.set($event)"
-            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
-          <label for="editIsPublic" class="text-sm text-[#4f493f]">Make this collection public</label>
+            class="w-4 h-4 rounded border-gray-300 dark:border-white/10 text-primary focus:ring-primary">
+          <label for="editIsPublic" class="text-sm text-text-main dark:text-white">Make this collection public</label>
         </div>
         
         <div class="flex items-center gap-3">
@@ -619,21 +616,21 @@
             id="editAllowEdit"
             [ngModel]="editCollectionAllowEdit()"
             (ngModelChange)="editCollectionAllowEdit.set($event)"
-            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
-          <label for="editAllowEdit" class="text-sm text-[#4f493f]">Allow others to edit</label>
+            class="w-4 h-4 rounded border-gray-300 dark:border-white/10 text-primary focus:ring-primary">
+          <label for="editAllowEdit" class="text-sm text-text-main dark:text-white">Allow others to edit</label>
         </div>
       </div>
       
       <div class="flex gap-3 mt-6">
         <button
           (click)="closeEditModal()"
-          class="flex-1 px-4 py-2 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+          class="flex-1 px-4 py-2 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
           Cancel
         </button>
         <button
           (click)="updateCollection()"
           [disabled]="!editCollectionName().trim()"
-          class="flex-1 px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          class="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-soft">
           Update
         </button>
       </div>

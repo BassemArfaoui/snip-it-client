@@ -651,15 +651,15 @@ export class CollectionDetailComponent implements OnInit {
   getItemBadgeColor(type: string): string {
     switch(type) {
       case 'PRIVATE_SNIPPET':
-        return 'bg-blue-900/30 text-blue-400';
+        return 'bg-warning-light dark:bg-warning-dark/20 text-warning-dark dark:text-warning';
       case 'POST':
-        return 'bg-green-900/30 text-green-400';
+        return 'bg-success-light dark:bg-success/15 text-success-dark dark:text-success';
       case 'ISSUE':
-        return 'bg-red-900/30 text-red-400';
+        return 'bg-danger-light dark:bg-danger-dark/20 text-danger-dark dark:text-danger';
       case 'SOLUTION':
-        return 'bg-purple-900/30 text-purple-400';
+        return 'bg-success-light dark:bg-success/15 text-success-dark dark:text-success';
       default:
-        return 'bg-gray-800 text-gray-400';
+        return 'bg-white dark:bg-white/5 text-text-muted dark:text-gray-400';
     }
   }
 }

@@ -1,15 +1,14 @@
-<div class="sunny-theme min-h-screen bg-[#f8f8f5] text-[#0f0f0f]">
+<div class="min-h-screen bg-gradient-to-b from-background-light to-white dark:from-background-dark dark:to-card-dark">
   <!-- Header -->
-  <div class="border-b border-[#ebe6d3] bg-[radial-gradient(circle_at_18%_15%,rgba(255,228,0,0.18),transparent_35%),radial-gradient(circle_at_82%_12%,rgba(255,228,0,0.16),transparent_32%),#fdfcf7] px-6 py-6 shadow-[0_18px_48px_-34px_rgba(0,0,0,0.45)]">
-    <div class="max-w-7xl mx-auto">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-2">
         <div>
-          <h1 class="text-3xl font-semibold mb-1">My Collections</h1>
-          <p class="text-[#676155]">Manage and organize your code snippets and solutions.</p>
+          <h1 class="text-3xl font-bold text-text-main dark:text-white mb-1">My Collections</h1>
+          <p class="text-text-muted dark:text-gray-400">Manage and organize your code snippets and solutions.</p>
         </div>
         <button 
           (click)="openCreateModal()"
-          class="px-5 py-2.5 bg-[#ffe500] text-[#0f0f0f] hover:bg-[#f6d600] rounded-full font-semibold shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)] transition-transform duration-150 hover:-translate-y-0.5 flex items-center gap-2">
+          class="px-5 py-2.5 bg-primary hover:bg-primary/90 text-black rounded-xl font-semibold shadow-soft transition-transform duration-150 hover:-translate-y-0.5 flex items-center gap-2">
           <span class="text-xl">+</span>
           New Collection
         </button>
@@ -24,7 +23,7 @@
             [ngModel]="searchQuery()"
             (ngModelChange)="searchQuery.set($event)"
             placeholder="Filter by name..."
-            class="w-full px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] placeholder-[#9b9586] shadow-sm">
+            class="w-full px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white placeholder:text-text-muted dark:placeholder:text-gray-500 shadow-soft">
         </div>
         
         <!-- Sort -->
@@ -32,7 +31,7 @@
           <select 
             [ngModel]="sortBy()"
             (ngModelChange)="setSortBy($event)"
-            class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] appearance-none pr-10 shadow-sm">
+            class="px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white appearance-none pr-10 shadow-soft">
             <option value="Recent">Sort by: Recent</option>
             <option value="Name">Sort by: Name</option>
           </select>
@@ -43,8 +42,8 @@
           @for (filter of ['All', 'Public', 'Private']; track filter) {
             <button
               (click)="setFilter(filter)"
-              [ngClass]="selectedFilter() === filter ? 'bg-[#ffe500] text-[#0f0f0f] border-[#e2c800]' : 'bg-white text-[#5c5549] hover:bg-[#fff8c9]'"
-              class="px-4 py-2 rounded-full border border-[#e6e0c7] font-semibold transition-colors shadow-[0_10px_30px_-20px_rgba(0,0,0,0.55)]">
+              [ngClass]="selectedFilter() === filter ? 'bg-primary text-black border-primary' : 'bg-white dark:bg-card-dark text-text-muted dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 border-gray-100 dark:border-white/10'"
+              class="px-4 py-2 rounded-xl border font-semibold transition-colors shadow-soft">
               {{ filter }}
             </button>
           }
@@ -53,40 +52,39 @@
       
       <!-- Tag Filters -->
       <div class="mt-4">
-        <div class="text-sm font-semibold text-[#6c6457] mb-2">Filter by tags:</div>
+        <div class="text-sm font-semibold text-text-muted dark:text-gray-400 mb-2">Filter by tags:</div>
         <div class="flex flex-wrap gap-2">
           @if (availableTags().length === 0) {
-            <span class="text-sm text-[#8b8475]">No tags available</span>
+            <span class="text-sm text-text-muted dark:text-gray-400">No tags available</span>
           } @else {
             @for (tag of availableTags(); track tag.id) {
               <button
                 (click)="toggleTagFilter(tag.id)"
                 [class.ring-2]="selectedTags().includes(tag.id)"
-                [class.ring-[#0f0f0f]]="selectedTags().includes(tag.id)"
-                [ngClass]="selectedTags().includes(tag.id) ? 'border-[#0f0f0f] scale-105' : 'border-[#e6dfc7]'"
-                class="px-3 py-1.5 rounded-full border-2 text-sm font-semibold text-[#4f493f] shadow-sm transition-all hover:scale-105"
-                [ngStyle]="{ 'background-color': tag.color || '#f8f6ef' }">
+                [class.ring-primary]="selectedTags().includes(tag.id)"
+                [ngClass]="selectedTags().includes(tag.id) ? 'border-primary scale-105' : 'border-gray-100 dark:border-white/10'"
+                class="px-3 py-1.5 rounded-xl border text-sm font-semibold text-text-main dark:text-white shadow-soft transition-all hover:scale-105 bg-primary/10"
+                [ngStyle]="tag.color ? { 'background-color': tag.color } : null">
                 #{{ tag.name }}
               </button>
             }
             @if (selectedTags().length > 0) {
               <button
                 (click)="clearTagFilters()"
-                class="px-3 py-1.5 rounded-full border border-[#d64545] text-sm font-semibold text-[#d64545] bg-[#fff1f1] hover:bg-[#ffe8e8] transition-colors">
+                class="px-3 py-1.5 rounded-xl border border-danger/30 text-sm font-semibold text-danger bg-danger-light dark:bg-danger-dark/20 hover:bg-danger/10 transition-colors">
                 Clear filters
               </button>
             }
           }
         </div>
       </div>
-    </div>
   </div>
 
   <!-- Collections Grid -->
-  <div class="max-w-7xl mx-auto px-6 py-8">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Error Message -->
     @if (error()) {
-      <div class="mb-4 p-4 bg-[#fff1f1] border border-[#ffd1d1] rounded-xl text-[#a83a3a]">
+      <div class="mb-4 p-4 bg-danger-light dark:bg-danger-dark/20 border border-danger/20 rounded-2xl text-danger">
         {{ error() }}
       </div>
     }
@@ -94,8 +92,11 @@
     <!-- Loading -->
     @if (loading()) {
       <div class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffe500]"></div>
-        <p class="mt-4 text-[#7d7769]">Loading collections...</p>
+        <div class="relative inline-block">
+          <div class="w-12 h-12 border-4 border-primary/20 rounded-full"></div>
+          <div class="absolute top-0 left-0 w-12 h-12 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+        </div>
+        <p class="mt-4 text-text-muted dark:text-gray-400">Loading collections...</p>
       </div>
     }
     
@@ -103,11 +104,11 @@
     @if (!loading() && filteredCollections().length === 0) {
       <div class="text-center py-20">
         <div class="text-6xl mb-4">📁</div>
-        <h3 class="text-xl font-semibold mb-2">No collections yet</h3>
-        <p class="text-[#7d7769] mb-6">Create your first collection to organize your code snippets</p>
+        <h3 class="text-2xl font-bold text-text-main dark:text-white mb-2">No collections yet</h3>
+        <p class="text-text-muted dark:text-gray-400 mb-6">Create your first collection to organize your code snippets</p>
         <button 
           (click)="openCreateModal()"
-          class="px-6 py-3 bg-[#ffe500] hover:bg-[#f6d600] rounded-full font-semibold transition-colors shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]">
+          class="px-6 py-3 bg-primary hover:bg-primary/90 text-black rounded-xl font-semibold transition-colors shadow-soft">
           Create Collection
         </button>
       </div>
@@ -120,21 +121,21 @@
         @for (collection of filteredCollections(); track collection.id) {
           <div
             (click)="openCollection(collection)"
-            class="bg-white border border-[#eee8d8] rounded-2xl p-6 hover:border-[#ffd600] cursor-pointer transition-all hover:shadow-[0_22px_60px_-36px_rgba(0,0,0,0.55)] group relative shadow-[0_16px_50px_-36px_rgba(0,0,0,0.5)]">
+            class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/5 rounded-2xl p-6 hover:border-primary/60 cursor-pointer transition-all hover:shadow-lg group relative shadow-soft">
             
             <!-- Three dots menu -->
             <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
               <button 
                 (click)="openEditModal($event, collection)"
-                class="p-2 hover:bg-[#fff8dd] rounded-xl"
+                class="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl"
                 title="Edit collection">
-                <span class="text-[#8a8375] hover:text-[#d1a000]">✏️</span>
+                <span class="text-text-muted dark:text-gray-400 hover:text-primary">✏️</span>
               </button>
               <button 
                 (click)="deleteCollection($event, collection)"
-                class="p-2 hover:bg-[#fff8dd] rounded-xl"
+                class="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl"
                 title="Delete collection">
-                <span class="text-[#8a8375] hover:text-[#d64545]">🗑️</span>
+                <span class="text-text-muted dark:text-gray-400 hover:text-danger">🗑️</span>
               </button>
             </div>
             
@@ -142,30 +143,30 @@
             <div class="text-4xl mb-4">{{ getCollectionIcon(collection) }}</div>
             <!-- Title & Badge -->
             <div class="flex items-start gap-2 mb-2">
-              <h3 class="text-lg font-semibold flex-1 line-clamp-1">{{ collection.name }}</h3>
+              <h3 class="text-lg font-semibold text-text-main dark:text-white flex-1 line-clamp-1">{{ collection.name }}</h3>
               @if (collection.isPublic) {
-                <span class="px-2 py-0.5 bg-[#e7f8d9] text-[#4c7c1f] text-xs rounded-full">
+                <span class="px-2 py-0.5 bg-success-light dark:bg-success/15 text-success text-xs rounded-full">
                   Public
                 </span>
               } @else {
-                <span class="px-2 py-0.5 bg-[#f1efe7] text-[#7b7467] text-xs rounded-full">
+                <span class="px-2 py-0.5 bg-white/60 dark:bg-white/5 text-text-muted dark:text-gray-400 text-xs rounded-full border border-gray-100 dark:border-white/10">
                   🔒
                 </span>
               }
             </div>
             
             <!-- Description -->
-            <p class="text-[#6e675a] text-sm mb-4 line-clamp-2">
+            <p class="text-text-muted dark:text-gray-400 text-sm mb-4 line-clamp-2">
               Collection of code snippets and solutions
             </p>
             
             <!-- Stats -->
             <div class="flex items-center justify-between text-sm">
-              <div class="flex items-center gap-2 text-[#6e675a]">
+              <div class="flex items-center gap-2 text-text-muted dark:text-gray-400">
                 <span>📦</span>
                 <span>{{ collection.itemCount || 0 }} Items</span>
               </div>
-              <button class="text-[#0f0f0f] font-semibold hover:text-[#c1a900] transition-colors">
+              <button class="text-text-main dark:text-white font-semibold hover:text-primary transition-colors">
                 →
               </button>
             </div>
@@ -175,10 +176,10 @@
         <!-- Create New Card -->
         <div
           (click)="openCreateModal()"
-          class="bg-white/70 border-2 border-dashed border-[#e6dfc7] rounded-2xl p-6 hover:border-[#ffd600] cursor-pointer transition-all flex flex-col items-center justify-center min-h-[200px] shadow-[0_12px_40px_-32px_rgba(0,0,0,0.45)]">
-          <div class="text-5xl mb-3 text-[#f0c400]">+</div>
-          <h3 class="text-lg font-semibold mb-1">Create Collection</h3>
-          <p class="text-[#8b8475] text-sm">Start a new project or list</p>
+          class="bg-white/60 dark:bg-card-dark/60 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-6 hover:border-primary/60 cursor-pointer transition-all flex flex-col items-center justify-center min-h-[200px] shadow-soft">
+          <div class="text-5xl mb-3 text-primary">+</div>
+          <h3 class="text-lg font-semibold text-text-main dark:text-white mb-1">Create Collection</h3>
+          <p class="text-text-muted dark:text-gray-400 text-sm">Start a new project or list</p>
         </div>
       </div>
     }
@@ -188,18 +189,18 @@
 <!-- Create Collection Modal -->
 @if (showCreateModal()) {
   <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-    <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+    <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
       <h2 class="text-xl font-bold mb-4">Create New Collection</h2>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-sm text-[#6c6457] mb-2">Collection Name</label>
+          <label class="block text-sm text-text-muted dark:text-gray-400 mb-2">Collection Name</label>
           <input
             type="text"
             [ngModel]="newCollectionName()"
             (ngModelChange)="newCollectionName.set($event)"
             placeholder="e.g., React Hooks Patterns"
-            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]"
+            class="w-full px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white"
             (keyup.enter)="createCollection()">
         </div>
         
@@ -209,8 +210,8 @@
             id="isPublic"
             [ngModel]="newCollectionPublic()"
             (ngModelChange)="newCollectionPublic.set($event)"
-            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
-          <label for="isPublic" class="text-sm text-[#4f493f]">Make this collection public</label>
+            class="w-4 h-4 rounded border-gray-200 dark:border-white/10 text-primary focus:ring-primary/20">
+          <label for="isPublic" class="text-sm text-text-main dark:text-white">Make this collection public</label>
         </div>
         
         <div class="flex items-center gap-3">
@@ -219,21 +220,21 @@
             id="allowEdit"
             [ngModel]="newCollectionAllowEdit()"
             (ngModelChange)="newCollectionAllowEdit.set($event)"
-            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
-          <label for="allowEdit" class="text-sm text-[#4f493f]">Allow others to edit</label>
+            class="w-4 h-4 rounded border-gray-200 dark:border-white/10 text-primary focus:ring-primary/20">
+          <label for="allowEdit" class="text-sm text-text-main dark:text-white">Allow others to edit</label>
         </div>
       </div>
       
       <div class="flex gap-3 mt-6">
         <button
           (click)="closeCreateModal()"
-          class="flex-1 px-4 py-2 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+          class="flex-1 px-4 py-2 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
           Cancel
         </button>
         <button
           (click)="createCollection()"
           [disabled]="!newCollectionName().trim()"
-          class="flex-1 px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          class="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
           Create
         </button>
       </div>
@@ -244,18 +245,18 @@
 <!-- Edit Collection Modal -->
 @if (showEditModal()) {
   <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-    <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+    <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
       <h2 class="text-xl font-bold mb-4">Edit Collection</h2>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-sm text-[#6c6457] mb-2">Collection Name</label>
+          <label class="block text-sm text-text-muted dark:text-gray-400 mb-2">Collection Name</label>
           <input
             type="text"
             [ngModel]="editCollectionName()"
             (ngModelChange)="editCollectionName.set($event)"
             placeholder="e.g., React Hooks Patterns"
-            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]"
+            class="w-full px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white"
             (keyup.enter)="updateCollection()">
         </div>
         
@@ -265,8 +266,8 @@
             id="editIsPublic"
             [ngModel]="editCollectionPublic()"
             (ngModelChange)="editCollectionPublic.set($event)"
-            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
-          <label for="editIsPublic" class="text-sm text-[#4f493f]">Make this collection public</label>
+            class="w-4 h-4 rounded border-gray-200 dark:border-white/10 text-primary focus:ring-primary/20">
+          <label for="editIsPublic" class="text-sm text-text-main dark:text-white">Make this collection public</label>
         </div>
         
         <div class="flex items-center gap-3">
@@ -275,21 +276,21 @@
             id="editAllowEdit"
             [ngModel]="editCollectionAllowEdit()"
             (ngModelChange)="editCollectionAllowEdit.set($event)"
-            class="w-4 h-4 rounded border-[#c3bca5] text-[#ffe500] focus:ring-[#ffe500]">
-          <label for="editAllowEdit" class="text-sm text-[#4f493f]">Allow others to edit</label>
+            class="w-4 h-4 rounded border-gray-200 dark:border-white/10 text-primary focus:ring-primary/20">
+          <label for="editAllowEdit" class="text-sm text-text-main dark:text-white">Allow others to edit</label>
         </div>
       </div>
       
       <div class="flex gap-3 mt-6">
         <button
           (click)="closeEditModal()"
-          class="flex-1 px-4 py-2 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+          class="flex-1 px-4 py-2 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
           Cancel
         </button>
         <button
           (click)="updateCollection()"
           [disabled]="!editCollectionName().trim()"
-          class="flex-1 px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          class="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
           Update
         </button>
       </div>

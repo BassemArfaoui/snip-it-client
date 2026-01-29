@@ -1,15 +1,14 @@
-<div class="sunny-theme min-h-screen bg-[#f8f8f5] text-[#0f0f0f]">
+<div class="min-h-screen bg-gradient-to-b from-background-light to-white dark:from-background-dark dark:to-card-dark">
   <!-- Header -->
-  <div class="border-b border-[#ebe6d3] bg-[radial-gradient(circle_at_18%_15%,rgba(255,228,0,0.18),transparent_35%),radial-gradient(circle_at_82%_12%,rgba(255,228,0,0.16),transparent_32%),#fdfcf7] px-6 py-6 shadow-[0_18px_48px_-34px_rgba(0,0,0,0.45)]">
-    <div class="max-w-7xl mx-auto">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-2">
         <div>
-          <h1 class="text-3xl font-semibold mb-1">My Private Snippets</h1>
-          <p class="text-[#676155]">Manage and organize your personal code library.</p>
+          <h1 class="text-3xl font-bold text-text-main dark:text-white mb-1">My Private Snippets</h1>
+          <p class="text-text-muted dark:text-gray-400">Manage and organize your personal code library.</p>
         </div>
         <button 
           (click)="openCreateModal()"
-          class="px-5 py-2.5 bg-[#ffe500] text-[#0f0f0f] hover:bg-[#f6d600] rounded-full font-semibold shadow-[0_10px_30px_-16px_rgba(0,0,0,0.55)] transition-transform duration-150 hover:-translate-y-0.5 flex items-center gap-2">
+          class="px-5 py-2.5 bg-primary hover:bg-primary/90 text-black rounded-xl font-semibold shadow-soft transition-transform duration-150 hover:-translate-y-0.5 flex items-center gap-2">
           <span class="text-xl">+</span>
           Create New Snippet
         </button>
@@ -23,13 +22,13 @@
           [ngModel]="searchQuery()"
           (ngModelChange)="searchQuery.set($event); onSearchChange()"
           placeholder="Search snippets by title, code, or tags..."
-          class="flex-1 min-w-[260px] px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] placeholder-[#9b9586] shadow-sm">
+          class="flex-1 min-w-[260px] px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white placeholder:text-text-muted dark:placeholder:text-gray-500 shadow-soft">
         
         <!-- Language Filter -->
         <select 
           [ngModel]="selectedLanguage()"
           (ngModelChange)="setLanguage($event)"
-          class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+          class="px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white shadow-soft">
           @for (lang of languages; track lang) {
             <option [value]="lang">Language: {{ lang === 'All' ? 'All' : (lang | titlecase) }}</option>
           }
@@ -37,7 +36,7 @@
         
         <!-- Tags Filter -->
         <select 
-          class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+          class="px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white shadow-soft">
           <option value="All">Tags: All</option>
         </select>
         
@@ -45,20 +44,19 @@
         <select 
           [ngModel]="sortBy()"
           (ngModelChange)="setSortBy($event)"
-          class="px-4 py-2.5 bg-white border border-[#ebe6d3] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f] shadow-sm">
+          class="px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white shadow-soft">
           <option value="Newest First">Newest First</option>
           <option value="Oldest First">Oldest First</option>
           <option value="Name">Name</option>
         </select>
       </div>
-    </div>
   </div>
 
   <!-- Snippets List -->
-  <div class="max-w-7xl mx-auto px-6 py-8">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Error Message -->
     @if (hasError()) {
-      <div class="mb-4 p-4 bg-[#fff1f1] border border-[#ffd1d1] rounded-xl text-[#a83a3a]">
+      <div class="mb-4 p-4 bg-danger-light dark:bg-danger-dark/20 border border-danger/20 rounded-2xl text-danger">
         {{ error() }}
       </div>
     }
@@ -66,8 +64,11 @@
     <!-- Loading -->
     @if (loading()) {
       <div class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffe500]"></div>
-        <p class="mt-4 text-[#7d7769]">Loading snippets...</p>
+        <div class="relative inline-block">
+          <div class="w-12 h-12 border-4 border-primary/20 rounded-full"></div>
+          <div class="absolute top-0 left-0 w-12 h-12 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+        </div>
+        <p class="mt-4 text-text-muted dark:text-gray-400">Loading snippets...</p>
       </div>
     }
     
@@ -75,11 +76,11 @@
     @if (isEmptyState()) {
       <div class="text-center py-20">
         <div class="text-6xl mb-4">📝</div>
-        <h3 class="text-xl font-semibold mb-2">No snippets yet</h3>
-        <p class="text-[#7d7769] mb-6">Create your first code snippet to get started</p>
+        <h3 class="text-2xl font-bold text-text-main dark:text-white mb-2">No snippets yet</h3>
+        <p class="text-text-muted dark:text-gray-400 mb-6">Create your first code snippet to get started</p>
         <button 
           (click)="openCreateModal()"
-          class="px-6 py-3 bg-[#ffe500] hover:bg-[#f6d600] rounded-full transition-colors font-semibold shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]">
+          class="px-6 py-3 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold shadow-soft">
           Create Snippet
         </button>
       </div>
@@ -92,7 +93,7 @@
         @for (snippet of filteredSnippets(); track snippet.id) {
           <div
             (click)="openSnippet(snippet)"
-            class="bg-white border border-[#eee8d8] rounded-2xl overflow-hidden hover:border-[#ffd600] cursor-pointer transition-all group shadow-[0_16px_50px_-36px_rgba(0,0,0,0.5)]">
+            class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden hover:border-primary/60 cursor-pointer transition-all group shadow-soft">
             
             <div class="p-4">
               <!-- Header -->
@@ -100,27 +101,27 @@
                 <div class="flex items-center gap-3 flex-1">
                   <div class="text-2xl">{{ getLanguageIcon(snippet.language) }}</div>
                   <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold mb-1 line-clamp-1">{{ snippet.title }}</h3>
+                    <h3 class="text-lg font-semibold text-text-main dark:text-white mb-1 line-clamp-1">{{ snippet.title }}</h3>
                     <div class="flex items-center gap-2 text-sm">
-                      <span [class]="getLanguageColor(snippet.language)" class="px-2 py-0.5 rounded bg-[#f8f4e3] text-[#4f493f]">
+                      <span [class]="getLanguageColor(snippet.language)" class="px-2 py-0.5 rounded bg-primary/10 text-text-main dark:text-white">
                         {{ snippet.language | titlecase }}
                       </span>
-                      <span class="text-[#8b8475]">{{ formatDate(snippet.updatedAt) }}</span>
+                      <span class="text-text-muted dark:text-gray-400">{{ formatDate(snippet.updatedAt) }}</span>
                     </div>
                   </div>
                 </div>
                 <button 
                   (click)="deleteSnippet($event, snippet)"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-[#fff4c8] rounded-xl">
-                  <span class="text-[#9c9483] hover:text-[#d64545]">🗑️</span>
+                  class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl">
+                  <span class="text-text-muted dark:text-gray-400 hover:text-danger">🗑️</span>
                 </button>
               </div>
               
               <!-- Code Preview -->
-              <div class="bg-[#f8f6ef] border border-[#e7dfc7] rounded-xl p-4 mb-3 overflow-hidden">
-                <pre class="text-sm text-[#3a3935] font-mono overflow-x-auto"><code>{{ getPreviewLines(snippet.content) }}</code></pre>
+              <div class="bg-background-light/60 dark:bg-background-dark/40 border border-gray-100 dark:border-white/10 rounded-xl p-4 mb-3 overflow-hidden">
+                <pre class="text-sm text-text-main dark:text-white font-mono overflow-x-auto"><code>{{ getPreviewLines(snippet.content) }}</code></pre>
                 @if (snippet.content.split('\n').length > 3) {
-                  <div class="text-xs text-[#8b8475] mt-2">
+                  <div class="text-xs text-text-muted dark:text-gray-400 mt-2">
                     ... {{ snippet.content.split('\n').length - 3 }} more lines
                   </div>
                 }
@@ -129,7 +130,7 @@
               <!-- Tags -->
               <div class="flex items-center gap-2 flex-wrap">
                 @for (tag of snippet.tags; track tag.id) {
-                  <span class="px-2 py-1 bg-[#f5f1e3] text-[#6d665a] text-xs rounded-full">
+                  <span class="px-2 py-1 bg-white/60 dark:bg-white/5 text-text-muted dark:text-gray-400 text-xs rounded-full border border-gray-100 dark:border-white/10">
                     #{{ tag.name }}
                   </span>
                 }
@@ -143,7 +144,7 @@
           <div class="text-center py-8">
             <button 
               (click)="loadSnippets()"
-              class="px-6 py-2 border border-[#e7dfc7] bg-white hover:bg-[#fff4c8] rounded-full transition-colors font-semibold shadow-sm">
+              class="px-6 py-2 border border-gray-100 dark:border-white/10 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors font-semibold shadow-soft">
               Load more snippets ↓
             </button>
           </div>
@@ -156,26 +157,26 @@
 <!-- Create Snippet Modal -->
 @if (showCreateModal()) {
   <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-    <div class="bg-white border border-[#ece5d2] rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <h2 class="text-xl font-bold mb-4">Create New Snippet</h2>
       
       <div class="space-y-4">
         <div>
-          <label class="block text-sm text-[#6c6457] mb-2">Title</label>
+          <label class="block text-sm text-text-muted dark:text-gray-400 mb-2">Title</label>
           <input
             type="text"
             [ngModel]="newSnippet().title"
             (ngModelChange)="updateNewSnippetTitle($event)"
             placeholder="e.g., React useDebounce Hook"
-            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
+            class="w-full px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white">
         </div>
         
         <div>
-          <label class="block text-sm text-[#6c6457] mb-2">Language</label>
+          <label class="block text-sm text-text-muted dark:text-gray-400 mb-2">Language</label>
           <select
             [ngModel]="newSnippet().language"
             (ngModelChange)="updateNewSnippetLanguage($event)"
-            class="w-full px-4 py-2 bg-white border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#0f0f0f]">
+            class="w-full px-4 py-2 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white">
             <option value="javascript">JavaScript</option>
             <option value="typescript">TypeScript</option>
             <option value="python">Python</option>
@@ -189,26 +190,26 @@
         </div>
         
         <div>
-          <label class="block text-sm text-[#6c6457] mb-2">Code</label>
+          <label class="block text-sm text-text-muted dark:text-gray-400 mb-2">Code</label>
           <textarea
             [ngModel]="newSnippet().content"
             (ngModelChange)="updateNewSnippetContent($event)"
             placeholder="Paste your code here..."
             rows="12"
-            class="w-full px-4 py-3 bg-[#f8f6ef] border border-[#e6dfc7] rounded-xl focus:outline-none focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffe500]/60 text-[#111111] font-mono text-sm resize-none"></textarea>
+            class="w-full px-4 py-3 bg-background-light/60 dark:bg-background-dark/40 border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white font-mono text-sm resize-none"></textarea>
         </div>
       </div>
       
       <div class="flex gap-3 mt-6">
         <button
           (click)="closeCreateModal()"
-          class="flex-1 px-4 py-2 bg-[#f5f3ea] hover:bg-[#f0eddf] rounded-xl transition-colors border border-[#e7dfc7] font-semibold text-[#4f493f]">
+          class="flex-1 px-4 py-2 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors border border-gray-100 dark:border-white/10 font-semibold text-text-main dark:text-white">
           Cancel
         </button>
         <button
           (click)="createSnippet()"
           [disabled]="!newSnippet().title.trim() || !newSnippet().content.trim()"
-          class="flex-1 px-4 py-2 bg-[#ffe500] hover:bg-[#f6d600] rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          class="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
           Create Snippet
         </button>
       </div>
