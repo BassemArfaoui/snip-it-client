@@ -76,7 +76,7 @@
     @if (!isLoading() && snippet()) {
       <div class="flex flex-col lg:flex-row gap-6">
         <!-- Left Column - Editor -->
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
           <!-- Title & Language -->
           <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/5 rounded-t-2xl p-4 shadow-soft">
             @if (!isEditing()) {
@@ -159,7 +159,7 @@
         </div>
 
         <!-- Right Sidebar -->
-        <div class="w-full lg:w-80 space-y-4">
+        <div class="w-full lg:w-72 shrink-0 space-y-4">
           <!-- Snippet Settings -->
           <div class="bg-white dark:bg-card-dark border border-gray-100 dark:border-white/5 rounded-xl p-4 shadow-soft">
             <h3 class="font-semibold mb-3">Snippet Settings</h3>
