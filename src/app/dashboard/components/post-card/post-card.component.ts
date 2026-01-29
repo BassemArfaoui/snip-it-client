@@ -18,7 +18,11 @@ export class PostCardComponent {
 
   readonly commentsModalOpen = signal(false);
   readonly commentsLoading = signal(false);
+  readonly commentsLoadingMore = signal(false);
   readonly comments = signal<Comment[]>([]);
+  readonly commentsPage = signal(1);
+  readonly commentsTotalPages = signal(1);
+  readonly commentsLimit = 10;
   readonly commentInput = signal('');
   readonly commentError = signal<string | null>(null);
   readonly submittingComment = signal(false);
@@ -36,7 +40,7 @@ export class PostCardComponent {
   openCommentsModal() {
     this.commentsModalOpen.set(true);
     if (this.comments().length === 0) {
-      this.loadComments();
+      this.loadCommentsPage(1);
     }
   }
 
@@ -45,17 +49,40 @@ export class PostCardComponent {
     this.commentError.set(null);
   }
 
-  loadComments() {
+  loadCommentsPage(page: number) {
     if (this.commentsLoading()) return;
     this.commentsLoading.set(true);
 
-    this.commentsService.getPostComments(this.post.id, 1, 10).subscribe({
+    this.commentsService.getPostComments(this.post.id, page, this.commentsLimit).subscribe({
       next: (res) => {
         this.comments.set(res.data);
+        this.commentsPage.set(res.page);
+        this.commentsTotalPages.set(res.totalPages);
         this.commentsLoading.set(false);
       },
       error: () => {
         this.commentsLoading.set(false);
+      },
+    });
+  }
+
+  loadMoreComments() {
+    if (this.commentsLoadingMore() || this.commentsLoading()) return;
+
+    const nextPage = this.commentsPage() + 1;
+    if (nextPage > this.commentsTotalPages()) return;
+
+    this.commentsLoadingMore.set(true);
+
+    this.commentsService.getPostComments(this.post.id, nextPage, this.commentsLimit).subscribe({
+      next: (res) => {
+        this.comments.update((current) => [...current, ...res.data]);
+        this.commentsPage.set(res.page);
+        this.commentsTotalPages.set(res.totalPages);
+        this.commentsLoadingMore.set(false);
+      },
+      error: () => {
+        this.commentsLoadingMore.set(false);
       },
     });
   }
@@ -75,6 +102,9 @@ export class PostCardComponent {
 
         // Keep UI consistent with backend tweaks
         this.post.commentsCount = (this.post.commentsCount ?? 0) + 1;
+
+        // Keep pagination state sensible after a new comment
+        if (this.commentsPage() === 0) this.commentsPage.set(1);
 
         this.showToast('Comment added');
       },

@@ -5,7 +5,12 @@
 /* Global base styles */
 body {
   font-family: "Spline Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  background-color: #f8f8f5;
+  background-color: #0b1220;
+  color: #ffffff;
+}
+
+html {
+  color-scheme: dark;
 }
 
 /* Material Symbols support */
