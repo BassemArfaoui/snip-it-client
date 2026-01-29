@@ -28,7 +28,7 @@
         </div>
       }
 
-      <form [formGroup]="issueForm" (ngSubmit)="onSubmit()" class="space-y-8">
+      <form [formGroup]="issueForm" class="space-y-8">
         <!-- Content Field -->
         <div>
           <label for="content" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
@@ -140,7 +140,8 @@
         <!-- Submit Buttons -->
         <div class="flex gap-4 pt-4">
           <button
-            type="submit"
+            type="button"
+            (click)="onSubmit()"
             [disabled]="submitting"
             class="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-xl shadow-soft hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-soft"
           >

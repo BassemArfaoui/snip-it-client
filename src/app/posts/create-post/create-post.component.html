@@ -24,7 +24,7 @@
         </div>
       }
 
-      <form [formGroup]="postForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <form [formGroup]="postForm" class="space-y-6">
         <div>
           <label for="title" class="block text-sm font-semibold text-text-main dark:text-white mb-2">
             Title <span class="text-danger">*</span>
@@ -141,7 +141,8 @@
 
         <div class="flex gap-4 pt-2">
           <button
-            type="submit"
+            type="button"
+            (click)="onSubmit()"
             [disabled]="submitting"
             class="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-xl shadow-soft hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-soft">
             @if (submitting) {
