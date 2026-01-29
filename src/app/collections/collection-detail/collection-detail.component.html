@@ -95,7 +95,7 @@
             <input
               type="text"
               [ngModel]="searchQuery()"
-              (ngModelChange)="searchQuery.set($event)"
+              (ngModelChange)="onSearchChange($event)"
               placeholder="Search collections, snippets..."
               class="flex-1 min-w-[240px] px-4 py-2.5 bg-white dark:bg-card-dark border border-gray-100 dark:border-white/10 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-main dark:text-white placeholder:text-text-muted dark:placeholder:text-gray-500 shadow-soft">
             
@@ -551,7 +551,8 @@
           }
           <button 
           (click)="revokeShareLink()" 
-          class="w-full mt-2 py-2 text-danger hover:bg-danger-light dark:hover:bg-danger-dark/20 rounded transition-colors text-sm font-semibold">
+          [disabled]="!collection()?.isPublic"
+          class="w-full mt-2 py-2 text-danger hover:bg-danger-light dark:hover:bg-danger-dark/20 rounded transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent">
             Revoke access
           </button>
           </div>

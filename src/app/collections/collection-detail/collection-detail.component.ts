@@ -294,8 +294,10 @@ export class CollectionDetailComponent implements OnInit {
     this.loadItems();
   }
 
-  onSearchChange(): void {
-    // No need to filter manually - template will use signals
+  onSearchChange(query: string): void {
+    this.searchQuery.set(query);
+    this.currentPage.set(1);
+    this.loadItems();
   }
 
   removeItem(event: Event, item: CollectionItem): void {
