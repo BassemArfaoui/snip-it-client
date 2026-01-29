@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommentsService, type Comment } from '../../../services/comments.service';
@@ -13,6 +13,10 @@ import { type Post, type ReactionType } from '../../../services/posts.service';
 })
 export class PostCardComponent {
   @Input({ required: true }) post!: Post;
+
+  @ViewChild('commentsScroll') private commentsScroll?: ElementRef<HTMLElement>;
+  @ViewChild('commentsSentinel') private commentsSentinel?: ElementRef<HTMLElement>;
+  private commentsObserver?: IntersectionObserver;
 
   readonly reactionTypes: ReactionType[] = ['HEART', 'HELPFUL', 'FIRE', 'FUNNY', 'INCORRECT'];
 
@@ -42,11 +46,41 @@ export class PostCardComponent {
     if (this.comments().length === 0) {
       this.loadCommentsPage(1);
     }
+
+    // Wait a tick for the modal DOM to render before attaching the observer.
+    setTimeout(() => this.setupCommentsInfiniteScroll());
   }
 
   closeCommentsModal() {
     this.commentsModalOpen.set(false);
     this.commentError.set(null);
+    this.commentsObserver?.disconnect();
+    this.commentsObserver = undefined;
+  }
+
+  private setupCommentsInfiniteScroll() {
+    this.commentsObserver?.disconnect();
+
+    const rootEl = this.commentsScroll?.nativeElement;
+    const sentinelEl = this.commentsSentinel?.nativeElement;
+    if (!rootEl || !sentinelEl) return;
+
+    this.commentsObserver = new IntersectionObserver(
+      (entries) => {
+        const isNearEnd = entries.some((e) => e.isIntersecting);
+        if (!isNearEnd) return;
+        if (this.commentsLoading() || this.commentsLoadingMore()) return;
+        if (this.commentsPage() >= this.commentsTotalPages()) return;
+        this.loadMoreComments();
+      },
+      {
+        root: rootEl,
+        rootMargin: '200px 0px',
+        threshold: 0,
+      }
+    );
+
+    this.commentsObserver.observe(sentinelEl);
   }
 
   loadCommentsPage(page: number) {

@@ -47,14 +47,9 @@
         <span class="material-symbols-outlined animate-spin">progress_activity</span>
         <span class="text-sm">Loading…</span>
       </div>
-    } @else if (posts().length > 0 && canLoadMore()) {
-      <button
-        class="inline-flex items-center gap-2 rounded-full bg-primary text-black px-5 py-2.5 text-sm font-semibold hover:bg-[#e6e205] transition-colors"
-        (click)="loadMore()">
-        <span class="material-symbols-outlined">expand_more</span>
-        Load more
-      </button>
     }
   </div>
+
+  <div #postsSentinel class="h-1"></div>
   </main>
 </div>

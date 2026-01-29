@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PostsService, type Post } from '../services/posts.service';
@@ -11,6 +11,9 @@ import { PostCardComponent } from './components/post-card/post-card.component';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
+  @ViewChild('postsSentinel', { static: true }) private postsSentinel!: ElementRef<HTMLElement>;
+  private postsObserver?: IntersectionObserver;
+
   private readonly pageSize = 10;
 
   readonly posts = signal<Post[]>([]);
@@ -28,6 +31,27 @@ export class DashboardComponent {
 
   constructor(private readonly postsService: PostsService) {
     this.loadFirstPage();
+  }
+
+  ngAfterViewInit(): void {
+    this.postsObserver = new IntersectionObserver(
+      (entries) => {
+        const isNearEnd = entries.some((e) => e.isIntersecting);
+        if (!isNearEnd) return;
+        this.loadMore();
+      },
+      {
+        root: null,
+        rootMargin: '400px 0px',
+        threshold: 0,
+      }
+    );
+
+    this.postsObserver.observe(this.postsSentinel.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.postsObserver?.disconnect();
   }
 
   loadFirstPage() {

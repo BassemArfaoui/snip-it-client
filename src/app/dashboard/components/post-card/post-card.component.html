@@ -203,7 +203,7 @@
             }
           </div>
 
-          <div class="flex-1 overflow-auto p-5 bg-[#f8f8f5] dark:bg-black/20">
+          <div #commentsScroll class="flex-1 overflow-auto p-5 bg-[#f8f8f5] dark:bg-black/20">
             <div class="flex items-center justify-between mb-3">
               <div class="text-sm font-bold text-text-main dark:text-white">All comments</div>
               @if (commentsLoading()) {
@@ -230,23 +230,14 @@
               }
             </div>
 
-            @if (!commentsLoading() && comments().length > 0) {
-              <div class="mt-4 flex items-center justify-center">
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-text-muted hover:bg-white/5 hover:text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  [disabled]="commentsLoadingMore() || commentsPage() >= commentsTotalPages()"
-                  (click)="loadMoreComments()">
-                  @if (commentsLoadingMore()) {
-                    <span class="material-symbols-outlined animate-spin">progress_activity</span>
-                    <span>Loading…</span>
-                  } @else {
-                    <span>Load more</span>
-                    <span class="text-xs opacity-80">({{ commentsPage() }}/{{ commentsTotalPages() }})</span>
-                  }
-                </button>
+            @if (commentsLoadingMore()) {
+              <div class="mt-4 flex items-center justify-center gap-2 text-text-muted dark:text-gray-400">
+                <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                <span class="text-sm">Loading…</span>
               </div>
             }
+
+            <div #commentsSentinel class="h-1"></div>
           </div>
         </div>
       </div>
