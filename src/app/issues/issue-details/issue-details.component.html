@@ -176,7 +176,7 @@
           <div class="space-y-6">
             <div>
               <label class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-                Solution Description <span class="text-text-muted font-normal">(Optional)</span>
+                Solution Description 
               </label>
               <textarea
                 [(ngModel)]="solutionTextContent"
@@ -186,9 +186,37 @@
               ></textarea>
             </div>
 
+            <!-- Snippet Fields -->
             <div>
               <label class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-                External Link <span class="text-text-muted font-normal">(Optional)</span>
+                Snippet 
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  [(ngModel)]="solutionSnippetTitle"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark transition-all"
+                  placeholder="Snippet title"
+                />
+                <input
+                  type="text"
+                  [(ngModel)]="solutionSnippetLanguage"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark transition-all"
+                  placeholder="Snippet language (e.g. TypeScript)"
+                />
+              </div>
+              <textarea
+                [(ngModel)]="solutionSnippetContent"
+                rows="6"
+                class="mt-4 w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark transition-all resize-none font-mono text-sm"
+                placeholder="Paste your code snippet..."
+              ></textarea>
+
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-text-main dark:text-white mb-2">
+                External Link 
               </label>
               <input
                 type="url"
@@ -201,7 +229,7 @@
             <!-- Image Upload for Solution -->
             <div>
               <label class="block text-sm font-semibold text-text-main dark:text-white mb-2">
-                Attach Image <span class="text-text-muted font-normal">(Optional)</span>
+                Attach Image
               </label>
               @if (solutionImagePreview) {
                 <div class="relative inline-block group">
@@ -408,11 +436,36 @@
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all resize-none"
                     placeholder="Solution content..."
                   ></textarea>
+
+                  <!-- Edit Snippet Fields -->
+                  <div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        [(ngModel)]="editSolutionSnippetTitle"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all"
+                        placeholder="Snippet title"
+                      />
+                      <input
+                        type="text"
+                        [(ngModel)]="editSolutionSnippetLanguage"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all"
+                        placeholder="Snippet language"
+                      />
+                    </div>
+                    <textarea
+                      [(ngModel)]="editSolutionSnippetContent"
+                      rows="6"
+                      class="mt-4 w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all resize-none font-mono text-sm"
+                      placeholder="Snippet content..."
+                    ></textarea>
+                  </div>
+
                   <input
                     type="url"
                     [(ngModel)]="editSolutionExternalLink"
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all"
-                    placeholder="External link (optional)"
+                    placeholder="External link"
                   />
                   <div class="flex gap-3">
                     <button
@@ -436,6 +489,22 @@
                     <p class="text-text-main dark:text-white whitespace-pre-wrap leading-relaxed">
                       {{ solution.textContent }}
                     </p>
+                  </div>
+                }
+
+                <!-- Snippet -->
+                @if (solution.snippet) {
+                  <div class="px-6 pb-4">
+                    <div class="rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark overflow-hidden">
+                      <div class="px-4 py-3 border-b border-gray-200 dark:border-white/10 flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                          <div class="text-sm font-semibold text-text-main dark:text-white truncate">{{ solution.snippet.title }}</div>
+                          <div class="text-xs text-text-muted dark:text-gray-400 truncate">{{ solution.snippet.language }}</div>
+                        </div>
+                        <span class="material-symbols-outlined text-text-muted">code</span>
+                      </div>
+                      <pre class="p-4 text-sm text-text-main dark:text-white whitespace-pre-wrap overflow-x-auto"><code>{{ solution.snippet.content }}</code></pre>
+                    </div>
                   </div>
                 }
 

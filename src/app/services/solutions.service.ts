@@ -8,11 +8,19 @@ export interface SolutionContributor {
   username: string;
 }
 
+export interface SolutionSnippet {
+  id?: number;
+  title: string;
+  content: string;
+  language: string;
+}
+
 export interface Solution {
   id: number;
   issueId: number;
   contributor: SolutionContributor | null;
   textContent: string | null;
+  snippet?: SolutionSnippet | null;
   externalLink: string | null;
   imageUrl: string | null;
   likesCount: number;
@@ -25,12 +33,14 @@ export interface Solution {
 
 export interface CreateSolutionRequest {
   textContent?: string;
+  snippet?: SolutionSnippet;
   externalLink?: string;
   imageUrl?: string;
 }
 
 export interface UpdateSolutionRequest {
   textContent?: string;
+  snippet?: SolutionSnippet;
   externalLink?: string;
   imageUrl?: string;
 }

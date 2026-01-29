@@ -42,6 +42,9 @@ export class IssueDetailsComponent implements OnInit {
   showSolutionForm = false;
   solutionTextContent = '';
   solutionExternalLink = '';
+  solutionSnippetTitle = '';
+  solutionSnippetLanguage = '';
+  solutionSnippetContent = '';
   solutionImagePreview: string | null = null;
   solutionImageData: string | null = null;
   submittingSolution = false;
@@ -51,6 +54,9 @@ export class IssueDetailsComponent implements OnInit {
   editingSolutionId: number | null = null;
   editSolutionTextContent = '';
   editSolutionExternalLink = '';
+  editSolutionSnippetTitle = '';
+  editSolutionSnippetLanguage = '';
+  editSolutionSnippetContent = '';
 
   // Delete dialogs
   showDeleteIssueDialog = false;
@@ -201,6 +207,9 @@ export class IssueDetailsComponent implements OnInit {
     if (!this.showSolutionForm) {
       this.solutionTextContent = '';
       this.solutionExternalLink = '';
+      this.solutionSnippetTitle = '';
+      this.solutionSnippetLanguage = '';
+      this.solutionSnippetContent = '';
       this.solutionImagePreview = null;
       this.solutionImageData = null;
       this.solutionError = null;
@@ -212,13 +221,24 @@ export class IssueDetailsComponent implements OnInit {
     const externalLink = this.solutionExternalLink.trim();
     const hasImage = !!this.solutionImageData;
 
+    const snippetTitle = this.solutionSnippetTitle.trim();
+    const snippetLanguage = this.solutionSnippetLanguage.trim();
+    const snippetContent = this.solutionSnippetContent.trim();
+    const hasAnySnippetField = !!(snippetTitle || snippetLanguage || snippetContent);
+    const hasValidSnippet = !!(snippetTitle && snippetLanguage && snippetContent);
+
     // At least one field must have content
-    if (!textContent && !externalLink && !hasImage) {
+    if (!textContent && !externalLink && !hasImage && !hasAnySnippetField) {
       return false;
     }
 
     // If text content is provided, it must be at least 10 characters
     if (textContent && textContent.length < 10) {
+      return false;
+    }
+
+    // If any snippet field is provided, require all snippet fields
+    if (hasAnySnippetField && !hasValidSnippet) {
       return false;
     }
 
@@ -233,15 +253,26 @@ export class IssueDetailsComponent implements OnInit {
     const externalLink = this.solutionExternalLink.trim();
     const imageUrl = this.solutionImageData;
 
+    const snippetTitle = this.solutionSnippetTitle.trim();
+    const snippetLanguage = this.solutionSnippetLanguage.trim();
+    const snippetContent = this.solutionSnippetContent.trim();
+    const hasAnySnippetField = !!(snippetTitle || snippetLanguage || snippetContent);
+    const hasValidSnippet = !!(snippetTitle && snippetLanguage && snippetContent);
+
     // Validate that at least one field has content
-    if (!textContent && !externalLink && !imageUrl) {
-      this.solutionError = 'Please provide text content, an external link, or an image';
+    if (!textContent && !externalLink && !imageUrl && !hasAnySnippetField) {
+      this.solutionError = 'Please provide text content, a snippet, an external link, or an image';
       return;
     }
 
     // Validate text content length if provided
     if (textContent && textContent.length < 10) {
       this.solutionError = 'Text content must be at least 10 characters';
+      return;
+    }
+
+    if (hasAnySnippetField && !hasValidSnippet) {
+      this.solutionError = 'Snippet requires title, language, and content';
       return;
     }
 
@@ -252,6 +283,13 @@ export class IssueDetailsComponent implements OnInit {
     const request: any = {};
     if (textContent) {
       request.textContent = textContent;
+    }
+    if (hasValidSnippet) {
+      request.snippet = {
+        title: snippetTitle,
+        language: snippetLanguage,
+        content: snippetContent,
+      };
     }
     if (externalLink) {
       request.externalLink = externalLink;
@@ -280,12 +318,18 @@ export class IssueDetailsComponent implements OnInit {
     this.editingSolutionId = solution.id;
     this.editSolutionTextContent = solution.textContent || '';
     this.editSolutionExternalLink = solution.externalLink || '';
+    this.editSolutionSnippetTitle = solution.snippet?.title || '';
+    this.editSolutionSnippetLanguage = solution.snippet?.language || '';
+    this.editSolutionSnippetContent = solution.snippet?.content || '';
   }
 
   cancelEditSolution() {
     this.editingSolutionId = null;
     this.editSolutionTextContent = '';
     this.editSolutionExternalLink = '';
+    this.editSolutionSnippetTitle = '';
+    this.editSolutionSnippetLanguage = '';
+    this.editSolutionSnippetContent = '';
   }
 
   submitEditSolution() {
@@ -294,6 +338,25 @@ export class IssueDetailsComponent implements OnInit {
     const request: any = {};
     if (this.editSolutionTextContent.trim()) {
       request.textContent = this.editSolutionTextContent.trim();
+    }
+
+    const snippetTitle = this.editSolutionSnippetTitle.trim();
+    const snippetLanguage = this.editSolutionSnippetLanguage.trim();
+    const snippetContent = this.editSolutionSnippetContent.trim();
+    const hasAnySnippetField = !!(snippetTitle || snippetLanguage || snippetContent);
+    const hasValidSnippet = !!(snippetTitle && snippetLanguage && snippetContent);
+
+    if (hasAnySnippetField && !hasValidSnippet) {
+      console.error('Snippet requires title, language, and content');
+      return;
+    }
+
+    if (hasValidSnippet) {
+      request.snippet = {
+        title: snippetTitle,
+        language: snippetLanguage,
+        content: snippetContent,
+      };
     }
     if (this.editSolutionExternalLink.trim()) {
       request.externalLink = this.editSolutionExternalLink.trim();
