@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CommentsService, type Comment } from '../../../services/comments.service';
 import { InteractionsService } from '../../../services/interactions.service';
-import { type Post, type ReactionType } from '../../../services/posts.service';
+import { PostsService, type Post, type ReactionType } from '../../../services/posts.service';
 import { Collection, CollectionsService } from '../../../services/collections.service';
+import { userId } from '../../../auth.store';
 
 @Component({
   selector: 'app-post-card',
@@ -15,6 +16,8 @@ import { Collection, CollectionsService } from '../../../services/collections.se
 })
 export class PostCardComponent {
   @Input({ required: true }) post!: Post;
+
+  readonly hidden = signal(false);
 
   @ViewChild('commentsScroll') private commentsScroll?: ElementRef<HTMLElement>;
   @ViewChild('commentsSentinel') private commentsSentinel?: ElementRef<HTMLElement>;
@@ -38,6 +41,21 @@ export class PostCardComponent {
 
   readonly reactionsMenuOpen = signal(false);
 
+  readonly moreMenuOpen = signal(false);
+
+  readonly editModalOpen = signal(false);
+  readonly confirmDeleteOpen = signal(false);
+  editTitle = '';
+  editDescription = '';
+  editSnippetTitle = '';
+  editSnippetLanguage = '';
+  editSnippetContent = '';
+  editGithubLink = '';
+  readonly editSaving = signal(false);
+  readonly editError = signal<string | null>(null);
+
+  readonly deleting = signal(false);
+
   readonly saveMenuOpen = signal(false);
   readonly collectionsLoading = signal(false);
   readonly collections = signal<Collection[]>([]);
@@ -50,7 +68,125 @@ export class PostCardComponent {
     private readonly commentsService: CommentsService,
     private readonly interactionsService: InteractionsService,
     private readonly collectionsService: CollectionsService,
+    private readonly postsService: PostsService,
   ) {}
+
+  isOwnPost(): boolean {
+    const me = userId();
+    return !!me && me === this.post.author.id;
+  }
+
+  toggleMoreMenu(event: MouseEvent) {
+    event.stopPropagation();
+
+    // Keep menus from stacking.
+    this.saveMenuOpen.set(false);
+    this.reactionsMenuOpen.set(false);
+
+    this.moreMenuOpen.update((open) => !open);
+  }
+
+  closeMoreMenu(event?: MouseEvent) {
+    event?.stopPropagation();
+    this.moreMenuOpen.set(false);
+  }
+
+  openEditModal(event: MouseEvent) {
+    event.stopPropagation();
+    this.closeMoreMenu();
+
+    this.editError.set(null);
+
+    this.editTitle = this.post.title ?? '';
+    this.editDescription = this.post.description ?? '';
+    this.editSnippetTitle = this.post.snippet?.title ?? '';
+    this.editSnippetLanguage = this.post.snippet?.language ?? '';
+    this.editSnippetContent = this.post.snippet?.content ?? '';
+    this.editGithubLink = this.post.githubLink ?? '';
+
+    this.editModalOpen.set(true);
+  }
+
+  closeEditModal(event?: MouseEvent) {
+    event?.stopPropagation();
+    if (this.editSaving()) return;
+    this.editModalOpen.set(false);
+    this.editError.set(null);
+  }
+
+  openDeleteConfirm(event: MouseEvent) {
+    event.stopPropagation();
+    this.closeMoreMenu();
+    this.confirmDeleteOpen.set(true);
+  }
+
+  closeDeleteConfirm(event?: MouseEvent) {
+    event?.stopPropagation();
+    if (this.deleting()) return;
+    this.confirmDeleteOpen.set(false);
+  }
+
+  saveEdit(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.editSaving()) return;
+
+    const title = this.editTitle.trim();
+    const description = this.editDescription.trim();
+    const snippetContent = this.editSnippetContent.trim();
+    const snippetLanguage = this.editSnippetLanguage.trim();
+    const snippetTitle = this.editSnippetTitle.trim();
+    const githubLink = this.editGithubLink.trim();
+
+    if (!title || !description || !snippetContent || !snippetLanguage) {
+      this.editError.set('Please fill the required fields.');
+      return;
+    }
+
+    this.editSaving.set(true);
+    this.editError.set(null);
+
+    this.postsService.updatePost(this.post.id, {
+      title,
+      description,
+      snippetContent,
+      snippetLanguage,
+      snippetTitle: snippetTitle ? snippetTitle : undefined,
+      githubLink: githubLink ? githubLink : undefined,
+    }).subscribe({
+      next: (updated) => {
+        this.post = updated;
+        this.editSaving.set(false);
+        this.editModalOpen.set(false);
+        this.showToast('Updated');
+      },
+      error: (err) => {
+        const message = err?.error?.message || 'Failed to update post';
+        this.editError.set(typeof message === 'string' ? message : 'Failed to update post');
+        this.editSaving.set(false);
+      },
+    });
+  }
+
+  confirmDelete(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.deleting()) return;
+
+    this.deleting.set(true);
+
+    this.postsService.deletePost(this.post.id).subscribe({
+      next: () => {
+        this.hidden.set(true);
+        this.confirmDeleteOpen.set(false);
+        this.deleting.set(false);
+        this.showToast('Deleted');
+      },
+      error: (err) => {
+        const message = err?.error?.message || 'Failed to delete post';
+        this.deleting.set(false);
+        this.showToast(typeof message === 'string' ? message : 'Failed to delete post');
+      },
+    });
+  }
 
   toggleSaveMenu(event: MouseEvent) {
     event.stopPropagation();

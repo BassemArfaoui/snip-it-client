@@ -63,6 +63,15 @@ export interface CreatePostRequest {
   githubLink?: string;
 }
 
+export interface UpdatePostRequest {
+  title?: string;
+  description?: string;
+  snippetContent?: string;
+  snippetLanguage?: string;
+  snippetTitle?: string;
+  githubLink?: string;
+}
+
 interface ApiResponse<T> {
   data: T;
   message: string;
@@ -111,5 +120,13 @@ export class PostsService {
 
   createPost(post: CreatePostRequest): Observable<Post> {
     return this.http.post<ApiResponse<Post>>(this.apiUrl, post).pipe(map((res) => res.data));
+  }
+
+  updatePost(id: number, patch: UpdatePostRequest): Observable<Post> {
+    return this.http.patch<ApiResponse<Post>>(`${this.apiUrl}/${id}`, patch).pipe(map((res) => res.data));
+  }
+
+  deletePost(id: number): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/${id}`);
   }
 }
