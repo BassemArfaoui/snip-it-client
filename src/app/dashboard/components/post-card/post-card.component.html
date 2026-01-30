@@ -318,16 +318,38 @@
               @for (c of comments(); track c.id) {
                 <div class="rounded-2xl bg-white/70 dark:bg-white/5 p-4 border border-[#f5f5f0] dark:border-white/10">
                   <div class="flex items-center justify-between gap-3 mb-1">
-                    <a
-                      [routerLink]="['/profile', c.user.id]"
-                      class="text-sm font-semibold text-text-main dark:text-white hover:text-primary"
-                    >
-                      {{ c.user.username }}
-                    </a>
-                    <div class="flex items-center gap-2 shrink-0">
-                      <div class="text-xs text-text-muted dark:text-gray-400">{{ c.createdAt | date:'short' }}</div>
+                    <div class="flex items-center gap-3 min-w-0">
+                      <a
+                        [routerLink]="['/profile', c.user.id]"
+                        class="shrink-0 w-9 h-9 rounded-full overflow-hidden bg-gray-100 dark:bg-background-dark border border-gray-200 dark:border-white/10 flex items-center justify-center font-bold text-text-main dark:text-white"
+                        aria-label="Open commenter profile"
+                      >
+                        @if (c.user.imageProfile) {
+                          <img
+                            [src]="c.user.imageProfile"
+                            [alt]="(c.user.username || 'User') + ' avatar'"
+                            title="User avatar"
+                            class="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        } @else {
+                          <span class="text-xs">{{ (c.user.username || 'U').charAt(0) | uppercase }}</span>
+                        }
+                      </a>
 
-                      @if (isOwnComment(c)) {
+                      <div class="min-w-0">
+                        <a
+                          [routerLink]="['/profile', c.user.id]"
+                          class="text-sm font-semibold text-text-main dark:text-white hover:text-primary truncate block"
+                        >
+                          {{ c.user.username }}
+                        </a>
+                        <div class="text-xs text-text-muted dark:text-gray-400 truncate">{{ c.createdAt | date:'short' }}</div>
+                      </div>
+                    </div>
+
+                    @if (isOwnComment(c)) {
+                      <div class="flex items-center gap-2 shrink-0">
                         <div class="relative" (click)="$event.stopPropagation()">
                           <button
                             type="button"
@@ -359,10 +381,10 @@
                             </div>
                           }
                         </div>
-                      }
-                    </div>
+                      </div>
+                    }
                   </div>
-                  <p class="text-sm text-text-main dark:text-white/90 whitespace-pre-line">{{ c.content }}</p>
+                  <p class="mt-2 text-sm text-text-main dark:text-white/90 whitespace-pre-line">{{ c.content }}</p>
                 </div>
               }
 
@@ -541,6 +563,8 @@
         <textarea
           [(ngModel)]="editCommentContent"
           rows="4"
+          title="Edit comment"
+          placeholder="Edit your comment"
           class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-text-main dark:text-white"
         ></textarea>
 

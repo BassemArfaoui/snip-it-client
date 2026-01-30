@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 export interface CommentAuthor {
   id: number;
   username: string;
+  imageProfile?: string | null;
 }
 
 export interface Comment {
