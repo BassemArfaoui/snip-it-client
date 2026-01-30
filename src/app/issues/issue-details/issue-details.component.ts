@@ -85,7 +85,19 @@ export class IssueDetailsComponent implements OnInit {
   collectionsLoading = false;
   collections: Collection[] = [];
   savingToCollection = false;
-  private readonly defaultSavedItemsCollectionName = 'Saved Items';
+  // Languages dropdown
+  languages = [
+    'typescript',
+    'javascript',
+    'python',
+    'java',
+    'csharp',
+    'go',
+    'rust',
+    'php',
+    'ruby',
+    'cpp'
+  ];  private readonly defaultSavedItemsCollectionName = 'Saved Items';
   private readonly legacyDefaultCollectionNames = ['Saved Posts', 'Saved Issues', 'Saved Solutions'];
 
   // Image upload settings

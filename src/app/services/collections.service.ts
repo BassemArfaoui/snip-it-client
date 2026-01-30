@@ -32,6 +32,7 @@ export interface CollectionItem {
     content?: string;
     description?: string;
     language?: string;
+    issueId?: number;
   };
 }
 

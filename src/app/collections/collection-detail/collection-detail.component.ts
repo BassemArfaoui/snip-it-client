@@ -371,7 +371,12 @@ export class CollectionDetailComponent implements OnInit {
     } else if (item.targetType === 'ISSUE') {
       this.router.navigate(['/issues', item.targetId]);
     } else if (item.targetType === 'SOLUTION') {
-      this.router.navigate(['/solutions', item.targetId]);
+      // Navigate to the issue page and scroll to the specific solution
+      if (item.target?.issueId) {
+        this.router.navigate(['/issues', item.target.issueId], { 
+          fragment: `solution-${item.targetId}` 
+        });
+      }
     }
   }
 

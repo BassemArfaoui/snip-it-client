@@ -217,12 +217,18 @@
                   class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark transition-all"
                   placeholder="Snippet title"
                 />
-                <input
-                  type="text"
-                  [(ngModel)]="solutionSnippetLanguage"
-                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark transition-all"
-                  placeholder="Snippet language (e.g. TypeScript)"
-                />
+                <div class="relative">
+                  <select
+                    [(ngModel)]="solutionSnippetLanguage"
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary focus:bg-white dark:focus:bg-card-dark transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select language</option>
+                    @for (lang of languages; track lang) {
+                      <option [value]="lang">{{ lang }}</option>
+                    }
+                  </select>
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
+                </div>
               </div>
               <textarea
                 [(ngModel)]="solutionSnippetContent"
@@ -484,12 +490,18 @@
                         class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all"
                         placeholder="Snippet title"
                       />
-                      <input
-                        type="text"
-                        [(ngModel)]="editSolutionSnippetLanguage"
-                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all"
-                        placeholder="Snippet language"
-                      />
+                      <div class="relative">
+                        <select
+                          [(ngModel)]="editSolutionSnippetLanguage"
+                          class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-background-dark text-text-main dark:text-white focus:ring-0 focus:border-primary transition-all appearance-none cursor-pointer"
+                        >
+                          <option value="" disabled>Select language</option>
+                          @for (lang of languages; track lang) {
+                            <option [value]="lang">{{ lang }}</option>
+                          }
+                        </select>
+                        <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
+                      </div>
                     </div>
                     <textarea
                       [(ngModel)]="editSolutionSnippetContent"
