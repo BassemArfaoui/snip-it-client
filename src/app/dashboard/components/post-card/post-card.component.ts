@@ -36,6 +36,18 @@ export class PostCardComponent {
   readonly commentError = signal<string | null>(null);
   readonly submittingComment = signal(false);
 
+  readonly commentMoreOpenId = signal<number | null>(null);
+
+  readonly editCommentOpen = signal(false);
+  readonly editCommentSaving = signal(false);
+  readonly editCommentError = signal<string | null>(null);
+  editCommentId: number | null = null;
+  editCommentContent = '';
+
+  readonly confirmCommentDeleteOpen = signal(false);
+  commentDeleteId: number | null = null;
+  readonly commentDeleting = signal(false);
+
   readonly fullscreen = signal(false);
   readonly toast = signal<string | null>(null);
 
@@ -74,6 +86,113 @@ export class PostCardComponent {
   isOwnPost(): boolean {
     const me = userId();
     return !!me && me === this.post.author.id;
+  }
+
+  isOwnComment(c: Comment): boolean {
+    const me = userId();
+    return !!me && me === c.user.id;
+  }
+
+  toggleCommentMore(commentId: number, event: MouseEvent) {
+    event.stopPropagation();
+    this.commentMoreOpenId.update((current) => (current === commentId ? null : commentId));
+  }
+
+  closeCommentMore(event?: MouseEvent) {
+    event?.stopPropagation();
+    this.commentMoreOpenId.set(null);
+  }
+
+  openEditComment(c: Comment, event: MouseEvent) {
+    event.stopPropagation();
+    this.closeCommentMore();
+
+    this.editCommentError.set(null);
+    this.editCommentId = c.id;
+    this.editCommentContent = c.content ?? '';
+    this.editCommentOpen.set(true);
+  }
+
+  closeEditComment(event?: MouseEvent) {
+    event?.stopPropagation();
+    if (this.editCommentSaving()) return;
+    this.editCommentOpen.set(false);
+    this.editCommentError.set(null);
+    this.editCommentId = null;
+    this.editCommentContent = '';
+  }
+
+  saveCommentEdit(event: MouseEvent) {
+    event.stopPropagation();
+    const id = this.editCommentId;
+    if (!id) return;
+    if (this.editCommentSaving()) return;
+
+    const content = this.editCommentContent.trim();
+    if (!content) {
+      this.editCommentError.set('Comment cannot be empty.');
+      return;
+    }
+
+    this.editCommentSaving.set(true);
+    this.editCommentError.set(null);
+
+    this.commentsService.updateComment(id, { content }).subscribe({
+      next: (updated) => {
+        this.comments.update((current) =>
+          current.map((c) => (c.id === updated.id ? { ...c, content: updated.content, updatedAt: updated.updatedAt } : c))
+        );
+        this.editCommentSaving.set(false);
+        this.editCommentOpen.set(false);
+        this.editCommentId = null;
+        this.editCommentContent = '';
+        this.showToast('Comment updated');
+      },
+      error: (err) => {
+        const message = err?.error?.message || 'Failed to update comment';
+        this.editCommentError.set(typeof message === 'string' ? message : 'Failed to update comment');
+        this.editCommentSaving.set(false);
+      },
+    });
+  }
+
+  openDeleteCommentConfirm(c: Comment, event: MouseEvent) {
+    event.stopPropagation();
+    this.closeCommentMore();
+    this.confirmCommentDeleteOpen.set(true);
+    this.commentDeleteId = c.id;
+  }
+
+  closeDeleteCommentConfirm(event?: MouseEvent) {
+    event?.stopPropagation();
+    if (this.commentDeleting()) return;
+    this.confirmCommentDeleteOpen.set(false);
+    this.commentDeleteId = null;
+  }
+
+  confirmDeleteComment(event: MouseEvent) {
+    event.stopPropagation();
+    const id = this.commentDeleteId;
+    if (!id) return;
+    if (this.commentDeleting()) return;
+
+    this.commentDeleting.set(true);
+
+    this.commentsService.deleteComment(id).subscribe({
+      next: () => {
+        this.comments.update((current) => current.filter((c) => c.id !== id));
+        this.post.commentsCount = Math.max(0, (this.post.commentsCount ?? 0) - 1);
+        this.commentDeleting.set(false);
+        this.confirmCommentDeleteOpen.set(false);
+        this.commentDeleteId = null;
+        this.showToast('Comment deleted');
+      },
+      error: (err) => {
+        const message = err?.error?.message || 'Failed to delete comment';
+        this.commentDeleting.set(false);
+        this.showToast(typeof message === 'string' ? message : 'Failed to delete comment');
+      },
+    });
   }
 
   toggleMoreMenu(event: MouseEvent) {
