@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContributionDay, ProfileService } from '../../../services/profile.service';
 @Component({
@@ -11,9 +11,9 @@ export class ContributionGraphComponent implements OnChanges {
   @Input() visible = false;
   @Input() userId?: number;
 
-  loading = false;
-  error = '';
-  // graphWeeks is computed locally from `contributionData`
+  loading = signal(false);
+  error = signal('');
+  // `contributionData` is the raw days; `graphWeeks` is derived below as a computed signal
 
   @Output() view = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
@@ -33,9 +33,9 @@ export class ContributionGraphComponent implements OnChanges {
   }
 
   // internal contribution days (fetched when visible/userId changes)
-  contributionData: ContributionDay[] | null = null;
+  contributionData = signal<ContributionDay[] | null>(null);
 
-  graphWeeks: { date: string; count: number; }[][] = [];
+  graphWeeks = computed(() => this.buildGraphWeeks(this.contributionData() || []));
 
   constructor(private profileService: ProfileService) {}
 
@@ -74,25 +74,23 @@ export class ContributionGraphComponent implements OnChanges {
 
   loadContributionData(): void {
     if (!this.userId) return;
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     this.profileService.getContributionGraph(this.userId).subscribe({
       next: (data) => {
-        this.contributionData = data || [];
-        this.graphWeeks = this.buildGraphWeeks(this.contributionData || []);
-        this.loading = false;
-        this.error = '';
+        this.contributionData.set(data || []);
+        this.loading.set(false);
+        this.error.set('');
       },
       error: (err) => {
         console.error('Contribution graph error:', err);
-        this.contributionData = [];
-        this.graphWeeks = [];
-        this.loading = false;
+        this.contributionData.set([]);
+        this.loading.set(false);
         const status = err?.status;
         if (status === 404) {
-          this.error = 'User not found';
+          this.error.set('User not found');
         } else {
-          this.error = err?.error?.message || 'Failed to load contribution graph';
+          this.error.set(err?.error?.message || 'Failed to load contribution graph');
         }
       }
     });

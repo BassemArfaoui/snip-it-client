@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProfileService } from '../../../services/profile.service';
 
@@ -12,9 +12,9 @@ export class GlobalLeaderboardComponent {
   @Input() visible = false;
   @Input() userId?: number;
 
-  leaderboard: any[] = [];
-  loading = false;
-  error = '';
+  leaderboard = signal<any[]>([]);
+  loading = signal(false);
+  error = signal('');
 
   @Output() view = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
@@ -29,19 +29,19 @@ export class GlobalLeaderboardComponent {
 
   loadLeaderboard(): void {
     if (!this.userId) return;
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     this.profileService.getLeaderBoard(this.userId).subscribe({
       next: (data) => {
-        this.leaderboard = data || [];
-        this.loading = false;
-        this.error = '';
+        this.leaderboard.set(data || []);
+        this.loading.set(false);
+        this.error.set('');
       },
       error: (err) => {
         console.error('Leaderboard error:', err);
-        this.leaderboard = [];
-        this.loading = false;
-        this.error = err?.error?.message || 'Failed to load leaderboard';
+        this.leaderboard.set([]);
+        this.loading.set(false);
+        this.error.set(err?.error?.message || 'Failed to load leaderboard');
       }
     });
   }

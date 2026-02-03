@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ProfileService, UpdateProfilePayload, ProfileSummary } from '../../../services/profile.service';
@@ -14,10 +14,10 @@ export class ProfileEditComponent implements OnChanges {
   @Input() profile: ProfileSummary | null = null;
 
   editForm: FormGroup;
-  imagePreview: string | null = null;
-  editError = '';
-  editSuccess = '';
-  editLoading = false;
+  imagePreview = signal<string | null>(null);
+  editError = signal('');
+  editSuccess = signal('');
+  editLoading = signal(false);
 
   @Output() imageData = new EventEmitter<string>();
   @Output() saved = new EventEmitter<any>();
@@ -38,9 +38,9 @@ export class ProfileEditComponent implements OnChanges {
         email: this.profile.email || '',
         imageProfile: ''
       });
-      this.imagePreview = this.profile.imageProfile || null;
-      this.editError = '';
-      this.editSuccess = '';
+      this.imagePreview.set(this.profile.imageProfile || null);
+      this.editError.set('');
+      this.editSuccess.set('');
     }
   }
 
@@ -54,17 +54,18 @@ export class ProfileEditComponent implements OnChanges {
     const payload: UpdateProfilePayload = {};
     if (username && username.trim().length > 0) payload.username = username.trim();
     if (email && email.trim().length > 0) payload.email = email.trim();
-    if (this.imagePreview !== null) payload.imageProfile = this.imagePreview;
+    const image = this.imagePreview();
+    if (image !== null) payload.imageProfile = image;
 
-    this.editLoading = true;
-    this.editError = '';
-    this.editSuccess = '';
+    this.editLoading.set(true);
+    this.editError.set('');
+    this.editSuccess.set('');
 
     this.profileService.updateProfile(payload).subscribe({
       next: (res) => {
-        this.editSuccess = res.message || 'Profile updated successfully';
-        this.editError = '';
-        this.editLoading = false;
+        this.editSuccess.set(res.message || 'Profile updated successfully');
+        this.editError.set('');
+        this.editLoading.set(false);
         if (res.usernameChanged && res.username) {
           updateUsername(res.username);
         }
@@ -73,18 +74,18 @@ export class ProfileEditComponent implements OnChanges {
       error: (err) => {
         const status = err?.status;
         if (status === 409) {
-          this.editError = 'Username or email already taken';
+          this.editError.set('Username or email already taken');
         } else if (status === 400) {
-          this.editError = err?.error?.message || 'Invalid profile data';
+          this.editError.set(err?.error?.message || 'Invalid profile data');
         } else if (status === 403) {
-          this.editError = 'Access denied';
+          this.editError.set('Access denied');
         } else if (status === 401) {
-          this.editError = 'Please log in to update your profile';
+          this.editError.set('Please log in to update your profile');
         } else {
-          this.editError = err?.error?.message || 'Failed to update profile. Please try again.';
+          this.editError.set(err?.error?.message || 'Failed to update profile. Please try again.');
         }
-        this.editSuccess = '';
-        this.editLoading = false;
+        this.editSuccess.set('');
+        this.editLoading.set(false);
         console.error('Update profile error:', err);
       }
     });
@@ -100,18 +101,18 @@ export class ProfileEditComponent implements OnChanges {
     const maxImageDimension = 512;
 
     if (file.size > maxUploadSize) {
-      this.editError = 'Image is too large. Please select a file under 2 MB.';
+      this.editError.set('Image is too large. Please select a file under 2 MB.');
       return;
     }
 
-    this.editError = '';
+    this.editError.set('');
 
     try {
       const dataUrl = await this.resizeImage(file, maxImageDimension);
-      this.imagePreview = dataUrl;
+      this.imagePreview.set(dataUrl);
       this.imageData.emit(dataUrl);
     } catch (e) {
-      this.editError = 'Could not process image. Please try a smaller image.';
+      this.editError.set('Could not process image. Please try a smaller image.');
     }
   }
 
