@@ -1,0 +1,63 @@
+<div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
+	<div class="flex items-center gap-3">
+		<div class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 p-2 rounded-lg">
+			<span class="material-symbols-outlined">local_fire_department</span>
+		</div>
+		<div class="flex flex-col items-start">
+			<span class="font-bold text-sm">Daily Streak</span>
+			<span class="text-xs text-text-muted">See current and longest streak</span>
+		</div>
+	</div>
+	<button class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-black" (click)="view.emit()">View</button>
+</div>
+
+@if (visible) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+		<div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="close.emit()"></div>
+		<div class="relative w-full max-w-2xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
+			<button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="close.emit()">
+				<span class="material-symbols-outlined text-lg">close</span>
+			</button>
+			<div class="flex items-center justify-between mb-4 pr-10">
+				<div class="flex items-center gap-2">
+					<span class="material-symbols-outlined text-orange-600">local_fire_department</span>
+					<h3 class="font-bold text-lg text-text-main dark:text-white">Daily Streak</h3>
+				</div>
+				@if (loading) {<span class="text-xs text-text-muted">Loading...</span>}
+			</div>
+
+			@if (error) {
+				<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+					<p class="text-red-600 dark:text-red-300">{{ error }}</p>
+					<button class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" (click)="reload.emit()">Retry</button>
+				</div>
+			}
+
+			@if (!loading && !error && streak === null) {
+				<p class="text-sm text-text-muted">No streak data yet.</p>
+			}
+
+			@if (streak) {
+				<div class="grid grid-cols-2 gap-4">
+					<div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+						<p class="text-xs text-text-muted">Current streak</p>
+						<p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.currentStreak }} days</p>
+					</div>
+					<div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+						<p class="text-xs text-text-muted">Longest streak</p>
+						<p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.longestStreak }} days</p>
+					</div>
+					<div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+						<p class="text-xs text-text-muted">Last contribution</p>
+						<p class="text-lg font-bold text-text-main dark:text-white">{{ streak.lastContributionDate ? formatDate(streak.lastContributionDate) : 'Never' }}</p>
+					</div>
+					<div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+						<p class="text-xs text-text-muted">Total contributions</p>
+						<p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.totalContributions }}</p>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+

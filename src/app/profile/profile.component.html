@@ -1,445 +1,93 @@
 @if (error && !loading) {
-<main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
-  <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 text-center">
-    <div class="text-6xl mb-4">😕</div>
-    <h2 class="text-2xl font-bold text-red-800 dark:text-red-200 mb-2">{{ error }}</h2>
-    <p class="text-red-600 dark:text-red-300">The user you're looking for doesn't exist or has been removed.</p>
-  </div>
-</main>
+  <main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 text-center">
+      <div class="text-6xl mb-4">😕</div>
+      <h2 class="text-2xl font-bold text-red-800 dark:text-red-200 mb-2">{{ error }}</h2>
+      <p class="text-red-600 dark:text-red-300">The user you're looking for doesn't exist or has been removed.</p>
+      <div class="mt-4">
+        <button class="retry-button mt-3 bg-black text-white px-4 py-2 rounded-lg" (click)="loadProfile()">Retry</button>
+      </div>
+    </div>
+  </main>
 }
 
+@if (loading) {
+  <div class="loading-container flex items-center justify-center py-24">
+    <div class="spinner mr-3"></div>
+    <p>Loading profile...</p>
+  </div>
+}
+
+<!-- Always render Profile Card so it can load the profile when given a userId -->
+<app-profile-card
+  [userId]="userId"
+  [isOwnProfile]="isOwnProfile"
+  [isFollowing]="profile?.isFollowing ?? false"
+  [followLoading]="followLoading"
+  (profileLoaded)="onProfileLoaded($event)"
+  (followChange)="onFollowChange($event)"
+  (edit)="openEditModal()"
+></app-profile-card>
+
+<!-- debug banner removed -->
+
 @if (!loading && profile) {
-<main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
-  <!-- Profile Header Card -->
-  <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 mb-8 relative overflow-hidden group">
-    <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-500"></div>
-    <div class="relative flex flex-col md:flex-row items-center md:items-start gap-8 z-10">
-      <!-- Avatar (initial fallback) -->
-      <div class="relative">
-        <div class="size-32 rounded-full border-4 border-white dark:border-card-dark shadow-lg bg-gray-100 flex items-center justify-center text-4xl font-bold text-text-main overflow-hidden">
-          @if (profile.imageProfile) {
-            <img [src]="profile.imageProfile" alt="{{ profile.name }}" class="w-full h-full object-cover" />
-          } @else {
-            {{ profile.name.charAt(0).toUpperCase() }}
-          }
-        </div>
-        <div class="absolute bottom-1 right-1 bg-primary text-black text-xs font-bold px-2 py-0.5 rounded-full border-2 border-white">LVL {{ profile.score }}</div>
-      </div>
-      <!-- Info -->
-      <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left gap-2">
-        <div class="flex flex-col md:flex-row items-center gap-3">
-          <h1 class="text-3xl font-bold text-text-main dark:text-white leading-tight">{{ profile.name }}</h1>
-          <span class="bg-primary/20 text-yellow-700 dark:text-yellow-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">&#64;{{ profile.username }}</span>
-        </div>
-        <div class="flex items-center gap-2 mt-1 text-sm text-text-muted dark:text-gray-500">
-          <span class="material-symbols-outlined text-[18px]">verified</span>
-          <span>Posts: {{ profile.posts }}</span>
-          <span class="mx-1">•</span>
-          <span>Issues: {{ profile.issues }}</span>
-        </div>
-        @if (!isOwnProfile) {
-          <div class="flex gap-3 mt-4 w-full md:w-auto">
-            <button 
-              (click)="toggleFollow()" 
-              [disabled]="followLoading"
-              [class]="profile.isFollowing 
-                ? 'flex-1 md:flex-none bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-black dark:text-white font-bold h-10 px-6 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm'
-                : 'flex-1 md:flex-none bg-primary hover:bg-[#e6e205] text-black font-bold h-10 px-6 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm'
-              ">
-              <span>{{ followLoading ? 'Loading...' : (profile.isFollowing ? 'Unfollow' : 'Follow') }}</span>
-            </button>
-          </div>
-        }
-        @if (isOwnProfile) {
-          <div class="flex gap-3 mt-4 w-full md:w-auto">
-            <button type="button" class="bg-black text-white dark:bg-white dark:text-black text-sm font-bold px-4 py-2 rounded-full shadow hover:opacity-90" (click)="openEditModal()">Edit Profile</button>
-          </div>
-        }
-      </div>
-      <!-- Quick Stats -->
-      <div class="flex gap-6 md:gap-8 md:pl-8 md:border-l border-gray-100 dark:border-white/10 pt-4 md:pt-2">
-        <div class="text-center">
-          <div class="text-2xl font-bold text-text-main dark:text-white">{{ profile.followers }}</div>
-          <div class="text-sm text-text-muted">Followers</div>
-        </div>
-        <div class="text-center">
-          <div class="text-2xl font-bold text-text-main dark:text-white">{{ profile.followedBy }}</div>
-          <div class="text-sm text-text-muted">Following</div>
-        </div>
-        <div class="text-center">
-          <div class="text-2xl font-bold text-text-main dark:text-white">{{ profile.score }}</div>
-          <div class="text-sm text-text-muted">XP Score</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
 
-  <!-- Feed Toggles (Posts/Issues) -->
-  <div class="bg-white dark:bg-card-dark rounded-full shadow-soft p-1.5 flex w-full sm:w-fit mb-6">
-    <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
-            [class.bg-primary]="activeTab === 'posts'" [class.text-black]="activeTab === 'posts'"
-            [class.text-text-muted]="activeTab !== 'posts'" (click)="switchTab('posts')">Posts ({{ profile.posts }})</button>
-    <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
-            [class.bg-primary]="activeTab === 'issues'" [class.text-black]="activeTab === 'issues'"
-            [class.text-text-muted]="activeTab !== 'issues'" (click)="switchTab('issues')">Issues ({{ profile.issues }})</button>
-  </div>
-
-  <!-- 3 Column Layout -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-    <!-- Left Column: Badges -->
-    <div class="lg:col-span-3 flex flex-col gap-6 order-2 lg:order-1">
-      <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-lg text-text-main dark:text-white">Badges</h3>
-        </div>
-        <div class="flex flex-col gap-3">
-          @if (badges.length > 0) {
-            @for (badge of badges; track badge.id) {
-              <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center text-yellow-700 dark:text-yellow-200">
-                  <span class="material-symbols-outlined filled-icon">military_tech</span>
-                </div>
-                <div>
-                  <p class="text-sm font-bold text-text-main dark:text-white leading-tight">{{ badge.name }}</p>
-                  <p class="text-xs text-text-muted">{{ badge.description }}</p>
-                </div>
-              </div>
-            }
-          }
-          @if (badges.length === 0) {
-            <p class="text-sm text-text-muted">No badges earned yet</p>
-          }
-        </div>
-      </div>
+    <!-- Feed Toggles (Posts/Issues) -->
+    <div class="bg-white dark:bg-card-dark rounded-full shadow-soft p-1.5 flex w-full sm:w-fit mb-6">
+      <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
+              [class.bg-primary]="activeTab === 'posts'" [class.text-black]="activeTab === 'posts'"
+              [class.text-text-muted]="activeTab !== 'posts'" (click)="switchTab('posts')">Posts ({{ profile.posts }})</button>
+      <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
+              [class.bg-primary]="activeTab === 'issues'" [class.text-black]="activeTab === 'issues'"
+              [class.text-text-muted]="activeTab !== 'issues'" (click)="switchTab('issues')">Issues ({{ profile.issues }})</button>
     </div>
 
-    <!-- Middle Column: Feed -->
-    <div class="lg:col-span-6 flex flex-col gap-6 order-1 lg:order-2">
-      <!-- Posts -->
-      @if (activeTab === 'posts') {
-        @if (postsError) {
-          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
-            <p class="text-red-600 dark:text-red-300 font-semibold">{{ postsError }}</p>
-            <button class="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" (click)="loadPosts()">Retry</button>
-          </div>
-        }
-        @if (!postsError && posts.length === 0) {
-          <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No posts yet</div>
-        }
-        @for (post of posts; track post.id) {
-          <a
-            [routerLink]="['/posts', post.id]"
-            class="block bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all cursor-pointer"
-          >
-            <h3 class="text-xl font-bold text-text-main dark:text-white mb-2">{{ post.title }}</h3>
-            <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-4">{{ post.description }}</p>
-            <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/10 text-sm text-text-muted">
-              <div class="flex gap-4">
-                <span>👁️ {{ post.viewsCount || 0 }}</span>
-                <span>❤️ {{ post.likesCount || 0 }}</span>
-                <span>💬 {{ post.commentsCount || 0 }}</span>
-              </div>
-              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-text-main dark:text-white font-semibold">
-                <span class="material-symbols-outlined text-lg">open_in_new</span>
-                View
-              </span>
-            </div>
-          </a>
-        }
-      }
-
-      <!-- Issues -->
-      @if (activeTab === 'issues') {
-        @if (issuesError) {
-          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
-            <p class="text-red-600 dark:text-red-300 font-semibold">{{ issuesError }}</p>
-            <button class="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700" (click)="loadIssues()">Retry</button>
-          </div>
-        }
-        @if (!issuesError && issues.length === 0) {
-          <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No issues yet</div>
-        }
-        @for (issue of issues; track issue.id) {
-          <a
-            [routerLink]="['/issues', issue.id]"
-            class="block bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all cursor-pointer"
-          >
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold" [class]="issue.isResolved ? 'text-green-700 bg-green-100 px-2 py-0.5 rounded-full' : 'text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full'">
-                    {{ issue.isResolved ? 'Resolved' : 'Open' }}
-                  </span>
-                </div>
-              </div>
-              <h3 class="text-lg font-bold text-text-main dark:text-white mb-1">{{ issue.title }}</h3>
-              <div class="text-xs text-text-muted dark:text-gray-400 mb-2">{{ issue.language }}</div>
-              <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-4">{{ issue.content }}</p>
-              <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/10 text-sm text-text-muted">
-                <span>💡 {{ issue.solutionsCount }} solutions</span>
-              </div>
-          </a>
-        }
-      }
-    </div>
-
-    <!-- Right Column: Actions + Saved Widget -->
-    <div class="lg:col-span-3 flex flex-col gap-6 order-3">
-      <!-- Contribution & Streak quick actions -->
-      <div class="flex flex-col gap-3">
-        <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="bg-green-100 dark:bg-green-900/30 text-green-600 p-2 rounded-lg">
-              <span class="material-symbols-outlined">dataset</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="font-bold text-sm">Contribution Graph</span>
-              <span class="text-xs text-text-muted">Heatmap for the past year</span>
-            </div>
-          </div>
-          <button class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-black" (click)="toggleGraph()">{{ showGraphCard ? 'Hide' : 'View' }}</button>
-        </div>
-        <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 p-2 rounded-lg">
-              <span class="material-symbols-outlined">local_fire_department</span>
-            </div>
-            <div class="flex flex-col items-start">
-              <span class="font-bold text-sm">Daily Streak</span>
-              <span class="text-xs text-text-muted">See current and longest streak</span>
-            </div>
-          </div>
-          <button class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-black" (click)="toggleStreak()">{{ showStreakCard ? 'Hide' : 'View' }}</button>
-        </div>
-        <div class="group w-full bg-white dark:bg-card-dark p-4 rounded-xl shadow-soft flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 p-2 rounded-lg">
-              <span class="material-symbols-outlined">leaderboard</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="font-bold text-sm">Global Leaderboard</span>
-              <span class="text-xs text-text-muted">Top creators by XP</span>
-            </div>
-          </div>
-          <button class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-black" (click)="toggleLeaderboard()">{{ showLeaderboardCard ? 'Hide' : 'View' }}</button>
-        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="lg:col-span-3 flex flex-col gap-6 order-2 lg:order-1">
+        <app-badges-list [userId]="userId"></app-badges-list>
       </div>
 
-      @if (showGraphCard) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="toggleGraph()"></div>
-          <div class="relative w-full max-w-4xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
-            <button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="toggleGraph()">
-              <span class="material-symbols-outlined text-lg">close</span>
-            </button>
-            <div class="flex items-center justify-between mb-4 pr-10">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-green-600">insights</span>
-                <h3 class="font-bold text-lg text-text-main dark:text-white">Contribution Graph</h3>
-              </div>
-              @if (graphLoading) { <span class="text-xs text-text-muted">Loading...</span> }
-            </div>
-            @if (graphError) {
-              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <p class="text-red-600 dark:text-red-300">{{ graphError }}</p>
-                <button class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" (click)="loadContributionGraph()">Retry</button>
-              </div>
-            }
-            @if (!graphLoading && !graphError && contributionGraph.length === 0) {
-              <p class="text-sm text-text-muted">No contributions yet.</p>
-            }
-            @if (contributionGraph.length > 0) {
-              <div class="overflow-x-auto">
-                <div class="flex gap-1 pb-2 min-w-[520px]">
-                  @for (week of graphWeeks; track $index) {
-                    <div class="flex flex-col gap-1">
-                      @for (day of week; track day.date) {
-                        <div class="w-3 h-3 rounded-sm" [ngClass]="contributionColor(day.count)" [title]="formatDateLabel(day.date) + ' • ' + day.count + ' contributions'"></div>
-                      }
-                    </div>
-                  }
-                </div>
-              </div>
-              <div class="flex items-center gap-2 mt-3 text-xs text-text-muted">
-                <span>Less</span>
-                <div class="w-3 h-3 rounded-sm bg-gray-100 dark:bg-white/10"></div>
-                <div class="w-3 h-3 rounded-sm bg-green-200 dark:bg-green-900/40"></div>
-                <div class="w-3 h-3 rounded-sm bg-green-400 dark:bg-green-800/70"></div>
-                <div class="w-3 h-3 rounded-sm bg-green-500 dark:bg-green-700"></div>
-                <div class="w-3 h-3 rounded-sm bg-green-600 dark:bg-green-600"></div>
-                <span>More</span>
-              </div>
-            }
-          </div>
-        </div>
-      }
+      <div class="lg:col-span-6 flex flex-col gap-6 order-1 lg:order-2">
+        <app-profile-feed
+          [activeTab]="activeTab"
+          [userId]="userId"
+          [counts]="{ posts: profile.posts, issues: profile.issues }"
+          (changeTab)="switchTab($event)"
+        ></app-profile-feed>
+      </div>
 
-      @if (showStreakCard) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="toggleStreak()"></div>
-          <div class="relative w-full max-w-2xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
-            <button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="toggleStreak()">
-              <span class="material-symbols-outlined text-lg">close</span>
-            </button>
-            <div class="flex items-center justify-between mb-4 pr-10">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-orange-600">local_fire_department</span>
-                <h3 class="font-bold text-lg text-text-main dark:text-white">Daily Streak</h3>
-              </div>
-              @if (streakLoading) { <span class="text-xs text-text-muted">Loading...</span> }
-            </div>
-            @if (streakError) {
-              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <p class="text-red-600 dark:text-red-300">{{ streakError }}</p>
-                <button class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" (click)="loadStreak()">Retry</button>
-              </div>
-            }
-            @if (!streakLoading && !streakError && streak === null) {
-              <p class="text-sm text-text-muted">No streak data yet.</p>
-            }
-            @if (streak) {
-              <div class="grid grid-cols-2 gap-4">
-                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                  <p class="text-xs text-text-muted">Current streak</p>
-                  <p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.currentStreak }} days</p>
-                </div>
-                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                  <p class="text-xs text-text-muted">Longest streak</p>
-                  <p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.longestStreak }} days</p>
-                </div>
-                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                  <p class="text-xs text-text-muted">Last contribution</p>
-                  <p class="text-lg font-bold text-text-main dark:text-white">{{ streak.lastContributionDate ? formatDateLabel(streak.lastContributionDate) : 'Never' }}</p>
-                </div>
-                <div class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                  <p class="text-xs text-text-muted">Total contributions</p>
-                  <p class="text-2xl font-bold text-text-main dark:text-white">{{ streak.totalContributions }}</p>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      }
+      <div class="lg:col-span-3 flex flex-col gap-6 order-3">
+        <app-contribution-graph
+          [visible]="showGraphCard"
+          [userId]="userId"
+          (view)="toggleGraph()"
+          (close)="toggleGraph()"
+        ></app-contribution-graph>
 
-      @if (showLeaderboardCard) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="toggleLeaderboard()"></div>
-          <div class="relative w-full max-w-3xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
-            <button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="toggleLeaderboard()">
-              <span class="material-symbols-outlined text-lg">close</span>
-            </button>
-            <div class="flex items-center justify-between mb-4 pr-10">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-blue-600">leaderboard</span>
-                <h3 class="font-bold text-lg text-text-main dark:text-white">Global Leaderboard</h3>
-              </div>
-              @if (leaderboardLoading) { <span class="text-xs text-text-muted">Loading...</span> }
-            </div>
-            @if (leaderboardError) {
-              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <p class="text-red-600 dark:text-red-300">{{ leaderboardError }}</p>
-                <button class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" (click)="loadLeaderboard()">Retry</button>
-              </div>
-            }
-            @if (!leaderboardLoading && !leaderboardError && leaderboard.length === 0) {
-              <p class="text-sm text-text-muted">No leaderboard entries yet.</p>
-            }
-            @if (leaderboard.length > 0) {
-              <div class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1">
-                @for (user of leaderboard; track user.id) {
-                  <div class="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                    <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-blue-200 dark:bg-white/10 flex items-center justify-center font-bold text-blue-800">{{ user.rank || '-' }}</div>
-                      <div class="flex flex-col">
-                        <span class="font-bold text-text-main dark:text-white">{{ user.name }}</span>
-                        <span class="text-xs text-text-muted">&#64;{{ user.username }}</span>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-sm font-bold text-text-main dark:text-white">{{ user.score }} XP</p>
-                      <p class="text-xs text-text-muted">Posts {{ user.postsCount || 0 }} • Issues {{ user.issuesCount || 0 }}</p>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </div>
-      }
+        <app-daily-streak
+          [visible]="showStreakCard"
+          [userId]="userId"
+          (view)="toggleStreak()"
+          (close)="toggleStreak()"
+        ></app-daily-streak>
 
+        <app-global-leaderboard
+          [visible]="showLeaderboardCard"
+          [userId]="userId"
+          (view)="toggleLeaderboard()"
+          (close)="toggleLeaderboard()"
+        ></app-global-leaderboard>
+      </div>
     </div>
-  </div>
-</main>
+  </main>
 }
 
 @if (showEditModal) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeEditModal()"></div>
-    <div class="relative w-full max-w-xl bg-white dark:bg-card-dark rounded-2xl shadow-2xl p-6 border border-white/10">
-      <button class="absolute top-3 right-3 size-9 rounded-full bg-black/10 dark:bg-white/10 text-text-main dark:text-white flex items-center justify-center" (click)="closeEditModal()">
-        <span class="material-symbols-outlined text-lg">close</span>
-      </button>
-      <h3 class="text-xl font-bold text-text-main dark:text-white mb-2 pr-10">Edit Profile</h3>
-      <p class="text-sm text-text-muted mb-4">Update your public info. Leave fields blank to keep current values.</p>
-      <form [formGroup]="editForm" (ngSubmit)="submitProfileUpdate()" class="flex flex-col gap-4 pr-2">
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-bold text-text-main dark:text-white">Username</label>
-          <input formControlName="username" type="text" class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 py-2 text-sm" placeholder="Your username" />
-          @if (editForm.get('username')?.touched && editForm.get('username')?.invalid) {
-            <span class="text-xs text-red-600">Username must be at least 3 characters.</span>
-          }
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-bold text-text-main dark:text-white">Email</label>
-          <input formControlName="email" type="email" class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 px-3 py-2 text-sm" placeholder="you@example.com" />
-          @if (editForm.get('email')?.touched && editForm.get('email')?.invalid) {
-            <span class="text-xs text-red-600">Enter a valid email.</span>
-          }
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-bold text-text-main dark:text-white">Avatar Image</label>
-          <input type="file" accept="image/*" (change)="onImageSelected($event)" class="w-full text-sm" />
-          @if (imagePreview) {
-            <div class="mt-2 flex items-center gap-3">
-              <img [src]="imagePreview" alt="Avatar preview" class="w-16 h-16 rounded-full object-cover border border-gray-200 dark:border-white/10" />
-              <span class="text-xs text-text-muted">New avatar preview</span>
-            </div>
-          }
-        </div>
-
-        @if (editError) {
-          <div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{{ editError }}</div>
-        }
-        @if (editSuccess) {
-          <div class="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">{{ editSuccess }}</div>
-        }
-
-        <div class="flex items-center justify-end gap-3 pt-2">
-          <button type="button" class="px-4 py-2 rounded-full bg-gray-100 dark:bg-white/10 text-sm font-bold" (click)="closeEditModal()">Cancel</button>
-          <button type="submit" [disabled]="editLoading" class="px-5 py-2 rounded-full bg-primary text-black text-sm font-bold disabled:opacity-60">
-            @if (editLoading) { Saving... } @else { Save Changes }
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <app-profile-edit
+    [profile]="profile"
+    (saved)="onProfileSaved($event)"
+    (cancel)="closeEditModal()"
+  ></app-profile-edit>
 }
-
-
-
-
-
- <!-- Loading State -->
- @if (loading) {
-   <div class="loading-container flex items-center justify-center py-24">
-     <div class="spinner mr-3"></div>
-     <p>Loading profile...</p>
-   </div>
- }
-
- <!-- Error State -->
- @if (error && !loading) {
-   <div class="error-container p-6 bg-red-50 text-red-700 rounded-xl">
-     <p class="error-message font-semibold">{{ error }}</p>
-     <button class="retry-button mt-3 bg-black text-white px-4 py-2 rounded-lg" (click)="loadProfile()">Retry</button>
-   </div>
- }
