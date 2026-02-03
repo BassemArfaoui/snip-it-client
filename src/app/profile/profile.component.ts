@@ -4,9 +4,11 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload } from '../services/profile.service';
 import { SubscriptionService } from '../services/subscription.service';
+import { AuthService } from '../auth.service';
+import { AdminService } from '../admin/admin.service';
 import { getUserId, updateUsername } from '../auth.store';
 
-type ProfileDetail = ProfileSummary & { email?: string; imageProfile?: string | null };
+type ProfileDetail = ProfileSummary & { email?: string; imageProfile?: string | null; role?: string };
 interface Badge {
   id?: number;
   name: string;
@@ -25,6 +27,8 @@ export class ProfileComponent implements OnInit {
   profile: ProfileDetail | null = null;
   activeTab: string = 'posts';
   isOwnProfile = false;
+  isAdminViewer = false;
+  openPostMenuId: number | null = null;
   
   // Tab data
   posts: Post[] = [];
@@ -66,7 +70,9 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private profileService: ProfileService,
     private subscriptionService: SubscriptionService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private auth: AuthService,
+    private adminService: AdminService,
   ) {
     this.editForm = this.fb.group({
       username: ['', [Validators.minLength(3)]],
@@ -82,6 +88,8 @@ export class ProfileComponent implements OnInit {
       this.userId = id ? parseInt(id, 10) : 1;
       const currentUserId = getUserId();
       this.isOwnProfile = !!currentUserId && currentUserId === this.userId;
+      const role = this.auth.getUserRole?.() ?? null;
+      this.isAdminViewer = !!role && typeof role === 'string' && role.toLowerCase() === 'admin';
       this.activeTab = 'posts';
       this.loadProfile();
     });
@@ -168,6 +176,110 @@ export class ProfileComponent implements OnInit {
         }
       }
     });
+  }
+
+  // Admin actions for posts/issues
+  togglePostMenu(postId: number) {
+    this.openPostMenuId = this.openPostMenuId === postId ? null : postId;
+  }
+
+  adminDeletePost(postId: number) {
+    // optimistic: mark deleted locally and update counts
+    this.adminDeleteLocal(postId);
+    this.adminService?.deletePost?.(postId)?.subscribe({
+      // keep optimistic UI on success so deleted posts remain visible for restore
+      next: () => { this.openPostMenuId = null; },
+      // if server returns error, reload from server to restore consistency
+      error: () => this.loadPosts(),
+    });
+  }
+
+  // local quick remove (optimistic)
+  adminDeleteLocal(postId: number) {
+    const idx = this.posts.findIndex(p => p.id === postId);
+    if (idx === -1) return;
+    const now = new Date().toISOString();
+    this.posts[idx] = { ...this.posts[idx], isDeleted: true, deletedAt: now } as any;
+    if (this.profile) this.profile.posts = Math.max(0, (this.profile.posts || 0) - 1);
+  }
+
+  adminRestorePost(postId: number) {
+    // optimistic: mark restored locally
+    this.adminRestoreLocal(postId);
+    this.adminService?.restorePost?.(postId)?.subscribe({
+      // ensure the local post is un-deleted and keep it visible
+      next: () => {
+        const idx = this.posts.findIndex(p => p.id === postId);
+        if (idx !== -1) {
+          this.posts[idx] = { ...this.posts[idx], isDeleted: false, deletedAt: null } as any;
+        }
+        this.openPostMenuId = null;
+        // reload authoritative data from server to ensure DB state is reflected
+        this.loadPosts();
+      },
+      // if server returns error, revert optimistic change and reload
+      error: () => {
+        const idx = this.posts.findIndex(p => p.id === postId);
+        if (idx !== -1) {
+          const now = new Date().toISOString();
+          this.posts[idx] = { ...this.posts[idx], isDeleted: true, deletedAt: now } as any;
+        }
+        this.loadPosts();
+      },
+    });
+  }
+
+  adminRestoreLocal(postId: number) {
+    const idx = this.posts.findIndex(p => p.id === postId);
+    if (idx === -1) return;
+    this.posts[idx] = { ...this.posts[idx], isDeleted: false, deletedAt: null } as any;
+    if (this.profile) this.profile.posts = (this.profile.posts || 0) + 1;
+  }
+
+  // Issues admin actions (mirror posts behaviour)
+  adminDeleteIssue(issueId: number) {
+    this.adminDeleteLocalIssue(issueId);
+    this.adminService?.deleteIssue?.(issueId)?.subscribe({
+      next: () => { this.openPostMenuId = null; },
+      error: () => this.loadIssues(),
+    });
+  }
+
+  adminDeleteLocalIssue(issueId: number) {
+    const idx = this.issues.findIndex(i => i.id === issueId);
+    if (idx === -1) return;
+    const now = new Date().toISOString();
+    this.issues[idx] = { ...this.issues[idx], isDeleted: true, deletedAt: now } as any;
+    if (this.profile) this.profile.issues = Math.max(0, (this.profile.issues || 0) - 1);
+  }
+
+  adminRestoreIssue(issueId: number) {
+    this.adminRestoreLocalIssue(issueId);
+    this.adminService?.restoreIssue?.(issueId)?.subscribe({
+      next: () => {
+        const idx = this.issues.findIndex(i => i.id === issueId);
+        if (idx !== -1) {
+          this.issues[idx] = { ...this.issues[idx], isDeleted: false, deletedAt: null } as any;
+        }
+        this.openPostMenuId = null;
+        this.loadIssues();
+      },
+      error: () => {
+        const idx = this.issues.findIndex(i => i.id === issueId);
+        if (idx !== -1) {
+          const now = new Date().toISOString();
+          this.issues[idx] = { ...this.issues[idx], isDeleted: true, deletedAt: now } as any;
+        }
+        this.loadIssues();
+      }
+    });
+  }
+
+  adminRestoreLocalIssue(issueId: number) {
+    const idx = this.issues.findIndex(i => i.id === issueId);
+    if (idx === -1) return;
+    this.issues[idx] = { ...this.issues[idx], isDeleted: false, deletedAt: null } as any;
+    if (this.profile) this.profile.issues = (this.profile.issues || 0) + 1;
   }
 
   loadIssues(): void {

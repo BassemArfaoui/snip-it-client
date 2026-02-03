@@ -7,6 +7,7 @@ import { SolutionsService, Solution } from '../../services/solutions.service';
 import { VotesService, VoteType } from '../../services/votes.service';
 import { CommentsService, Comment } from '../../services/comments.service';
 import { AuthService } from '../../auth.service';
+import { AdminService } from '../../admin/admin.service';
 import { Collection, CollectionsService } from '../../services/collections.service';
 import { LanguageBadgeComponent } from '../../shared/language-badge/language-badge.component';
 import { ResolvedBadgeComponent } from '../../shared/resolved-badge/resolved-badge.component';
@@ -37,6 +38,9 @@ export class IssueDetailsComponent implements OnInit {
 
   currentUserId: number | null = null;
   isAuthenticated = false;
+
+  isAdminViewer = false;
+  adminMenuOpen = false;
 
   // Solution form
   showSolutionForm = false;
@@ -113,17 +117,70 @@ export class IssueDetailsComponent implements OnInit {
     private commentsService: CommentsService,
     private authService: AuthService,
     private collectionsService: CollectionsService,
+    private adminService: AdminService,
   ) {}
 
   ngOnInit() {
     this.isAuthenticated = !!this.authService.getAccessToken();
     this.currentUserId = this.authService.getUserId();
+    const role = this.authService.getUserRole?.() ?? null;
+    this.isAdminViewer = !!role && typeof role === 'string' && role.toLowerCase() === 'admin';
 
     this.route.params.subscribe(params => {
       const id = +params['id'];
       if (id) {
         this.loadIssue(id);
         this.loadSolutions(id);
+      }
+    });
+  }
+
+  toggleAdminMenu(event?: MouseEvent) {
+    event?.stopPropagation && event?.stopPropagation();
+    this.adminMenuOpen = !this.adminMenuOpen;
+  }
+
+  closeAdminMenu() {
+    this.adminMenuOpen = false;
+  }
+
+  // Admin moderation (soft-delete/restore for other user's issues)
+  adminDeleteIssue() {
+    if (!this.issue) return;
+    // optimistic local change
+    this.issue.isDeleted = true as any;
+    this.issue.deletedAt = new Date().toISOString();
+    this.closeAdminMenu();
+
+    this.adminService.deleteIssue(this.issue.id).subscribe({
+      next: () => {
+        this.showToast('Issue deleted', 'success');
+      },
+      error: (err) => {
+        // revert on error
+        this.issue!.isDeleted = false as any;
+        this.issue!.deletedAt = null as any;
+        this.showToast('Failed to delete issue', 'error');
+        console.error('Admin delete issue error:', err);
+      }
+    });
+  }
+
+  adminRestoreIssue() {
+    if (!this.issue) return;
+    this.issue.isDeleted = false as any;
+    this.issue.deletedAt = null as any;
+    this.closeAdminMenu();
+
+    this.adminService.restoreIssue(this.issue.id).subscribe({
+      next: () => {
+        this.showToast('Issue restored', 'success');
+      },
+      error: (err) => {
+        this.issue!.isDeleted = true as any;
+        this.issue!.deletedAt = new Date().toISOString() as any;
+        this.showToast('Failed to restore issue', 'error');
+        console.error('Admin restore issue error:', err);
       }
     });
   }

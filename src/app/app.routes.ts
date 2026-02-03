@@ -7,6 +7,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProfileComponent } from './profile/profile.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 import { AuthGuard } from './auth.guard';
+import { AdminComponent } from './admin/admin.component';
+import { AdminGuard } from './admin/admin.guard';
 import { GitHubCallbackComponent } from './github-callback/github-callback.component';
 import { IssuesListComponent } from './issues/issues-list/issues-list.component';
 import { IssueDetailsComponent } from './issues/issue-details/issue-details.component';
@@ -30,6 +32,7 @@ export const routes: Routes = [
 	{ path: 'dashboard', pathMatch: 'full', redirectTo: '' },
 	{ path: 'posts/new', component: CreatePostComponent, canActivate: [AuthGuard] },
 	{ path: 'posts/:id', component: PostDetailsComponent, canActivate: [AuthGuard] },
+	{ path: 'admin', component: AdminComponent, canActivate: [AuthGuard, AdminGuard] },
 	{ path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/new', component: CreateIssueComponent, canActivate: [AuthGuard] },
 	{ path: 'issues/:id/edit', component: EditIssueComponent, canActivate: [AuthGuard] },

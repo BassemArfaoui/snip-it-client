@@ -8,6 +8,11 @@ import { PostsService, type Post, type ReactionType } from '../../../services/po
 import { Collection, CollectionsService } from '../../../services/collections.service';
 import { userId } from '../../../auth.store';
 
+/** Local augmented post type including moderation fields present on server */
+type ModeratedPost = Post & { isDeleted?: boolean; deletedAt?: string | null };
+import { AuthService } from '../../../auth.service';
+import { AdminService } from '../../../admin/admin.service';
+
 @Component({
   selector: 'app-post-card',
   standalone: true,
@@ -15,7 +20,7 @@ import { userId } from '../../../auth.store';
   templateUrl: './post-card.component.html',
 })
 export class PostCardComponent {
-  @Input({ required: true }) post!: Post;
+  @Input({ required: true }) post!: ModeratedPost;
 
   readonly hidden = signal(false);
 
@@ -54,6 +59,7 @@ export class PostCardComponent {
   readonly reactionsMenuOpen = signal(false);
 
   readonly moreMenuOpen = signal(false);
+  readonly adminMenuOpen = signal(false);
 
   readonly editModalOpen = signal(false);
   readonly confirmDeleteOpen = signal(false);
@@ -76,12 +82,19 @@ export class PostCardComponent {
   private readonly defaultSavedItemsCollectionName = 'Saved Items';
   private readonly legacyDefaultCollectionNames = ['Saved Posts', 'Saved Issues', 'Saved Solutions'];
 
+  isAdminViewer = false;
+
   constructor(
     private readonly commentsService: CommentsService,
     private readonly interactionsService: InteractionsService,
     private readonly collectionsService: CollectionsService,
     private readonly postsService: PostsService,
-  ) {}
+    private readonly auth: AuthService,
+    private readonly adminService: AdminService,
+  ) {
+    const role = this.auth.getUserRole?.() ?? null;
+    this.isAdminViewer = !!role && typeof role === 'string' && role.toLowerCase() === 'admin';
+  }
 
   isOwnPost(): boolean {
     const me = userId();
@@ -208,6 +221,51 @@ export class PostCardComponent {
   closeMoreMenu(event?: MouseEvent) {
     event?.stopPropagation();
     this.moreMenuOpen.set(false);
+  }
+
+  toggleAdminMenu(event: MouseEvent) {
+    event.stopPropagation();
+    // Close other menus to avoid stacking
+    this.saveMenuOpen.set(false);
+    this.reactionsMenuOpen.set(false);
+    this.moreMenuOpen.set(false);
+    this.adminMenuOpen.update((open) => !open);
+  }
+
+  adminDeletePost(event?: MouseEvent) {
+    event?.stopPropagation && event?.stopPropagation();
+    // optimistic: mark deleted locally so admins can restore immediately
+    this.post.isDeleted = true as any;
+    this.post.deletedAt = new Date().toISOString() as any;
+    this.adminMenuOpen.set(false);
+
+    this.adminService.deletePost(this.post.id).subscribe({
+      next: () => { this.showToast('Deleted'); },
+      error: () => {
+        // revert optimistic change on error
+        this.post.isDeleted = false as any;
+        this.post.deletedAt = null as any;
+        this.showToast('Failed to delete post');
+      },
+    });
+  }
+
+  adminRestorePost(event?: MouseEvent) {
+    event?.stopPropagation && event?.stopPropagation();
+    // optimistic restore locally
+    this.post.isDeleted = false as any;
+    this.post.deletedAt = null as any;
+    this.adminMenuOpen.set(false);
+
+    this.adminService.restorePost(this.post.id).subscribe({
+      next: () => { this.showToast('Restored'); },
+      error: () => {
+        // revert optimistic restore on error
+        this.post.isDeleted = true as any;
+        this.post.deletedAt = new Date().toISOString() as any;
+        this.showToast('Failed to restore post');
+      },
+    });
   }
 
   openEditModal(event: MouseEvent) {
