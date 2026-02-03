@@ -1,8 +1,8 @@
-@if (error && !loading) {
+@if (error() && !loading()) {
   <main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
     <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 text-center">
       <div class="text-6xl mb-4">😕</div>
-      <h2 class="text-2xl font-bold text-red-800 dark:text-red-200 mb-2">{{ error }}</h2>
+      <h2 class="text-2xl font-bold text-red-800 dark:text-red-200 mb-2">{{ error() }}</h2>
       <p class="text-red-600 dark:text-red-300">The user you're looking for doesn't exist or has been removed.</p>
       <div class="mt-4">
         <button class="retry-button mt-3 bg-black text-white px-4 py-2 rounded-lg" (click)="loadProfile()">Retry</button>
@@ -11,7 +11,7 @@
   </main>
 }
 
-@if (loading) {
+@if (loading()) {
   <div class="loading-container flex items-center justify-center py-24">
     <div class="spinner mr-3"></div>
     <p>Loading profile...</p>
@@ -21,9 +21,9 @@
 <!-- Always render Profile Card so it can load the profile when given a userId -->
 <app-profile-card
   [userId]="userId"
-  [isOwnProfile]="isOwnProfile"
-  [isFollowing]="profile?.isFollowing ?? false"
-  [followLoading]="followLoading"
+  [isOwnProfile]="isOwnProfile()"
+  [isFollowing]="profile()?.isFollowing ?? false"
+  [followLoading]="followLoading()"
   (profileLoaded)="onProfileLoaded($event)"
   (followChange)="onFollowChange($event)"
   (edit)="openEditModal()"
@@ -31,17 +31,17 @@
 
 <!-- debug banner removed -->
 
-@if (!loading && profile) {
+@if (!loading() && profile()) {
   <main class="flex-1 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
 
     <!-- Feed Toggles (Posts/Issues) -->
     <div class="bg-white dark:bg-card-dark rounded-full shadow-soft p-1.5 flex w-full sm:w-fit mb-6">
-      <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
-              [class.bg-primary]="activeTab === 'posts'" [class.text-black]="activeTab === 'posts'"
-              [class.text-text-muted]="activeTab !== 'posts'" (click)="switchTab('posts')">Posts ({{ profile.posts }})</button>
-      <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
-              [class.bg-primary]="activeTab === 'issues'" [class.text-black]="activeTab === 'issues'"
-              [class.text-text-muted]="activeTab !== 'issues'" (click)="switchTab('issues')">Issues ({{ profile.issues }})</button>
+            <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
+              [class.bg-primary]="activeTab() === 'posts'" [class.text-black]="activeTab() === 'posts'"
+              [class.text-text-muted]="activeTab() !== 'posts'" (click)="switchTab('posts')">Posts ({{ profile()?.posts ?? 0 }})</button>
+            <button class="flex-1 sm:flex-none px-6 py-2 rounded-full text-sm font-bold"
+              [class.bg-primary]="activeTab() === 'issues'" [class.text-black]="activeTab() === 'issues'"
+              [class.text-text-muted]="activeTab() !== 'issues'" (click)="switchTab('issues')">Issues ({{ profile()?.issues ?? 0 }})</button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -51,30 +51,30 @@
 
       <div class="lg:col-span-6 flex flex-col gap-6 order-1 lg:order-2">
         <app-profile-feed
-          [activeTab]="activeTab"
+          [activeTab]="activeTab()"
           [userId]="userId"
-          [counts]="{ posts: profile.posts, issues: profile.issues }"
+          [counts]="{ posts: profile()?.posts ?? 0, issues: profile()?.issues ?? 0 }"
           (changeTab)="switchTab($event)"
         ></app-profile-feed>
       </div>
 
       <div class="lg:col-span-3 flex flex-col gap-6 order-3">
         <app-contribution-graph
-          [visible]="showGraphCard"
+          [visible]="showGraphCard()"
           [userId]="userId"
           (view)="toggleGraph()"
           (close)="toggleGraph()"
         ></app-contribution-graph>
 
         <app-daily-streak
-          [visible]="showStreakCard"
+          [visible]="showStreakCard()"
           [userId]="userId"
           (view)="toggleStreak()"
           (close)="toggleStreak()"
         ></app-daily-streak>
 
         <app-global-leaderboard
-          [visible]="showLeaderboardCard"
+          [visible]="showLeaderboardCard()"
           [userId]="userId"
           (view)="toggleLeaderboard()"
           (close)="toggleLeaderboard()"
@@ -84,9 +84,9 @@
   </main>
 }
 
-@if (showEditModal) {
+@if (showEditModal()) {
   <app-profile-edit
-    [profile]="profile"
+    [profile]="profile()"
     (saved)="onProfileSaved($event)"
     (cancel)="closeEditModal()"
   ></app-profile-edit>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -23,23 +23,23 @@ type ProfileDetail = ProfileSummary & { email?: string; imageProfile?: string | 
 })
 export class ProfileComponent implements OnInit {
   userId: number = 1;
-  profile: ProfileDetail | null = null;
-  activeTab: 'posts' | 'issues' = 'posts';
-  isOwnProfile = false;
+  profile = signal<ProfileDetail | null>(null);
+  activeTab = signal<'posts' | 'issues'>('posts');
+  isOwnProfile = signal(false);
   @ViewChild(ProfileCardComponent) profileCard?: ProfileCardComponent;
 
-  showGraphCard = false;
-  showStreakCard = false;
-  showLeaderboardCard = false;
-  showEditModal = false;
-  imagePreview: string | null = null;
+  showGraphCard = signal(false);
+  showStreakCard = signal(false);
+  showLeaderboardCard = signal(false);
+  showEditModal = signal(false);
+  imagePreview = signal<string | null>(null);
   editForm: FormGroup;
-  followLoading = false;
+  followLoading = signal(false);
 
-  loading: boolean = false;
-  error: string = '';
-  postsError: string = '';
-  issuesError: string = '';
+  loading = signal(false);
+  error = signal('');
+  postsError = signal('');
+  issuesError = signal('');
   
   
 
@@ -60,14 +60,14 @@ export class ProfileComponent implements OnInit {
       const id = params.get('id');
       this.userId = id ? parseInt(id, 10) : 1;
       const currentUserId = getUserId();
-      this.isOwnProfile = !!currentUserId && currentUserId === this.userId;
-      this.activeTab = 'posts';
+      this.isOwnProfile.set(!!currentUserId && currentUserId === this.userId);
+      this.activeTab.set('posts');
     });
     console.log('[ProfileComponent] ngOnInit userId=', this.userId, 'isOwnProfile=', this.isOwnProfile);
   }
 
   switchTab(tab: 'posts' | 'issues'): void {
-    this.activeTab = tab;
+    this.activeTab.set(tab);
     this.loadTabData(tab);
     console.log('[ProfileComponent] switchTab ->', tab);
   }
@@ -80,7 +80,7 @@ export class ProfileComponent implements OnInit {
       case 'badges':
         break;
       case 'leaderboard':
-        this.showLeaderboardCard = true;
+        this.showLeaderboardCard.set(true);
         break;
       case 'overview':
       default:
@@ -92,59 +92,62 @@ export class ProfileComponent implements OnInit {
 
 
   toggleGraph(): void {
-    this.showGraphCard = !this.showGraphCard;
+    this.showGraphCard.set(!this.showGraphCard());
   }
 
   toggleStreak(): void {
-    this.showStreakCard = !this.showStreakCard;
+    this.showStreakCard.set(!this.showStreakCard());
   }
 
   toggleLeaderboard(): void {
-    this.showLeaderboardCard = !this.showLeaderboardCard;
+    this.showLeaderboardCard.set(!this.showLeaderboardCard());
   }
 
   openEditModal(): void {
-    if (!this.profile) return;
+    if (!this.profile()) return;
+    const p = this.profile()!;
     this.editForm.patchValue({
-      username: this.profile.username || '',
-      email: this.profile.email || '',
+      username: p.username || '',
+      email: p.email || '',
       imageProfile: ''
     });
-    this.imagePreview = this.profile.imageProfile || null;
-    this.showEditModal = true;
+    this.imagePreview.set(p.imageProfile || null);
+    this.showEditModal.set(true);
     console.log('[ProfileComponent] openEditModal profile=', this.profile);
   }
 
   closeEditModal(): void {
-    this.showEditModal = false;
+    this.showEditModal.set(false);
     console.log('[ProfileComponent] closeEditModal');
   }
 
 
   onProfileSaved(res: any): void {
-    if (!this.profile) return;
-    this.profile = {
-      ...this.profile,
-      username: res.username ?? this.profile.username,
-      email: res.email ?? this.profile.email,
-      imageProfile: res.imageProfile ?? this.profile.imageProfile,
+    if (!this.profile()) return;
+    const p = this.profile()!;
+    const updated: ProfileDetail = {
+      ...p,
+      username: res.username ?? p.username,
+      email: res.email ?? p.email,
+      imageProfile: res.imageProfile ?? p.imageProfile,
     };
-    this.imagePreview = this.profile.imageProfile || null;
+    this.profile.set(updated);
+    this.imagePreview.set(updated.imageProfile || null);
     setTimeout(() => this.closeEditModal(), 200);
     console.log('[ProfileComponent] onProfileSaved, updated profile=', this.profile);
   }
 
   onProfileLoaded(profile: ProfileDetail): void {
-    this.profile = profile;
-    this.loading = false;
+    this.profile.set(profile);
+    this.loading.set(false);
     console.log('[ProfileComponent] onProfileLoaded received profile=', profile);
   }
 
 
   onFollowChange(payload: { isFollowing: boolean; followers: number }): void {
-    if (!this.profile) return;
-    this.profile.isFollowing = payload.isFollowing;
-    this.profile.followers = payload.followers;
+    if (!this.profile()) return;
+    const p = this.profile()!;
+    this.profile.set({ ...p, isFollowing: payload.isFollowing, followers: payload.followers });
     console.log('[ProfileComponent] onFollowChange', payload);
   }
 

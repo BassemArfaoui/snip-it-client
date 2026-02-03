@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProfileService } from '../../../services/profile.service';
 
@@ -12,9 +12,9 @@ export class DailyStreakComponent implements OnChanges {
   @Input() visible = false;
   @Input() userId?: number;
 
-  streak: any = null;
-  loading = false;
-  error = '';
+  streak = signal<any | null>(null);
+  loading = signal(false);
+  error = signal('');
 
   @Output() view = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
@@ -30,21 +30,21 @@ export class DailyStreakComponent implements OnChanges {
 
   loadStreak(): void {
     if (!this.userId) return;
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
     this.profileService.getStreak(this.userId).subscribe({
       next: (data) => {
-        this.streak = data;
-        this.loading = false;
-        this.error = '';
+        this.streak.set(data);
+        this.loading.set(false);
+        this.error.set('');
       },
       error: (err) => {
         console.error('Daily streak error:', err);
-        this.streak = null;
-        this.loading = false;
+        this.streak.set(null);
+        this.loading.set(false);
         const status = err?.status;
-        if (status === 404) this.error = 'User not found';
-        else this.error = err?.error?.message || 'Failed to load streak data';
+        if (status === 404) this.error.set('User not found');
+        else this.error.set(err?.error?.message || 'Failed to load streak data');
       }
     });
   }
