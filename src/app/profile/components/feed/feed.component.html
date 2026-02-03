@@ -1,0 +1,63 @@
+<div>
+  <div class="flex flex-col gap-6">
+    @if (activeTab === 'posts') {
+      @if (postsError()) {
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+          <p class="text-red-600 dark:text-red-300 font-semibold">{{ postsError() }}</p>
+          <button class="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg" (click)="loadPosts()">Retry</button>
+        </div>
+      }
+
+      @if (!postsError() && posts().length === 0) {
+        <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No posts yet</div>
+      }
+
+      @for (post of posts(); track post.id) {
+        <a [routerLink]="['/posts', post.id]" class="block bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all cursor-pointer">
+          <h3 class="text-xl font-bold text-text-main dark:text-white mb-2">{{ post.title }}</h3>
+          <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-4">{{ post.description }}</p>
+          <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/10 text-sm text-text-muted">
+            <div class="flex gap-4">
+              <span>👁️ {{ post.viewsCount || 0 }}</span>
+              <span>❤️ {{ post.likesCount || 0 }}</span>
+              <span>💬 {{ post.commentsCount || 0 }}</span>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-text-main dark:text-white font-semibold">
+              <span class="material-symbols-outlined text-lg">open_in_new</span>
+              View
+            </span>
+          </div>
+        </a>
+      }
+    }
+
+    @if (activeTab === 'issues') {
+      @if (issuesError()) {
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+          <p class="text-red-600 dark:text-red-300 font-semibold">{{ issuesError() }}</p>
+          <button class="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg" (click)="loadIssues()">Retry</button>
+        </div>
+      }
+      @if (!issuesError() && issues().length === 0) {
+        <div class="bg-white dark:bg-card-dark rounded-xl shadow-soft p-6 text-center text-text-muted">No issues yet</div>
+      }
+
+      @for (issue of issues(); track issue.id) {
+        <a [routerLink]="['/issues', issue.id]" class="block bg-white dark:bg-card-dark rounded-xl shadow-soft p-5 border border-transparent hover:border-primary/30 transition-all cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold" [class]="issue.isResolved ? 'text-green-700 bg-green-100 px-2 py-0.5 rounded-full' : 'text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full'">{{ issue.isResolved ? 'Resolved' : 'Open' }}</span>
+            </div>
+          </div>
+          <h3 class="text-lg font-bold text-text-main dark:text-white mb-1">{{ issue.title }}</h3>
+          <div class="text-xs text-text-muted dark:text-gray-400 mb-2">{{ issue.language }}</div>
+          <p class="text-text-muted dark:text-gray-300 text-sm leading-relaxed mb-4">{{ issue.content }}</p>
+          <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/10 text-sm text-text-muted">
+            <span>💡 {{ issue.solutionsCount }} solutions</span>
+          </div>
+        </a>
+      }
+    }
+  </div>
+</div>
+

@@ -1,85 +1,94 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ProfileService, ProfileSummary, Post, Issue, LeaderBoardUser, ContributionDay, StreakStats, UpdateProfilePayload } from '../services/profile.service';
-import { SubscriptionService } from '../services/subscription.service';
+import { ProfileService, ProfileSummary, ContributionDay, UpdateProfilePayload } from '../services/profile.service';
 import { AuthService } from '../auth.service';
 import { AdminService } from '../admin/admin.service';
 import { getUserId, updateUsername } from '../auth.store';
+import { ProfileCardComponent } from './components/profile-card/profile-card.component';
+import { ContributionGraphComponent } from './components/contribution-graph/contribution-graph.component';
+import { DailyStreakComponent } from './components/daily-streak/daily-streak.component';
+import { BadgesListComponent } from './components/badges-list/badges-list.component';
+import { FeedComponent } from './components/feed/feed.component';
+import { GlobalLeaderboardComponent } from './components/global-leaderboard/global-leaderboard.component';
+import { ProfileEditComponent } from './components/profile-edit/profile-edit.component';
 
 type ProfileDetail = ProfileSummary & { email?: string; imageProfile?: string | null; role?: string };
-interface Badge {
-  id?: number;
-  name: string;
-  description: string;
-}
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ProfileCardComponent, ContributionGraphComponent, DailyStreakComponent, BadgesListComponent, FeedComponent, GlobalLeaderboardComponent, ProfileEditComponent],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.css'
+  styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
   userId: number = 1;
-  profile: ProfileDetail | null = null;
-  activeTab: string = 'posts';
-  isOwnProfile = false;
-  isAdminViewer = false;
-  openPostMenuId: number | null = null;
-  
-  // Tab data
-  posts: Post[] = [];
-  issues: Issue[] = [];
-  badges: Badge[] = [];
-  leaderboard: LeaderBoardUser[] = [];
-  contributionGraph: ContributionDay[] = [];
-  streak: StreakStats | null = null;
+  profile = signal<ProfileDetail | null>(null);
+  activeTab = signal<'posts' | 'issues'>('posts');
+  isOwnProfile = signal(false);
+  @ViewChild(ProfileCardComponent) profileCard?: ProfileCardComponent;
 
-  showGraphCard = false;
-  showStreakCard = false;
-  showLeaderboardCard = false;
-  showEditModal = false;
-  imagePreview: string | null = null;
-  newImageData: string | null = null;
-  readonly maxUploadSize = 2 * 1024 * 1024; // 2MB client-side limit
-  readonly maxImageDimension = 512; // pixels
-
-  graphWeeks: { date: string; count: number; }[][] = [];
-  graphLoading = false;
-  streakLoading = false;
-  leaderboardLoading = false;
+  showGraphCard = signal(false);
+  showStreakCard = signal(false);
+  showLeaderboardCard = signal(false);
+  showEditModal = signal(false);
+  showPasswordModal = signal(false);
+  imagePreview = signal<string | null>(null);
   editForm: FormGroup;
-  editLoading = false;
-  editError = '';
-  editSuccess = '';
-  followLoading = false;
+  followLoading = signal(false);
 
-  loading: boolean = false;
-  error: string = '';
-  postsError: string = '';
-  issuesError: string = '';
-  badgesError: string = '';
-  leaderboardError: string = '';
-  graphError: string = '';
-  streakError: string = '';
+  // open/close handlers for the "Change Password" button (stub for now)
+  openPasswordModal(): void {
+    if (!this.profile()) return;
+    this.showPasswordModal.set(true);
+    console.log('[ProfileComponent] openPasswordModal');
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal.set(false);
+  }
+
+  loading = signal(false);
+  error = signal('');
+
+  // Use plain strings for these errors (code assigns strings directly)
+  postsError = '';
+  issuesError = '';
+
+  // Missing state from the merge
+  // make this a signal so template usage like isAdminViewer() works
+  isAdminViewer = signal(false);
+  posts: any[] = [];
+  issues: any[] = [];
+  badges: any[] = [];
+  badgesError = '';
+  leaderboard: any[] = [];
+  leaderboardLoading = false;
+  leaderboardError = '';
+  contributionGraph: ContributionDay[] = [];
+  graphWeeks: ContributionDay[][] = [];
+  graphLoading = false;
+  graphError = '';
+  streak: any = null;
+  streakLoading = false;
+  streakError = '';
+  openPostMenuId: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
-    private profileService: ProfileService,
-    private subscriptionService: SubscriptionService,
     private fb: FormBuilder,
     private auth: AuthService,
     private adminService: AdminService,
+    private profileService: ProfileService,
   ) {
     this.editForm = this.fb.group({
       username: ['', [Validators.minLength(3)]],
       email: ['', [Validators.email]],
       imageProfile: ['']
     });
-    
+
   }
 
   ngOnInit(): void {
@@ -87,66 +96,33 @@ export class ProfileComponent implements OnInit {
       const id = params.get('id');
       this.userId = id ? parseInt(id, 10) : 1;
       const currentUserId = getUserId();
-      this.isOwnProfile = !!currentUserId && currentUserId === this.userId;
+      this.isOwnProfile.set(!!currentUserId && currentUserId === this.userId);
       const role = this.auth.getUserRole?.() ?? null;
-      this.isAdminViewer = !!role && typeof role === 'string' && role.toLowerCase() === 'admin';
-      this.activeTab = 'posts';
-      this.loadProfile();
+      this.isAdminViewer.set(!!role && typeof role === 'string' && role.toLowerCase() === 'admin');
+      this.activeTab.set('posts');
     });
+    console.log('[ProfileComponent] ngOnInit userId=', this.userId, 'isOwnProfile=', this.isOwnProfile());
   }
 
-  loadProfile(): void {
-    this.loading = true;
-    this.error = '';
-    
-    this.profileService.getProfile(this.userId).subscribe({
-      next: (data) => {
-        this.profile = data;
-        this.loading = false;
-        this.editForm.patchValue({
-          username: data.username || '',
-          email: data.email || '',
-          imageProfile: ''
-        });
-        this.imagePreview = data.imageProfile || null;
-        this.newImageData = null;
-        this.loadTabData(this.activeTab);
-      },
-      error: (err) => {
-        const status = err?.status;
-        if (status === 404) {
-          this.error = 'User not found';
-        } else {
-          this.error = err?.error?.message || 'Failed to load profile. Please try again.';
-        }
-        this.loading = false;
-        console.error('Profile error:', err);
-      }
-    });
-  }
-
-  switchTab(tab: string): void {
-    this.activeTab = tab;
+  switchTab(tab: 'posts' | 'issues'): void {
+    this.activeTab.set(tab);
     this.loadTabData(tab);
+    console.log('[ProfileComponent] switchTab ->', tab);
   }
 
-  loadTabData(tab: string): void {
+  loadTabData(tab: 'posts' | 'issues' | 'badges' | 'leaderboard' | 'overview'): void {
     switch(tab) {
       case 'posts':
-        this.loadPosts();
-        break;
       case 'issues':
-        this.loadIssues();
         break;
       case 'badges':
-        this.loadBadges();
         break;
       case 'leaderboard':
-        this.loadLeaderboard();
+        this.showLeaderboardCard.set(true);
         break;
       case 'overview':
       default:
-        this.loadOverviewData();
+        // overview data (contribution graph, streak) are handled by their child components
         break;
     }
   }
@@ -200,7 +176,11 @@ export class ProfileComponent implements OnInit {
     if (idx === -1) return;
     const now = new Date().toISOString();
     this.posts[idx] = { ...this.posts[idx], isDeleted: true, deletedAt: now } as any;
-    if (this.profile) this.profile.posts = Math.max(0, (this.profile.posts || 0) - 1);
+
+    const p = this.profile();
+    if (p) {
+      this.profile.set({ ...p, posts: Math.max(0, (p.posts || 0) - 1) } as ProfileDetail);
+    }
   }
 
   adminRestorePost(postId: number) {
@@ -233,7 +213,11 @@ export class ProfileComponent implements OnInit {
     const idx = this.posts.findIndex(p => p.id === postId);
     if (idx === -1) return;
     this.posts[idx] = { ...this.posts[idx], isDeleted: false, deletedAt: null } as any;
-    if (this.profile) this.profile.posts = (this.profile.posts || 0) + 1;
+
+    const p = this.profile();
+    if (p) {
+      this.profile.set({ ...p, posts: (p.posts || 0) + 1 } as ProfileDetail);
+    }
   }
 
   // Issues admin actions (mirror posts behaviour)
@@ -250,7 +234,11 @@ export class ProfileComponent implements OnInit {
     if (idx === -1) return;
     const now = new Date().toISOString();
     this.issues[idx] = { ...this.issues[idx], isDeleted: true, deletedAt: now } as any;
-    if (this.profile) this.profile.issues = Math.max(0, (this.profile.issues || 0) - 1);
+
+    const p = this.profile();
+    if (p) {
+      this.profile.set({ ...p, issues: Math.max(0, (p.issues || 0) - 1) } as ProfileDetail);
+    }
   }
 
   adminRestoreIssue(issueId: number) {
@@ -279,7 +267,11 @@ export class ProfileComponent implements OnInit {
     const idx = this.issues.findIndex(i => i.id === issueId);
     if (idx === -1) return;
     this.issues[idx] = { ...this.issues[idx], isDeleted: false, deletedAt: null } as any;
-    if (this.profile) this.profile.issues = (this.profile.issues || 0) + 1;
+
+    const p = this.profile();
+    if (p) {
+      this.profile.set({ ...p, issues: (p.issues || 0) + 1 } as ProfileDetail);
+    }
   }
 
   loadIssues(): void {
@@ -386,238 +378,77 @@ export class ProfileComponent implements OnInit {
   }
 
   toggleGraph(): void {
-    this.showGraphCard = !this.showGraphCard;
-    if (this.showGraphCard && this.contributionGraph.length === 0 && !this.graphLoading) {
-      this.loadContributionGraph();
-    }
+    this.showGraphCard.set(!this.showGraphCard());
   }
 
   toggleStreak(): void {
-    this.showStreakCard = !this.showStreakCard;
-    if (this.showStreakCard && !this.streak && !this.streakLoading) {
-      this.loadStreak();
-    }
+    this.showStreakCard.set(!this.showStreakCard());
   }
 
   toggleLeaderboard(): void {
-    this.showLeaderboardCard = !this.showLeaderboardCard;
-    if (this.showLeaderboardCard && this.leaderboard.length === 0 && !this.leaderboardLoading) {
-      this.loadLeaderboard();
-    }
+    this.showLeaderboardCard.set(!this.showLeaderboardCard());
   }
 
   openEditModal(): void {
-    if (!this.profile) return;
-    this.editError = '';
-    this.editSuccess = '';
+    if (!this.profile()) return;
+    const p = this.profile()!;
     this.editForm.patchValue({
-      username: this.profile.username || '',
-      email: this.profile.email || '',
+      username: p.username || '',
+      email: p.email || '',
       imageProfile: ''
     });
-    this.imagePreview = this.profile.imageProfile || null;
-    this.newImageData = null;
-    this.showEditModal = true;
+    this.imagePreview.set(p.imageProfile || null);
+    this.showEditModal.set(true);
+    console.log('[ProfileComponent] openEditModal profile=', this.profile());
   }
 
   closeEditModal(): void {
-    this.showEditModal = false;
+    this.showEditModal.set(false);
+    console.log('[ProfileComponent] closeEditModal');
   }
 
-  onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
 
-    if (file.size > this.maxUploadSize) {
-      this.editError = 'Image is too large. Please select a file under 2 MB.';
-      return;
-    }
-
-    this.editError = '';
-
-    this.resizeImage(file)
-      .then((dataUrl) => {
-        this.newImageData = dataUrl;
-        this.imagePreview = dataUrl;
-      })
-      .catch(() => {
-        this.editError = 'Could not process image. Please try a smaller image.';
-      });
+  onProfileSaved(res: any): void {
+    if (!this.profile()) return;
+    const p = this.profile()!;
+    const updated: ProfileDetail = {
+      ...p,
+      username: res.username ?? p.username,
+      email: res.email ?? p.email,
+      imageProfile: res.imageProfile ?? p.imageProfile,
+    };
+    this.profile.set(updated);
+    this.imagePreview.set(updated.imageProfile || null);
+    setTimeout(() => this.closeEditModal(), 200);
+    console.log('[ProfileComponent] onProfileSaved, updated profile=', this.profile());
   }
 
-  private resizeImage(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            reject(new Error('No canvas context'));
-            return;
-          }
-
-          let { width, height } = img;
-          const maxDim = this.maxImageDimension;
-          if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else if (height >= width && height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
-          resolve(dataUrl);
-        };
-        img.onerror = () => reject(new Error('Image load error'));
-        img.src = reader.result as string;
-      };
-      reader.onerror = () => reject(new Error('File read error'));
-      reader.readAsDataURL(file);
-    });
+  onProfileLoaded(profile: ProfileDetail): void {
+    this.profile.set(profile);
+    this.loading.set(false);
+    console.log('[ProfileComponent] onProfileLoaded received profile=', profile);
   }
 
-  submitProfileUpdate(): void {
-    if (this.editForm.invalid) {
-      this.editForm.markAllAsTouched();
-      return;
-    }
 
-    const { username, email } = this.editForm.value;
-    const payload: UpdateProfilePayload = {};
-    if (username && username.trim().length > 0) payload.username = username.trim();
-    if (email && email.trim().length > 0) payload.email = email.trim();
-    if (this.newImageData !== null) payload.imageProfile = this.newImageData;
-
-    this.editLoading = true;
-    this.editError = '';
-    this.editSuccess = '';
-
-    this.profileService.updateProfile(payload).subscribe({
-      next: (res) => {
-        if (this.profile) {
-          this.profile = {
-            ...this.profile,
-            username: res.username ?? this.profile.username,
-            email: res.email ?? this.profile.email,
-            imageProfile: res.imageProfile ?? this.profile.imageProfile,
-          };
-          this.imagePreview = this.profile.imageProfile || null;
-          this.newImageData = null;
-          
-          // Update username in auth store if it changed
-          if (res.usernameChanged && res.username) {
-            updateUsername(res.username);
-          }
-        }
-        this.editSuccess = res.message || 'Profile updated successfully';
-        this.editError = '';
-        this.editLoading = false;
-        setTimeout(() => this.closeEditModal(), 2000);
-      },
-      error: (err) => {
-        const status = err?.status;
-        if (status === 409) {
-          this.editError = 'Username or email already taken';
-        } else if (status === 400) {
-          this.editError = err?.error?.message || 'Invalid profile data';
-        } else if (status === 403) {
-          this.editError = 'Access denied';
-        } else if (status === 401) {
-          this.editError = 'Please log in to update your profile';
-        } else {
-          this.editError = err?.error?.message || 'Failed to update profile. Please try again.';
-        }
-        this.editSuccess = '';
-        this.editLoading = false;
-        console.error('Update profile error:', err);
-      }
-    });
+  onFollowChange(payload: { isFollowing: boolean; followers: number }): void {
+    if (!this.profile()) return;
+    const p = this.profile()!;
+    this.profile.set({ ...p, isFollowing: payload.isFollowing, followers: payload.followers });
+    console.log('[ProfileComponent] onFollowChange', payload);
   }
 
-  buildGraphWeeks(data: ContributionDay[]): { date: string; count: number; }[][] {
-    const today = new Date();
-    const start = new Date();
-    start.setDate(today.getDate() - 364);
-    const counts = new Map<string, number>();
-    data.forEach(entry => counts.set(entry.date.slice(0, 10), entry.count));
+  loadProfile(): void {
+    this.profileCard?.loadProfile();
+    console.log('[ProfileComponent] loadProfile called, delegating to profileCard');
+  }
 
-    const weeks: { date: string; count: number; }[][] = [];
-    let currentWeek: { date: string; count: number; }[] = [];
-
-    for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
-      const iso = d.toISOString().slice(0, 10);
-      currentWeek.push({ date: iso, count: counts.get(iso) || 0 });
-
-      if (d.getDay() === 6) {
-        weeks.push(currentWeek);
-        currentWeek = [];
-      }
+  // helper used by buildGraphWeeks call in loadContributionGraph
+  private buildGraphWeeks(days: ContributionDay[]): ContributionDay[][] {
+    // naive grouping into weeks (keep existing behavior)
+    const weeks: ContributionDay[][] = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
     }
-
-    if (currentWeek.length) {
-      weeks.push(currentWeek);
-    }
-
     return weeks;
-  }
-
-  contributionColor(count: number): string {
-    if (count === 0) return 'bg-gray-100 dark:bg-white/10';
-    if (count <= 2) return 'bg-green-200 dark:bg-green-900/40';
-    if (count <= 4) return 'bg-green-400 dark:bg-green-800/70';
-    if (count <= 6) return 'bg-green-500 dark:bg-green-700';
-    return 'bg-green-600 dark:bg-green-600';
-  }
-
-  formatDateLabel(date: string): string {
-    const parsed = new Date(date + 'T00:00:00');
-    return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  }
-
-  
-  
-
-  toggleFollow(): void {
-    if (!this.profile || this.followLoading) return;
-
-    this.followLoading = true;
-    const isCurrentlyFollowing = this.profile.isFollowing;
-
-    const action = isCurrentlyFollowing
-      ? this.subscriptionService.unfollow(this.userId)
-      : this.subscriptionService.follow(this.userId);
-
-    action.subscribe({
-      next: (response) => {
-        if (this.profile) {
-          this.profile.isFollowing = !isCurrentlyFollowing;
-          this.profile.followers = response.followers;
-        }
-        this.followLoading = false;
-      },
-      error: (err) => {
-        console.error('Follow/unfollow failed:', err);
-        const status = err?.status;
-        let errorMsg = 'Failed to update follow status';
-        if (status === 401) {
-          errorMsg = 'Please log in to follow users';
-        } else if (status === 400) {
-          errorMsg = err?.error?.message || 'Invalid request';
-        } else if (status === 404) {
-          errorMsg = 'User not found';
-        }
-        // Show error to user (you can add a toast notification here)
-        alert(errorMsg);
-        this.followLoading = false;
-      }
-    });
   }
 }

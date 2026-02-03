@@ -13,7 +13,7 @@ import { IssuesService, IssueDetails } from '../../services/issues.service';
 export class EditIssueComponent implements OnInit {
   issueForm!: FormGroup;
   issue: IssueDetails | null = null;
-  loading = false;
+  loading = true;
   submitting = false;
   error: string | null = null;
   issueId!: number;
@@ -88,9 +88,17 @@ export class EditIssueComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log('onSubmit called');
+    console.log('Form valid:', this.issueForm.valid);
+    console.log('Form value:', this.issueForm.value);
+    console.log('Issue ID:', this.issueId);
+
     if (this.issueForm.invalid) {
+      console.log('Form is invalid');
       Object.keys(this.issueForm.controls).forEach(key => {
-        this.issueForm.get(key)?.markAsTouched();
+        const control = this.issueForm.get(key);
+        console.log(`${key} - valid: ${control?.valid}, errors:`, control?.errors);
+        control?.markAsTouched();
       });
       return;
     }
@@ -98,8 +106,10 @@ export class EditIssueComponent implements OnInit {
     this.submitting = true;
     this.error = null;
 
+    console.log('Calling updateIssue API...');
     this.issuesService.updateIssue(this.issueId, this.issueForm.value).subscribe({
-      next: () => {
+      next: (result) => {
+        console.log('Update successful:', result);
         this.router.navigate(['/issues', this.issueId]);
       },
       error: (err) => {
