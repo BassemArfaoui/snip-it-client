@@ -61,7 +61,7 @@
 
     <!-- Issue Content Card -->
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <article class="bg-white dark:bg-card-dark rounded-2xl shadow-soft overflow-hidden">
+      <article class="relative bg-white dark:bg-card-dark rounded-2xl shadow-soft overflow-hidden">
         <!-- Author Header -->
         <div class="p-6 pb-4">
           <div class="flex items-center gap-3 mb-4">
@@ -96,9 +96,15 @@
           </div>
 
           <!-- Issue Content -->
-          <h1 class="text-2xl sm:text-3xl font-bold text-text-main dark:text-white mb-4 leading-tight">
-            {{ issue.title }}
-          </h1>
+          <div class="flex items-center gap-3 mb-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-text-main dark:text-white leading-tight">
+              {{ issue.title }}
+            </h1>
+
+            @if (issue.isDeleted) {
+              <div class="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">Deleted</div>
+            }
+          </div>
 
           <div class="text-text-main dark:text-white text-lg leading-relaxed whitespace-pre-wrap">
             {{ issue.content }}
@@ -150,6 +156,37 @@
                   >
                     <span class="material-symbols-outlined">delete</span>
                   </button>
+                }
+
+                <!-- Admin moderation for other users' issues -->
+                @if (isAdminViewer && !isIssueOwner()) {
+                  <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <a
+                      [routerLink]="['/issues', issue.id, 'edit']"
+                      class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                      title="Edit Issue"
+                    >
+                      <span class="material-symbols-outlined text-text-main dark:text-white">edit</span>
+                    </a>
+
+                    @if (!issue.isDeleted) {
+                      <button
+                        (click)="adminDeleteIssue()"
+                        class="p-2.5 rounded-xl hover:bg-danger/10 transition-colors text-text-muted hover:text-danger"
+                        title="Delete Issue"
+                      >
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    } @else {
+                      <button
+                        (click)="adminRestoreIssue()"
+                        class="p-2.5 rounded-xl hover:bg-primary/10 transition-colors"
+                        title="Restore Issue"
+                      >
+                        <span class="material-symbols-outlined text-primary">restore</span>
+                      </button>
+                    }
+                  </div>
                 }
               </div>
             }

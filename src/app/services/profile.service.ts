@@ -25,6 +25,8 @@ export interface Post {
   likesCount: number;
   commentsCount: number;
   createdAt?: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 }
 
 export interface Issue {
@@ -35,6 +37,8 @@ export interface Issue {
   solutionsCount: number;
   isResolved: boolean;
   createdAt?: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 }
 
 export interface LeaderBoardUser {

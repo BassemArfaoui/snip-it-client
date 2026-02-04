@@ -44,6 +44,9 @@ export interface Post {
   interactions?: PostInteractionsSummary;
   createdAt: string;
   updatedAt: string;
+  /** Moderation fields (soft-delete) */
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 }
 
 export interface PaginatedPosts {

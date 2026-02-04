@@ -20,6 +20,10 @@ export interface Issue {
   dislikesCount: number;
   created_at: string;
   author: IssueAuthor | null;
+
+  // Moderation fields (soft-delete)
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 }
 
 export interface IssueDetails extends Issue {
