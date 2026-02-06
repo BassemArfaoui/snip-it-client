@@ -6,62 +6,51 @@
       <!-- Left menu -->
       <aside class="w-72 shrink-0 border-r border-gray-200/60 dark:border-white/10 bg-background-light dark:bg-background-dark">
         <div class="h-full px-4 py-6">
-          <a routerLink="/" class="flex items-center gap-3 text-text-main dark:text-white">
+          <a routerLink="/page1" class="flex items-center gap-3 text-text-main dark:text-white">
             <div class="bg-primary p-2 rounded-xl text-black">
               <span class="material-symbols-outlined text-2xl">code</span>
             </div>
-            <h2 class="text-xl font-bold tracking-tight">Snip-it</h2>
+            <h2 class="text-xl font-bold tracking-tight">Starter App</h2>
           </a>
 
           @if (isLoggedIn()) {
             <nav class="mt-8 space-y-2" aria-label="Main">
               <a
-                routerLink="/"
+                routerLink="/page1"
                 [routerLinkActiveOptions]="{ exact: true }"
                 routerLinkActive="bg-white/70 dark:bg-white/10 text-text-main dark:text-white"
                 class="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold text-text-muted hover:bg-white/50 dark:hover:bg-white/10 hover:text-text-main dark:hover:text-white transition-colors"
               >
                 <span class="material-symbols-outlined text-xl">dynamic_feed</span>
-                <span>Feed</span>
+                <span>Page 1</span>
               </a>
 
               <a
-                routerLink="/issues"
+                routerLink="/page2"
                 routerLinkActive="bg-white/70 dark:bg-white/10 text-text-main dark:text-white"
                 class="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold text-text-muted hover:bg-white/50 dark:hover:bg-white/10 hover:text-text-main dark:hover:text-white transition-colors"
               >
                 <span class="material-symbols-outlined text-xl">bug_report</span>
-                <span>Issues</span>
+                <span>Page 2</span>
               </a>
 
               <a
-                routerLink="/collections"
+                routerLink="/page3"
                 routerLinkActive="bg-white/70 dark:bg-white/10 text-text-main dark:text-white"
                 class="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold text-text-muted hover:bg-white/50 dark:hover:bg-white/10 hover:text-text-main dark:hover:text-white transition-colors"
               >
                 <span class="material-symbols-outlined text-xl">bookmark</span>
-                <span>Saves</span>
+                <span>Page 3</span>
               </a>
 
               <a
-                routerLink="/snippets"
+                routerLink="/page4"
                 routerLinkActive="bg-white/70 dark:bg-white/10 text-text-main dark:text-white"
                 class="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold text-text-muted hover:bg-white/50 dark:hover:bg-white/10 hover:text-text-main dark:hover:text-white transition-colors"
               >
                 <span class="material-symbols-outlined text-xl">lock</span>
-                <span>Private Snippets</span>
+                <span>Page 4</span>
               </a>
-
-              @if (userId()) {
-                <a
-                  [routerLink]="['/profile', userId()]"
-                  routerLinkActive="bg-white/70 dark:bg-white/10 text-text-main dark:text-white"
-                  class="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold text-text-muted hover:bg-white/50 dark:hover:bg-white/10 hover:text-text-main dark:hover:text-white transition-colors"
-                >
-                  <span class="material-symbols-outlined text-xl">person</span>
-                  <span>Profile</span>
-                </a>
-              }
             </nav>
           } @else {
             <div class="mt-8 space-y-3">
@@ -120,14 +109,6 @@
 
                 @if (profileMenuOpen) {
                   <div class="absolute right-0 mt-2 w-44 rounded-xl border border-gray-200/60 dark:border-white/10 bg-white dark:bg-card-dark shadow-soft overflow-hidden z-50">
-                    <a
-                      [routerLink]="['/profile', userId()]"
-                      class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-text-main dark:text-white hover:bg-background-light dark:hover:bg-white/5 transition-colors"
-                      (click)="profileMenuOpen = false"
-                    >
-                      <span class="material-symbols-outlined text-xl">person</span>
-                      <span>Profile</span>
-                    </a>
                     <button
                       type="button"
                       (click)="handleLogout(); profileMenuOpen = false"

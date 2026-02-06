@@ -11,7 +11,7 @@ import { AuthService } from './auth.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'client';
+  title = 'starter-app';
   // expose the signals to the template
   isLoggedIn = isLoggedIn;
   username = username;
@@ -26,14 +26,18 @@ export class AppComponent implements OnInit {
     this.isAuthRoute =
       this.router.url.startsWith('/login') ||
       this.router.url.startsWith('/signup') ||
-      this.router.url.startsWith('/forgot-password');
+      this.router.url.startsWith('/forgot-password') ||
+      this.router.url.startsWith('/reset-password') ||
+      this.router.url.startsWith('/verify-email');
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
         this.isAuthRoute =
           event.urlAfterRedirects.startsWith('/login') ||
           event.urlAfterRedirects.startsWith('/signup') ||
-          event.urlAfterRedirects.startsWith('/forgot-password');
+          event.urlAfterRedirects.startsWith('/forgot-password') ||
+          event.urlAfterRedirects.startsWith('/reset-password') ||
+          event.urlAfterRedirects.startsWith('/verify-email');
       });
 
     // Provide AuthService to auth store

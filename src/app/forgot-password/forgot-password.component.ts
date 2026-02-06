@@ -7,7 +7,7 @@ import { BaseAuthComponent } from '../shared/base-auth.component';
 import { CountdownService } from '../shared/countdown.service';
 
 @Component({
-  selector: 'snip-it-forgot-password',
+  selector: 'app-forgot-password',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './forgot-password.component.html',

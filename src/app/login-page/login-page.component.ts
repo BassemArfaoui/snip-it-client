@@ -6,7 +6,7 @@ import { AuthService } from '../auth.service';
 import { login, isLoggedIn } from '../auth.store';
 
 @Component({
-  selector: 'snip-it-login-page',
+  selector: 'app-login-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login-page.component.html',

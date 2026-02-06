@@ -9,7 +9,7 @@ import { passwordMatchValidator } from '../shared/validators';
 import { CountdownService } from '../shared/countdown.service';
 
 @Component({
-  selector: 'snip-it-signup-page',
+  selector: 'app-signup-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './signup-page.component.html',

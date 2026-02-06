@@ -9,7 +9,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('accessToken');
 
   // Skip adding auth header for specific public auth endpoints (login/register/refresh/etc.)
-  const publicAuthPattern = /\/auth\/(login|register|refresh|verify-email|resend-otp|forgot-password|reset-password|github)(?:$|\?|\/)/i;
+  const publicAuthPattern = /\/auth\/(login|register|refresh|verify-email|resend-otp|forgot-password|reset-password)(?:$|\?|\/)/i;
   if (!token || publicAuthPattern.test(req.url)) {
     return next(req);
   }

@@ -8,7 +8,7 @@ import { passwordMatchValidator } from '../shared/validators';
 import { CountdownService } from '../shared/countdown.service';
 
 @Component({
-  selector: 'snip-it-reset-password',
+  selector: 'app-reset-password',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './reset-password.component.html',
